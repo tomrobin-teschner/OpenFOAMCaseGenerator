@@ -1,4 +1,7 @@
-def write_boilerplate(file_id, version, variable, type):
+import os
+
+def write_transport_properties(case_name, version, nu):
+    file_id = open(os.path.join(case_name, 'constant', 'transportProperties'), "w")
     file_id.write('/*--------------------------------*- C++ -*----------------------------------*\ \n')
     file_id.write('| =========                 |                                                 |\n')
     file_id.write('| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n')
@@ -10,8 +13,15 @@ def write_boilerplate(file_id, version, variable, type):
     file_id.write('{\n')
     file_id.write('    version     2.0;\n')
     file_id.write('    format      ascii;\n')
-    file_id.write('    class       ' + type + ';\n')
-    file_id.write('    location    "0";\n')
-    file_id.write('    object      ' + variable + ';\n')
+    file_id.write('    class       dictionary;\n')
+    file_id.write('    location    "constant";\n')
+    file_id.write('    object      transportProperties;\n')
     file_id.write('}\n')
     file_id.write('// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n')
+    file_id.write('\n')
+    file_id.write('transportModel  Newtonian;\n')
+    file_id.write('\n')
+    file_id.write('nu              ' + str(nu) + ';\n')
+    file_id.write('\n')
+    file_id.write('// ************************************************************************* //\n')
+    file_id.close()

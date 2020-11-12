@@ -1,6 +1,6 @@
 import os
 import GlobalVariables as Parameters
-import WriteBoundaryConditions as Header
+import FileManager as Header
 import BoundaryConditions as boundary_conditions
 from math import sqrt, pow
 
@@ -16,7 +16,7 @@ def write_boundary_condition(BC, outlet_type, velocity, TKE_intensity, wall_func
     file_id = open(os.path.join(case_name, '0', 'k'), 'w')
 
     # write header
-    Header.write_boilerplate(file_id, version, 'k', 'volScalarField')
+    Header.write_boundary_condition_header(file_id, version, 'k', 'volScalarField')
 
     # write dimensions and internfield
     initial_field = 'uniform ' + str(k)

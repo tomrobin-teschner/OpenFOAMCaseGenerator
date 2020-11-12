@@ -13,3 +13,8 @@ INLET_OUTLET = 2
 
 # turbulence constant
 C_MU = 0.09
+
+# simulation type
+LAMINAR = 0
+RANS = 1
+LES = 2

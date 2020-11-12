@@ -1,6 +1,6 @@
 import os
 import GlobalVariables as Parameters
-import WriteBoundaryConditions as Header
+import FileManager as Header
 import BoundaryConditions as boundary_conditions
 
 
@@ -10,7 +10,7 @@ def write_boundary_condition(BC, outlet_type, pressure, case_name, version):
     file_id = open(os.path.join(case_name, '0', 'p'), 'w')
 
     # write header
-    Header.write_boilerplate(file_id, version, 'p', 'volScalarField')
+    Header.write_boundary_condition_header(file_id, version, 'p', 'volScalarField')
 
     # write dimensions and internfield
     initial_field = 'uniform ' + str(pressure)

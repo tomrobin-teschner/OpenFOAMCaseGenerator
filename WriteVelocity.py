@@ -1,6 +1,6 @@
 import os
 import GlobalVariables as Parameters
-import WriteBoundaryConditions as Header
+import FileManager as Header
 import BoundaryConditions as boundary_conditions
 
 def write_boundary_condition(BC, outlet_type, velocity, case_name, version):
@@ -9,7 +9,7 @@ def write_boundary_condition(BC, outlet_type, velocity, case_name, version):
     file_id = open(os.path.join(case_name, '0', 'U'), 'w')
 
     # write header
-    Header.write_boilerplate(file_id, version, 'U', 'volVectorField')
+    Header.write_boundary_condition_header(file_id, version, 'U', 'volVectorField')
 
     # write dimensions and internfield
     initial_field = 'uniform (' + str(velocity[0]) + ' ' + str(velocity[1]) + ' ' + str(velocity[2]) + ')'
