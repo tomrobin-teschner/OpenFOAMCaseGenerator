@@ -1,5 +1,5 @@
 import os
-import FileManager as file_manager
+import FileManager as FileManager
 import WriteVelocity as U
 import WritePressure as p
 import WriteTurbulentKineticEnergy as k
@@ -10,6 +10,9 @@ import WriteNut as nut
 import GlobalVariables as Parameters
 import WriteTransportProperties as Transport
 import WriteTurbulenceProperties as Turbulence
+import WriteControlDict as ControlDict
+import WritefvSolution as fvSolution
+import WritefvSchemes as fvSchemes
 
 from math import sqrt, pow
 
@@ -19,7 +22,7 @@ def main():
     case_name = 'test_case'
 
     # path to folder where to copy test case to
-    path = 'C:\\Users\\e802985\\Documents\\openfoam\\run'
+    path = 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run'
 
     # absolute path of text case location
     case = os.path.join(path, case_name)
@@ -70,7 +73,7 @@ def main():
     wall_functions = True
 
     # file output writing
-    file_manager.create_folder(case)
+    FileManager.create_folder(case, case_name)
 
     # output velocity boundary conditions
     U.write_boundary_condition(BC, outlet_type, inlet_velocity, case, version)
@@ -98,6 +101,15 @@ def main():
 
     # write turbulence properties to file
     Turbulence.write_turbulence_properties(case, version, simulation_type)
+
+    # write control dict file out
+    ControlDict.write_control_dict(case, version)
+
+    # write fvSolution file out
+    fvSolution.write_fvsolution(case, version)
+
+    # write fvSchemes
+    fvSchemes.write_fvschemes(case, version)
 
     # output diagnostics
     print('Generated case : ' + case)

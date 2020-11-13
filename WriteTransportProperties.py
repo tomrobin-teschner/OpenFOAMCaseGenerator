@@ -1,23 +1,10 @@
 import os
+import FileManager as Header
+
 
 def write_transport_properties(case_name, version, nu):
     file_id = open(os.path.join(case_name, 'constant', 'transportProperties'), "w")
-    file_id.write('/*--------------------------------*- C++ -*----------------------------------*\ \n')
-    file_id.write('| =========                 |                                                 |\n')
-    file_id.write('| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n')
-    file_id.write('|  \\\    /   O peration     | Version:  ' + version + '                                 |\n')
-    file_id.write('|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n')
-    file_id.write('|    \\\/     M anipulation  |                                                 |\n')
-    file_id.write('\*---------------------------------------------------------------------------*/\n')
-    file_id.write('FoamFile\n')
-    file_id.write('{\n')
-    file_id.write('    version     2.0;\n')
-    file_id.write('    format      ascii;\n')
-    file_id.write('    class       dictionary;\n')
-    file_id.write('    location    "constant";\n')
-    file_id.write('    object      transportProperties;\n')
-    file_id.write('}\n')
-    file_id.write('// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n')
+    Header.write_header(file_id, version, 'transportProperties', 'constant', 'dictionary')
     file_id.write('\n')
     file_id.write('transportModel  Newtonian;\n')
     file_id.write('\n')

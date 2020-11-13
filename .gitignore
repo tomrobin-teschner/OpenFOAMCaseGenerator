@@ -1,5 +1,4 @@
 # ignore folder
 __pycache__
 .idea
-test_case
 venv

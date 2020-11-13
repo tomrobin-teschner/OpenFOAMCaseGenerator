@@ -9,7 +9,7 @@ def write_boundary_condition(BC, outlet_type, velocity, case_name, version):
     file_id = open(os.path.join(case_name, '0', 'U'), 'w')
 
     # write header
-    Header.write_boundary_condition_header(file_id, version, 'U', 'volVectorField')
+    Header.write_header(file_id, version, 'U', '0', 'volVectorField')
 
     # write dimensions and internfield
     initial_field = 'uniform (' + str(velocity[0]) + ' ' + str(velocity[1]) + ' ' + str(velocity[2]) + ')'

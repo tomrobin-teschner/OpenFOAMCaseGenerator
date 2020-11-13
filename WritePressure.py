@@ -10,7 +10,7 @@ def write_boundary_condition(BC, outlet_type, pressure, case_name, version):
     file_id = open(os.path.join(case_name, '0', 'p'), 'w')
 
     # write header
-    Header.write_boundary_condition_header(file_id, version, 'p', 'volScalarField')
+    Header.write_header(file_id, version, 'p', '0', 'volScalarField')
 
     # write dimensions and internfield
     initial_field = 'uniform ' + str(pressure)

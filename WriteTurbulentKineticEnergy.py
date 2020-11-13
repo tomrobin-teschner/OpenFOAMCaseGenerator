@@ -16,7 +16,7 @@ def write_boundary_condition(BC, outlet_type, velocity, TKE_intensity, wall_func
     file_id = open(os.path.join(case_name, '0', 'k'), 'w')
 
     # write header
-    Header.write_boundary_condition_header(file_id, version, 'k', 'volScalarField')
+    Header.write_header(file_id, version, 'k', '0', 'volScalarField')
 
     # write dimensions and internfield
     initial_field = 'uniform ' + str(k)
