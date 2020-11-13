@@ -17,11 +17,11 @@ def write_turbulence_properties(case_name, version, simulation_type):
     if simulation_type != Parameters.LAMINAR:
         if simulation_type == Parameters.RANS:
             file_id.write('RAS\n{\n')
-            file_id.write('    RASModel        kOmegaSST\n')
+            file_id.write('    RASModel        kOmegaSST;\n')
             file_id.write('\n')
-            file_id.write('    turbulence      on\n')
+            file_id.write('    turbulence      on;\n')
             file_id.write('\n')
-            file_id.write('    printCoeffs     on\n')
+            file_id.write('    printCoeffs     on;\n')
 
         elif simulation_type == Parameters.LES:
             file_id.write('LES\n{\n')

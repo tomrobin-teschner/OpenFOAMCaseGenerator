@@ -1,5 +1,5 @@
 import os
-import FileManager as FileManager
+import FileDirectoryIO.FileManager as IO
 import WriteVelocity as U
 import WritePressure as p
 import WriteTurbulentKineticEnergy as k
@@ -19,7 +19,7 @@ from math import sqrt, pow
 
 def main():
     # name of the case to use (will be used for the folder name)
-    case_name = 'test_case'
+    case_name = 'flatPlateTest'
 
     # path to folder where to copy test case to
     path = 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run'
@@ -28,20 +28,18 @@ def main():
     case = os.path.join(path, case_name)
 
     # version of openfoam to use (does not have an influence on the case setup, but will be used in headers)
-    version = 'v1912'
+    version = 'v2006'
 
     # define boundary conditions
-    # first  entry: name of boundary condition (specified in mesh generator
+    # first  entry: name of boundary condition (specified in mesh generator)
     # second entry: type of boundary condition
     BC = {
         "inlet": Parameters.INLET,
-        "outflow": Parameters.OUTLET,
+        "outlet": Parameters.OUTLET,
         "wall": Parameters.WALL,
         "symmetry": Parameters.SYMMETRY,
         "top": Parameters.SYMMETRY,
-        "frontAndBack": Parameters.EMPTY,
-        "left": Parameters.CYCLIC,
-        "right": Parameters.CYCLIC
+        "BaseAndTop": Parameters.EMPTY,
     }
 
     # specify the outlet type
@@ -51,16 +49,16 @@ def main():
     outlet_type = Parameters.NEUMANN
 
     # specify the inlet boundary condition (free stream velocity)
-    inlet_velocity = [10, 0, 0]
+    inlet_velocity = [1, 0, 0]
 
     # specify the laminar viscosity
     nu = 1e-4
 
     # intensity of turbulent kinetic energy (between 0 - 1)
-    TKE_intensity = 0.05
+    TKE_intensity = 0.01
 
     # Reference length in simulation
-    reference_length = 1.0
+    reference_length = 2.0
 
     # Reynolds number calculation
     Re = sqrt(pow(inlet_velocity[0], 2) + pow(inlet_velocity[1], 2) + pow(inlet_velocity[2], 2)) * reference_length / nu
@@ -72,11 +70,12 @@ def main():
     # use wall functions (if set to false, y+ needs to be in the region of 1, otherwise y+ should be > 30)
     wall_functions = True
 
-    # file output writing
-    FileManager.create_folder(case, case_name)
+    # create the initial data structure for the case set-up
+    file_manager = IO.FileManager(case_name, path, version)
+    file_manager.create_directory_structure()
 
     # output velocity boundary conditions
-    U.write_boundary_condition(BC, outlet_type, inlet_velocity, case, version)
+    U.write_boundary_condition(file_manager, BC, outlet_type, inlet_velocity)
 
     # output pressure boundary conditions
     p.write_boundary_condition(BC, outlet_type, 0, case, version)

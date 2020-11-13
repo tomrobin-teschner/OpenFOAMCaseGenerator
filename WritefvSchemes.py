@@ -8,7 +8,7 @@ def write_fvschemes(case_name, version):
     file_id.write('\n')
     file_id.write('ddtSchemes\n')
     file_id.write('{\n')
-    file_id.write('    default         Backward;\n')
+    file_id.write('    default         backward;\n')
     file_id.write('}\n')
     file_id.write('\n')
     file_id.write('gradSchemes\n')

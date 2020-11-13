@@ -8,6 +8,7 @@ def write_control_dict(case_name, version):
     file_id.write('\n')
     file_id.write('application      pimpleFoam;\n\n')
     file_id.write('startFrom        startTime;\n\n')
+    file_id.write('startTime        0;\n\n')
     file_id.write('stopAt           endTime;\n\n')
     file_id.write('endTime          1000;\n\n')
     file_id.write('deltaT           0.1;\n\n')
