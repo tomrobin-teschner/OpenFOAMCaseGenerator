@@ -1,5 +1,8 @@
 import os
 import FileDirectoryIO.FileManager as IO
+import WriteInputFiles.WriteTransportProperties as transport
+import WriteInputFiles.WriteTurbulenceProperties as turbulence
+
 import WriteVelocity as U
 import WritePressure as p
 import WriteTurbulentKineticEnergy as k
@@ -8,8 +11,6 @@ import WriteSpecificDissipationRate as omega
 import WriteNuTilda as nuTilda
 import WriteNut as nut
 import GlobalVariables as Parameters
-import WriteTransportProperties as Transport
-import WriteTurbulenceProperties as Turbulence
 import WriteControlDict as ControlDict
 import WritefvSolution as fvSolution
 import WritefvSchemes as fvSchemes
@@ -18,11 +19,14 @@ from math import sqrt, pow
 
 
 def main():
+
     # name of the case to use (will be used for the folder name)
     case_name = 'flatPlateTest'
 
     # path to folder where to copy test case to
-    path = 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run'
+    # path = 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run'
+    # path = 'C:\\Users\\e802985\\Documents\\openfoam\\run'
+    path = ''
 
     # absolute path of text case location
     case = os.path.join(path, case_name)
@@ -96,10 +100,13 @@ def main():
     nut.write_boundary_condition(BC, outlet_type, inlet_velocity, TKE_intensity, reference_length, case, version)
 
     # write transport properties to file
-    Transport.write_transport_properties(case, version, nu)
+    transportProperties = transport.TransportPropertiesFile(file_manager, nu)
+    transportProperties.write_input_file()
 
     # write turbulence properties to file
-    Turbulence.write_turbulence_properties(case, version, simulation_type)
+    # Turbulence.write_turbulence_properties(case, version, simulation_type)
+    turbulenceProperties = turbulence.TurbulencePropertiesFile(file_manager, simulation_type)
+    turbulenceProperties.write_input_file()
 
     # write control dict file out
     ControlDict.write_control_dict(case, version)
