@@ -18,3 +18,7 @@ C_MU = 0.09
 LAMINAR = 0
 RANS = 1
 LES = 2
+
+# wall modelling type
+LOW_RE = 0
+HIGH_RE = 1

@@ -2,7 +2,7 @@ import GlobalVariables as Parameters
 import BoundaryConditions as BoundaryConditions
 
 
-def write_boundary_condition(file_manager, boundary_properties):
+def write_boundary_condition(file_manager, boundary_properties, solver_properties):
     # create new boundary file
     file_id = file_manager.create_file('0', 'nut')
     file_manager.write_header(file_id, 'volScalarField', '0', 'nut')
@@ -16,7 +16,10 @@ def write_boundary_condition(file_manager, boundary_properties):
     for key in boundary_properties:
         file_manager.write(file_id, '    ' + key + '\n    {\n')
         if boundary_properties[key] == Parameters.WALL:
-            BoundaryConditions.nutUSpaldingWallFunction(file_id)
+            if solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                BoundaryConditions.nutLowReWallFunction(file_id, initial_field)
+            elif solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                BoundaryConditions.nutkWallFunction(file_id, initial_field)
         elif boundary_properties[key] == Parameters.CYCLIC:
             BoundaryConditions.periodic(file_id)
         elif boundary_properties[key] == Parameters.EMPTY:

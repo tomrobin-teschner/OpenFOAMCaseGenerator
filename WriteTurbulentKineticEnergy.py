@@ -3,7 +3,7 @@ import BoundaryConditions as BoundaryConditions
 from math import sqrt, pow
 
 
-def write_boundary_condition(file_manager, boundary_properties, outlet_type, flow_properties, wall_functions):
+def write_boundary_condition(file_manager, boundary_properties, flow_properties, solver_properties):
 
     # velocity magnitude
     velocity_magnitude = (sqrt(pow(flow_properties['inlet_velocity'][0], 2) +
@@ -19,7 +19,6 @@ def write_boundary_condition(file_manager, boundary_properties, outlet_type, flo
 
     # write dimensions and internal-field
     initial_field = 'uniform ' + str(k)
-    zero = 'uniform 0'
     file_manager.write(file_id, '\ndimensions      [0 2 -2 0 0 0 0];\n\ninternalField   ' + initial_field + ';\n\n')
 
     # write boundary conditions
@@ -27,16 +26,16 @@ def write_boundary_condition(file_manager, boundary_properties, outlet_type, flo
     for key in boundary_properties:
         file_manager.write(file_id, '    ' + key + '\n    {\n')
         if boundary_properties[key] == Parameters.WALL:
-            if wall_functions:
+            if solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                BoundaryConditions.kLowReWallFunction(file_id, initial_field)
+            elif solver_properties['wall_modelling'] == Parameters.HIGH_RE:
                 BoundaryConditions.kqRWallFunction(file_id, initial_field)
-            else:
-                BoundaryConditions.dirichlet(file_id, zero)
         elif boundary_properties[key] == Parameters.OUTLET:
-            if outlet_type == Parameters.NEUMANN:
+            if boundary_properties['outlet_type'] == Parameters.NEUMANN:
                 BoundaryConditions.neumann(file_id)
-            elif outlet_type == Parameters.ADVECTIVE:
+            elif boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
                 BoundaryConditions.advective(file_id)
-            elif outlet_type == Parameters.INLET_OUTLET:
+            elif boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
                 BoundaryConditions.inlet_outlet(file_id, initial_field)
         elif boundary_properties[key] == Parameters.SYMMETRY:
             BoundaryConditions.neumann(file_id)
