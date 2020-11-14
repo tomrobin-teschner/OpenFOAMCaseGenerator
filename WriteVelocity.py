@@ -2,7 +2,7 @@ import GlobalVariables as Parameters
 import BoundaryConditions as BoundaryConditions
 
 
-def write_boundary_condition(file_manager, boundary_properties, outlet_type, flow_properties):
+def write_boundary_condition(file_manager, boundary_properties, flow_properties):
 
     # create new boundary file
     file_id = file_manager.create_file('0', 'U')
@@ -20,11 +20,11 @@ def write_boundary_condition(file_manager, boundary_properties, outlet_type, flo
         if boundary_properties[key] == Parameters.WALL:
             BoundaryConditions.no_slip_wall(file_id)
         elif boundary_properties[key] == Parameters.OUTLET:
-            if outlet_type == Parameters.NEUMANN:
+            if boundary_properties['outlet_type'] == Parameters.NEUMANN:
                 BoundaryConditions.neumann(file_id)
-            elif outlet_type == Parameters.ADVECTIVE:
+            elif boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
                 BoundaryConditions.advective(file_id)
-            elif outlet_type == Parameters.INLET_OUTLET:
+            elif boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
                 BoundaryConditions.inlet_outlet(file_id, initial_field)
         elif boundary_properties[key] == Parameters.SYMMETRY:
             BoundaryConditions.neumann(file_id)

@@ -1,8 +1,8 @@
-def write_control_dict(file_manager):
+def write_control_dict(file_manager, solver_properties):
     file_id = file_manager.create_file('system', 'controlDict')
     file_manager.write_header(file_id, 'dictionary', 'system', 'controlDict')
     file_manager.write(file_id, '\n')
-    file_manager.write(file_id, 'application       pimpleFoam;\n\n')
+    file_manager.write(file_id, 'application       ' + solver_properties['solver'] + ';\n\n')
     file_manager.write(file_id, 'startFrom         startTime;\n\n')
     file_manager.write(file_id, 'startTime         0;\n\n')
     file_manager.write(file_id, 'stopAt            endTime;\n\n')
