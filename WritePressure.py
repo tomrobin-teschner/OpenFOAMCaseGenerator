@@ -1,43 +1,38 @@
-import os
 import GlobalVariables as Parameters
-import FileManager as Header
-import BoundaryConditions as boundary_conditions
+import BoundaryConditions as BoundaryConditions
 
 
-def write_boundary_condition(BC, outlet_type, pressure, case_name, version):
-
+def write_boundary_condition(file_manager, boundary_properties, outlet_type, pressure):
     # create new boundary file
-    file_id = open(os.path.join(case_name, '0', 'p'), 'w')
+    file_id = file_manager.create_file('0', 'p')
+    file_manager.write_header(file_id, 'volScalarField', '0', 'p')
 
-    # write header
-    Header.write_header(file_id, version, 'p', '0', 'volScalarField')
-
-    # write dimensions and internfield
+    # write dimensions and internal-field
     initial_field = 'uniform ' + str(pressure)
-    file_id.write('\ndimensions      [0 2 -2 0 0 0 0];\n\ninternalField   ' + initial_field + ';\n\n')
+    file_manager.write(file_id, '\ndimensions      [0 2 -2 0 0 0 0];\n\ninternalField   ' + initial_field + ';\n\n')
 
     # write boundary conditions
-    file_id.write('boundaryField\n{\n')
-    for key in BC:
-        file_id.write('    ' + key + '\n    {\n')
-        if BC[key] == Parameters.WALL:
-            boundary_conditions.neumann(file_id)
-        elif BC[key] == Parameters.OUTLET:
+    file_manager.write(file_id, 'boundaryField\n{\n')
+    for key in boundary_properties:
+        file_manager.write(file_id, '    ' + key + '\n    {\n')
+        if boundary_properties[key] == Parameters.WALL:
+            BoundaryConditions.neumann(file_id)
+        elif boundary_properties[key] == Parameters.OUTLET:
             if outlet_type == Parameters.NEUMANN:
-                boundary_conditions.dirichlet(file_id, initial_field)
+                BoundaryConditions.dirichlet(file_id, initial_field)
             elif outlet_type == Parameters.ADVECTIVE:
-                boundary_conditions.advective(file_id)
+                BoundaryConditions.advective(file_id)
             elif outlet_type == Parameters.INLET_OUTLET:
-                boundary_conditions.dirichlet(file_id, initial_field)
-        elif BC[key] == Parameters.SYMMETRY:
-            boundary_conditions.neumann(file_id)
-        elif BC[key] == Parameters.INLET:
-            boundary_conditions.neumann(file_id)
-        elif BC[key] == Parameters.CYCLIC:
-            boundary_conditions.periodic(file_id)
-        elif BC[key] == Parameters.EMPTY:
-            boundary_conditions.empty(file_id)
-        file_id.write('    }\n')
+                BoundaryConditions.dirichlet(file_id, initial_field)
+        elif boundary_properties[key] == Parameters.SYMMETRY:
+            BoundaryConditions.neumann(file_id)
+        elif boundary_properties[key] == Parameters.INLET:
+            BoundaryConditions.neumann(file_id)
+        elif boundary_properties[key] == Parameters.CYCLIC:
+            BoundaryConditions.periodic(file_id)
+        elif boundary_properties[key] == Parameters.EMPTY:
+            BoundaryConditions.empty(file_id)
+        file_manager.write(file_id, '    }\n')
 
-    file_id.write('}')
+    file_manager.write(file_id, '}')
     file_id.close()
