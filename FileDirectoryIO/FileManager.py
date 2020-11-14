@@ -47,27 +47,3 @@ class FileManager:
         file_id.write('    object      ' + object_type + ';\n')
         file_id.write('}\n')
         file_id.write('// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n')
-
-    def write_all_run_file(self):
-        file_id = self.create_file('', 'Allrun')
-        self.write(file_id, '# !/bin/sh\n')
-        self.write(file_id, 'cd "${0%/*}" || exit  # Run from this directory\n')
-        self.write(file_id, '. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions  # Tutorial run functions\n')
-        self.write(file_id, '# ------------------------------------------------------------------------------\n')
-        self.write(file_id, '\n')
-        self.write(file_id, 'runApplication $(getApplication)\n')
-        self.write(file_id, 'foamLog log.*\n')
-        self.write(file_id, '\n')
-        self.write(file_id, '# ------------------------------------------------------------------------------\n')
-        self.close_file(file_id)
-
-    def write_all_clean_file(self):
-        file_id = self.create_file('', 'Allclean')
-        self.write(file_id, '# !/bin/sh\n')
-        self.write(file_id, 'cd "${0%/*}" || exit  # Run from this directory\n')
-        self.write(file_id, '# ------------------------------------------------------------------------------\n')
-        self.write(file_id, '\n')
-        self.write(file_id, 'rm -rf 0.* [1-9]* log.*\n')
-        self.write(file_id, '\n')
-        self.write(file_id, '# ------------------------------------------------------------------------------\n')
-        self.close_file(file_id)
