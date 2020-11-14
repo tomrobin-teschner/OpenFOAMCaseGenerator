@@ -1,34 +1,32 @@
-import os
 import GlobalVariables as Parameters
-import FileManager as Header
-import BoundaryConditions as boundary_conditions
-from math import sqrt, pow
+import BoundaryConditions as BoundaryConditions
 
-def write_boundary_condition(BC, outlet_type, velocity, TKE_intensity, reference_length, case_name, version):
 
+def write_boundary_condition(file_manager, boundary_properties, solver_properties):
     # create new boundary file
-    file_id = open(os.path.join(case_name, '0', 'nut'), 'w')
+    file_id = file_manager.create_file('0', 'nut')
+    file_manager.write_header(file_id, 'volScalarField', '0', 'nut')
 
-    # write header
-    Header.write_header(file_id, version, 'nut', '0', 'volScalarField')
-
-    # write dimensions and internfield
+    # write dimensions and internal-field
     initial_field = 'uniform ' + str(0)
-    file_id.write('\ndimensions      [0 2 -1 0 0 0 0];\n\ninternalField   ' + initial_field + ';\n\n')
+    file_manager.write(file_id, '\ndimensions      [0 2 -1 0 0 0 0];\n\ninternalField   ' + initial_field + ';\n\n')
 
     # write boundary conditions
-    file_id.write('boundaryField\n{\n')
-    for key in BC:
-        file_id.write('    ' + key + '\n    {\n')
-        if BC[key] == Parameters.WALL:
-            boundary_conditions.nutUSpaldingWallFunction(file_id)
-        elif BC[key] == Parameters.CYCLIC:
-            boundary_conditions.periodic(file_id)
-        elif BC[key] == Parameters.EMPTY:
-            boundary_conditions.empty(file_id)
+    file_manager.write(file_id, 'boundaryField\n{\n')
+    for key in boundary_properties:
+        file_manager.write(file_id, '    ' + key + '\n    {\n')
+        if boundary_properties[key] == Parameters.WALL:
+            if solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                BoundaryConditions.nutLowReWallFunction(file_id, initial_field)
+            elif solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                BoundaryConditions.nutkWallFunction(file_id, initial_field)
+        elif boundary_properties[key] == Parameters.CYCLIC:
+            BoundaryConditions.periodic(file_id)
+        elif boundary_properties[key] == Parameters.EMPTY:
+            BoundaryConditions.empty(file_id)
         else:
-            boundary_conditions.zeroCalculated(file_id)
-        file_id.write('    }\n')
+            BoundaryConditions.zeroCalculated(file_id)
+        file_manager.write(file_id, '    }\n')
 
-    file_id.write('}')
+    file_manager.write(file_id, '}')
     file_id.close()
