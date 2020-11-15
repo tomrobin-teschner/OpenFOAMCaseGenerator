@@ -1,22 +1,16 @@
 import os
+from math import sqrt, pow
+
 import FileDirectoryIO.FileManager as IO
+import GlobalVariables as Parameters
+
 import FileDirectoryIO.WriteUtilityScripts as UtilityScripts
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
 import WriteConstantDirectoryFiles.WriteTurbulenceProperties as Turbulence
 import WriteSystemDirectoryFiles.WriteControlDictFile as ControlDict
 import WriteSystemDirectoryFiles.WritefvSolutionFile as fvSolution
 import WriteSystemDirectoryFiles.WritefvSchemesFile as fvSchemes
-
-import WriteVelocity as U
-import WritePressure as p
-import WriteTurbulentKineticEnergy as k
-import WriteDissipationRate as epsilon
-import WriteSpecificDissipationRate as omega
-import WriteNuTilda as nuTilda
-import WriteNut as nut
-import GlobalVariables as Parameters
-
-from math import sqrt, pow
+import Write0DirectoryFiles.WriteBoundaryConditions as WriteBoundaryConditions
 
 
 def main():
@@ -39,8 +33,8 @@ def main():
     file_properties['path'] = os.path.join(file_properties['run_directory'], file_properties['case_name'])
 
     # define boundary conditions
-    # first  entry: name of boundary condition (specified in mesh generator)
-    # second entry: type of boundary condition
+    #   first  entry: name of boundary condition (specified in mesh generator)
+    #   second entry: type of boundary condition
     boundary_properties = {
         'inlet': Parameters.INLET,
         'outlet': Parameters.OUTLET,
@@ -50,9 +44,9 @@ def main():
         'BaseAndTop': Parameters.EMPTY,
 
         # specify the outlet type
-        # NEUMANN     : apply zero gradient (neumann) boundary condition (reflective boundary conditions)
-        # ADVECTIVE   : transport any fluid outside the domain near outlet (non-reflective boundary condition)
-        # INLET_OUTLET: allow for backflow at outlet, prescribe inlet (free-stream) condition for reverse flow
+        #   NEUMANN     : apply zero gradient (neumann) boundary condition (reflective boundary conditions)
+        #   ADVECTIVE   : transport any fluid outside the domain near outlet (non-reflective boundary condition)
+        #   INLET_OUTLET: allow for backflow at outlet, prescribe inlet (free-stream) condition for reverse flow
         'outlet_type': Parameters.NEUMANN,
     }
 
@@ -87,7 +81,7 @@ def main():
         'startTime': 0,
 
         # end time
-        'endTime': 1,
+        'endTime': 1e-3,
 
         # flag indicating whether to dynamically caculate time step based on CFL criterion
         'CFLBasedTimeStepping': True,
@@ -100,17 +94,18 @@ def main():
         'deltaT': 0.1,
 
         # largest allowable time step
-        'maxDeltaT': 1e-5,
+        'maxDeltaT': 1,
 
         # frequency at which to write output files. Behaviour controlled through write control entry below.
-        'write_frequency': 1e-6,
+        'write_frequency': 1e-5,
 
         # write control, specify when to output results, the options are listed below
-        # TIME_STEP: write every 'write_frequency' time steps
-        # RUN_TIME: write data every 'write_frequency' seconds of simulated time
-        # ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values (use with 'CFLBasedTimeStepping' = True)
-        # CPU_TIME: write data every 'write_frequency' seconds of CPU time
-        # CLOCK_TIME: write data every 'write_frequency' seconds of real time
+        #   TIME_STEP: write every 'write_frequency' time steps
+        #   RUN_TIME: write data every 'write_frequency' seconds of simulated time
+        #   ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values
+        #                        (use with 'CFLBasedTimeStepping' = True)
+        #   CPU_TIME: write data every 'write_frequency' seconds of CPU time
+        #   CLOCK_TIME: write data every 'write_frequency' seconds of real time
         'write_control': Parameters.ADJUSTABLE_RUN_TIME,
 
         # specify how many solutions to keep (specify 0 to keep all)
@@ -121,33 +116,33 @@ def main():
         'turbulence_type': Parameters.RANS,
 
         # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
-        # LOW_RE  : first cell-height near wall is of order y+ <= 1
-        # HIGH_RE : first cell-height near wall is of order y+ >  30
+        #   LOW_RE  : first cell-height near wall is of order y+ <= 1
+        #   HIGH_RE : first cell-height near wall is of order y+ >  30
         'wall_modelling': Parameters.LOW_RE,
 
         # time integration scheme, options are listed below
-        # STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
-        # FIRST_ORDER: Implicit Euler (1st-order)
-        # SECOND_ORDER: Implicit backward Euler (2nd-order)
+        #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
+        #   FIRST_ORDER: Implicit Euler (1st-order)
+        #   SECOND_ORDER: Implicit backward Euler (2nd-order)
         'time_integration': Parameters.FIRST_ORDER,
 
         # spatial interpolation scheme for convective fluxes
-        # FIRST_ORDER: Upwind (1st-order)
-        # SECOND_ORDER: Upwind with Gradient correction (2nd-order)
-        # THIRD_ORDER: MUSCL scheme (3rd-order)
+        #   FIRST_ORDER: Upwind (1st-order)
+        #   SECOND_ORDER: Upwind with Gradient correction (2nd-order)
+        #   THIRD_ORDER: MUSCL scheme (3rd-order)
         'convective_fluxes': Parameters.SECOND_ORDER,
 
         # spatial interpolation of turbulent quantities for convective fluxes
-        # FIRST_ORDER: Upwind (1st-order)
-        # SECOND_ORDER: Upwind with Gradient correction (2nd-order)
-        # THIRD_ORDER: MUSCL scheme (3rd-order)
+        #   FIRST_ORDER: Upwind (1st-order)
+        #   SECOND_ORDER: Upwind with Gradient correction (2nd-order)
+        #   THIRD_ORDER: MUSCL scheme (3rd-order)
         'turbulent_fluxes': Parameters.FIRST_ORDER,
 
         # Choose level of corrections to be applied to numerical schemes in order to control stability and accuracy.
-        # NO_CORRECTION: No correction to be applied, best for accuracy and regular (orthogonal / cartesian) meshes
-        # SLIGHT_CORRECTION: Apply some correction. Best for unstructured meshes with slight convergence problems
-        # MODERATE_CORRECTION: Apply more correction for even heavier convergence problems
-        # FULL_CORRECTION: Full correction is applied, best for poor quality meshes. Will reduce accuracy of solution
+        #   NO_CORRECTION: No correction to be applied, best for accuracy and regular (orthogonal / cartesian) meshes
+        #   SLIGHT_CORRECTION: Apply some correction. Best for unstructured meshes
+        #   MODERATE_CORRECTION: Apply even more correction. Best for cases with convergence problems
+        #   FULL_CORRECTION: Full correction is applied, best for poor quality meshes. Will reduce accuracy of solution
         'numerical_schemes_correction': Parameters.NO_CORRECTION,
 
         # absolute convergence criterion for implicit solvers
@@ -162,10 +157,10 @@ def main():
         # under-relaxation factor for pressure
         'under_relaxation_p': 0.3,
 
-        # under-relxation factor for velocity
+        # under-relaxation factor for velocity
         'under_relaxation_U': 0.7,
 
-        # under-relxation factor for turbulent quantities
+        # under-relaxation factor for turbulent quantities
         'under_relaxation_turbulence': 0.7,
     }
 
@@ -173,26 +168,15 @@ def main():
     file_manager = IO.FileManager(file_properties)
     file_manager.create_directory_structure()
 
-    # output velocity boundary conditions
-    U.write_boundary_condition(file_manager, boundary_properties, flow_properties)
-
-    # output pressure boundary conditions
-    p.write_boundary_condition(file_manager, boundary_properties, 0)
-
-    # output turbulent kinetic energy boundary condition
-    k.write_boundary_condition(file_manager, boundary_properties, flow_properties, solver_properties)
-
-    # output dissipation rate boundary condition
-    epsilon.write_boundary_condition(file_manager, boundary_properties, flow_properties, solver_properties)
-
-    # output specific dissipation rate boundary condition
-    omega.write_boundary_condition(file_manager, boundary_properties, flow_properties, solver_properties)
-
-    # output nu tilda boundary conditions
-    nuTilda.write_boundary_condition(file_manager, boundary_properties, flow_properties, solver_properties)
-
-    # output turbulent viscosity boundary condition
-    nut.write_boundary_condition(file_manager, boundary_properties, solver_properties)
+    # write out boundary conditions for all relevant flow properties
+    boundary_conditions = WriteBoundaryConditions.WriteBoundaryConditions(file_manager, boundary_properties, flow_properties, solver_properties)
+    boundary_conditions.write_U()
+    boundary_conditions.write_p()
+    boundary_conditions.write_k()
+    boundary_conditions.write_nut()
+    boundary_conditions.write_omega()
+    boundary_conditions.write_epsilon()
+    boundary_conditions.write_nuTilda()
 
     # write transport properties to file
     transportProperties = Transport.TransportPropertiesFile(file_manager, flow_properties)
