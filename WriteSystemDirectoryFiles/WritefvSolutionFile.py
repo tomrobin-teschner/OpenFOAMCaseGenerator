@@ -89,5 +89,6 @@ class fvSolutionFile:
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '// ************************************************************************* //\n')
-        file_id.close()
+        self.file_manager.write(file_id,
+                                '// ************************************************************************* //\n')
+        self.file_manager.close_file(file_id)

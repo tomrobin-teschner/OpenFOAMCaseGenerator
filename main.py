@@ -5,6 +5,7 @@ import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
 import WriteConstantDirectoryFiles.WriteTurbulenceProperties as Turbulence
 import WriteSystemDirectoryFiles.WriteControlDictFile as ControlDict
 import WriteSystemDirectoryFiles.WritefvSolutionFile as fvSolution
+import WriteSystemDirectoryFiles.WritefvSchemesFile as fvSchemes
 
 import WriteVelocity as U
 import WritePressure as p
@@ -14,7 +15,6 @@ import WriteSpecificDissipationRate as omega
 import WriteNuTilda as nuTilda
 import WriteNut as nut
 import GlobalVariables as Parameters
-import WritefvSchemes as fvSchemes
 
 from math import sqrt, pow
 
@@ -87,23 +87,23 @@ def main():
         'startTime': 0,
 
         # end time
-        'endTime': 10,
+        'endTime': 1,
 
         # flag indicating whether to dynamically caculate time step based on CFL criterion
-        'CFLBasedTimeStepping': False,
+        'CFLBasedTimeStepping': True,
 
         # CFL number
-        'CFL': 1.3,
+        'CFL': 1.0,
 
         # time step to be used (will be ignored if CFL-based time steppng is chosen)
         # WARNING: solver needs to support adjustable deltaT calculation
         'deltaT': 0.1,
 
         # largest allowable time step
-        'maxDeltaT': 1,
+        'maxDeltaT': 1e-5,
 
         # frequency at which to write output files. Behaviour controlled through write control entry below.
-        'write_frequency': 10,
+        'write_frequency': 1e-6,
 
         # write control, specify when to output results, the options are listed below
         # TIME_STEP: write every 'write_frequency' time steps
@@ -124,6 +124,31 @@ def main():
         # LOW_RE  : first cell-height near wall is of order y+ <= 1
         # HIGH_RE : first cell-height near wall is of order y+ >  30
         'wall_modelling': Parameters.LOW_RE,
+
+        # time integration scheme, options are listed below
+        # STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
+        # FIRST_ORDER: Implicit Euler (1st-order)
+        # SECOND_ORDER: Implicit backward Euler (2nd-order)
+        'time_integration': Parameters.FIRST_ORDER,
+
+        # spatial interpolation scheme for convective fluxes
+        # FIRST_ORDER: Upwind (1st-order)
+        # SECOND_ORDER: Upwind with Gradient correction (2nd-order)
+        # THIRD_ORDER: MUSCL scheme (3rd-order)
+        'convective_fluxes': Parameters.SECOND_ORDER,
+
+        # spatial interpolation of turbulent quantities for convective fluxes
+        # FIRST_ORDER: Upwind (1st-order)
+        # SECOND_ORDER: Upwind with Gradient correction (2nd-order)
+        # THIRD_ORDER: MUSCL scheme (3rd-order)
+        'turbulent_fluxes': Parameters.FIRST_ORDER,
+
+        # Choose level of corrections to be applied to numerical schemes in order to control stability and accuracy.
+        # NO_CORRECTION: No correction to be applied, best for accuracy and regular (orthogonal / cartesian) meshes
+        # SLIGHT_CORRECTION: Apply some correction. Best for unstructured meshes with slight convergence problems
+        # MODERATE_CORRECTION: Apply more correction for even heavier convergence problems
+        # FULL_CORRECTION: Full correction is applied, best for poor quality meshes. Will reduce accuracy of solution
+        'numerical_schemes_correction': Parameters.NO_CORRECTION,
 
         # absolute convergence criterion for implicit solvers
         'absolute_convergence_criterion': 1e-8,
@@ -186,7 +211,8 @@ def main():
     fv_solution.write_input_file()
 
     # write fvSchemes
-    fvSchemes.write_fvschemes(file_manager)
+    fv_schemes = fvSchemes.fvSchemesFile(file_manager, solver_properties)
+    fv_schemes.write_input_file()
 
     # generate utility script class that produces useful scripts to run the simulation
     utility_scripts = UtilityScripts.WriteUtilityScripts(file_properties, file_manager, solver_properties)

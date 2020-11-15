@@ -29,3 +29,15 @@ RUN_TIME = 1
 ADJUSTABLE_RUN_TIME = 2
 CPU_TIME = 3
 CLOCK_TIME = 4
+
+# numerical schemes
+STEADY_STATE = 0
+FIRST_ORDER = 1
+SECOND_ORDER = 2
+THIRD_ORDER = 3
+
+# stability controlling parameter for gradient schemes
+NO_CORRECTION = 0
+SLIGHT_CORRECTION = 1
+MODERATE_CORRECTION = 2
+FULL_CORRECTION = 3

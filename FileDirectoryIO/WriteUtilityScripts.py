@@ -26,7 +26,7 @@ class WriteUtilityScripts:
         self.file_manager.write(file_id, 'cd "${0%/*}" || exit  # Run from this directory\n')
         self.file_manager.write(file_id, '# ------------------------------------------------------------------------------\n')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'rm -rf 0.* [1-9]* log\n')
+        self.file_manager.write(file_id, 'rm -rf 0.* [1-9]* log logs/\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '# ------------------------------------------------------------------------------\n')
         self.file_manager.close_file(file_id)

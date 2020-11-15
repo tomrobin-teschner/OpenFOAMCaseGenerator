@@ -32,7 +32,8 @@ class ControlDictFile:
             self.file_manager.write(file_id, 'writeControl      cpuTime;\n\n')
         elif self.solver_properties['write_control'] == Parameters.CLOCK_TIME:
             self.file_manager.write(file_id, 'writeControl      clockTime;\n\n')
-        self.file_manager.write(file_id, 'writeInterval     ' + str(self.solver_properties['write_frequency']) + ';\n\n')
+        self.file_manager.write(file_id, 'writeInterval     ' +
+                                str(self.solver_properties['write_frequency']) + ';\n\n')
         self.file_manager.write(file_id, 'purgeWrite        ' + str(self.solver_properties['purge_write']) + ';\n\n')
         self.file_manager.write(file_id, 'writeFormat       ascii;\n\n')
         self.file_manager.write(file_id, 'writePrecision    6;\n\n')
@@ -40,5 +41,6 @@ class ControlDictFile:
         self.file_manager.write(file_id, 'timeFormat        general;\n\n')
         self.file_manager.write(file_id, 'timePrecision     6;\n\n')
         self.file_manager.write(file_id, 'runTimeModifiable true;\n\n')
-        self.file_manager.write(file_id, '// ************************************************************************* //\n')
-        file_id.close()
+        self.file_manager.write(file_id,
+                                '// ************************************************************************* //\n')
+        self.file_manager.close_file(file_id)
