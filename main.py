@@ -1,7 +1,10 @@
 import os
 import FileDirectoryIO.FileManager as IO
+import FileDirectoryIO.WriteUtilityScripts as UtilityScripts
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
 import WriteConstantDirectoryFiles.WriteTurbulenceProperties as Turbulence
+import WriteSystemDirectoryFiles.WriteControlDictFile as ControlDict
+import WriteSystemDirectoryFiles.WritefvSolutionFile as fvSolution
 
 import WriteVelocity as U
 import WritePressure as p
@@ -11,8 +14,6 @@ import WriteSpecificDissipationRate as omega
 import WriteNuTilda as nuTilda
 import WriteNut as nut
 import GlobalVariables as Parameters
-import WriteControlDict as ControlDict
-import WritefvSolution as fvSolution
 import WritefvSchemes as fvSchemes
 
 from math import sqrt, pow
@@ -82,6 +83,39 @@ def main():
         # name of solver to use for simulation
         'solver': 'pimpleFoam',
 
+        # start time
+        'startTime': 0,
+
+        # end time
+        'endTime': 10,
+
+        # flag indicating whether to dynamically caculate time step based on CFL criterion
+        'CFLBasedTimeStepping': False,
+
+        # CFL number
+        'CFL': 1.3,
+
+        # time step to be used (will be ignored if CFL-based time steppng is chosen)
+        # WARNING: solver needs to support adjustable deltaT calculation
+        'deltaT': 0.1,
+
+        # largest allowable time step
+        'maxDeltaT': 1,
+
+        # frequency at which to write output files. Behaviour controlled through write control entry below.
+        'write_frequency': 10,
+
+        # write control, specify when to output results, the options are listed below
+        # TIME_STEP: write every 'write_frequency' time steps
+        # RUN_TIME: write data every 'write_frequency' seconds of simulated time
+        # ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values (use with 'CFLBasedTimeStepping' = True)
+        # CPU_TIME: write data every 'write_frequency' seconds of CPU time
+        # CLOCK_TIME: write data every 'write_frequency' seconds of real time
+        'write_control': Parameters.ADJUSTABLE_RUN_TIME,
+
+        # specify how many solutions to keep (specify 0 to keep all)
+        'purge_write': 0,
+
         # turbulence treatment type
         # options are: LAMINAR, RANS, LES
         'turbulence_type': Parameters.RANS,
@@ -144,19 +178,24 @@ def main():
     turbulenceProperties.write_input_file()
 
     # write control dict file out
-    ControlDict.write_control_dict(file_manager, solver_properties)
+    control_dict = ControlDict.ControlDictFile(file_manager, solver_properties)
+    control_dict.write_input_file()
 
     # write fvSolution file out
-    fvSolution.write_fvsolution(file_manager, solver_properties)
+    fv_solution = fvSolution.fvSolutionFile(file_manager, solver_properties)
+    fv_solution.write_input_file()
 
     # write fvSchemes
     fvSchemes.write_fvschemes(file_manager)
 
+    # generate utility script class that produces useful scripts to run the simulation
+    utility_scripts = UtilityScripts.WriteUtilityScripts(file_properties, file_manager, solver_properties)
+
     # write Allrun file to execute case automatically
-    file_manager.write_all_run_file()
+    utility_scripts.write_all_run_file()
 
     # write Allclean file to clean up case directory
-    file_manager.write_all_clean_file()
+    utility_scripts.write_all_clean_file()
 
     # output diagnostics
     print('Generated case : ' + file_properties['path'])

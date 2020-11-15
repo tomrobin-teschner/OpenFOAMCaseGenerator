@@ -22,3 +22,10 @@ LES = 2
 # wall modelling type
 LOW_RE = 0
 HIGH_RE = 1
+
+# output write control
+TIME_STEP = 0
+RUN_TIME = 1
+ADJUSTABLE_RUN_TIME = 2
+CPU_TIME = 3
+CLOCK_TIME = 4
