@@ -132,7 +132,7 @@ class WriteBoundaryConditions:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
                 if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
-                    self.__epsilonLowReWallFunction(file_id, initial_field)
+                    self.__neumann(file_id)
                 elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__epsilonWallFunction(file_id, initial_field)
             elif self.boundary_properties[key] == Parameters.OUTLET:
@@ -282,9 +282,6 @@ class WriteBoundaryConditions:
         file_id.write('        type            kLowReWallFunction;\n')
         file_id.write('        value           ' + initial_field + ';\n')
 
-    def __epsilonLowReWallFunction(self, file_id, initial_field):
-        file_id.write('        type            epsilonLowReWallFunction;\n')
-        file_id.write('        value           ' + initial_field + ';\n')
 
     def __nutLowReWallFunction(self, file_id, initial_field):
         file_id.write('        type            nutLowReWallFunction;\n')

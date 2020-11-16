@@ -47,3 +47,6 @@ class FileManager:
         file_id.write('    object      ' + object_type + ';\n')
         file_id.write('}\n')
         file_id.write('// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n')
+
+    def get_version(self):
+        return self.file_properties['version']
