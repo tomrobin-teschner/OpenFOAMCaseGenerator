@@ -301,6 +301,42 @@ class WriteBoundaryConditions:
         self.file_manager.write(file_id, '}')
         self.file_manager.close_file(file_id)
 
+    def write_R(self):
+        file_id = self.file_manager.create_file('0', 'R')
+        uiui = (2.0/3.0)*self.freestream_k
+        initial_field = 'uniform (' + str(uiui) + ' 0 0 ' + str(uiui) + ' 0 ' + str(uiui) + ')'
+        self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', initial_field)
+        self.file_manager.write(file_id, 'boundaryField\n{\n')
+
+        self.file_manager.write(file_id, 'boundaryField\n{\n')
+        for key in self.boundary_properties:
+            if key != 'outlet_type':
+                self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+                if self.boundary_properties[key] == Parameters.WALL:
+                    if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                        self.__dirichlet(file_id, 'uniform (0 0 0 0 0 0)')
+                    elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                        self.__kqRWallFunction(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.OUTLET:
+                    if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
+                        self.__neumann(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
+                        self.__advective(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
+                        self.__inlet_outlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.SYMMETRY:
+                    self.__neumann(file_id)
+                elif self.boundary_properties[key] == Parameters.INLET:
+                    self.__dirichlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.CYCLIC:
+                    self.__periodic(file_id)
+                elif self.boundary_properties[key] == Parameters.EMPTY:
+                    self.__empty(file_id)
+                self.file_manager.write(file_id, '    }\n')
+
+        self.file_manager.write(file_id, '}')
+        self.file_manager.close_file(file_id)
+
     def __dirichlet(self, file_id, initial_field):
         file_id.write('        type            fixedValue;\n')
         file_id.write('        value           ' + initial_field + ';\n')

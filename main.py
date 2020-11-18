@@ -212,6 +212,7 @@ def main():
     boundary_conditions.write_nuTilda()
     boundary_conditions.write_ReThetat()
     boundary_conditions.write_gammaInt()
+    boundary_conditions.write_R()
 
     # write transport properties to file
     transport_properties = Transport.TransportPropertiesFile(file_manager, flow_properties)
