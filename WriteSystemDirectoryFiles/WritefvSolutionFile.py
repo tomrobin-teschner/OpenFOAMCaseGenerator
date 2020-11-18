@@ -24,7 +24,7 @@ class fvSolutionFile:
         self.file_manager.write(file_id, '        relTol           0;\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    "(U|k|omega|epsilon|nuTilda|zeta)"\n')
+        self.file_manager.write(file_id, '    "(U|k|omega|epsilon|nuTilda|zeta|ReThetat|gammaInt)"\n')
         self.file_manager.write(file_id, '    {\n')
         self.file_manager.write(file_id, '        solver           PBiCGStab;\n')
         self.file_manager.write(file_id, '        preconditioner   DILU;\n')
@@ -34,7 +34,7 @@ class fvSolutionFile:
             self.solver_properties['relative_convergence_criterion']) + ';\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    "(UFinal|kFinal|omegaFinal|epsilonFinal|nuTildaFinal|zetaFinal)"\n')
+        self.file_manager.write(file_id, '    "(UFinal|kFinal|omegaFinal|epsilonFinal|nuTildaFinal|zetaFinal|ReThetatFinal|gammaIntFinal)"\n')
         self.file_manager.write(file_id, '    {\n')
         self.file_manager.write(file_id, '        $U;\n')
         self.file_manager.write(file_id, '        relTol           0;\n')
@@ -63,6 +63,10 @@ class fvSolutionFile:
                                 '        epsilon   ' + str(self.solver_properties['convergence_threshold']) + ';\n')
         self.file_manager.write(file_id,
                                 '        nuTilda   ' + str(self.solver_properties['convergence_threshold']) + ';\n')
+        self.file_manager.write(file_id,
+                                '        Rethetat  ' + str(self.solver_properties['convergence_threshold']) + ';\n')
+        self.file_manager.write(file_id,
+                                '        gammaInt  ' + str(self.solver_properties['convergence_threshold']) + ';\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
@@ -79,13 +83,23 @@ class fvSolutionFile:
         self.file_manager.write(file_id,
                                 '        U         ' + str(self.solver_properties['under_relaxation_U']) + ';\n')
         self.file_manager.write(file_id,
-                           '        k         ' + str(self.solver_properties['under_relaxation_turbulence']) + ';\n')
+                                '        k         ' + str(self.solver_properties['under_relaxation_turbulence']) +
+                                ';\n')
         self.file_manager.write(file_id,
-                           '        omega     ' + str(self.solver_properties['under_relaxation_turbulence']) + ';\n')
+                                '        omega     ' + str(self.solver_properties['under_relaxation_turbulence']) +
+                                ';\n')
         self.file_manager.write(file_id,
-                           '        epsilon   ' + str(self.solver_properties['under_relaxation_turbulence']) + ';\n')
+                                '        epsilon   ' + str(self.solver_properties['under_relaxation_turbulence']) +
+                                ';\n')
         self.file_manager.write(file_id,
-                           '        nuTilda   ' + str(self.solver_properties['under_relaxation_turbulence']) + ';\n')
+                                '        nuTilda   ' + str(self.solver_properties['under_relaxation_turbulence']) +
+                                ';\n')
+        self.file_manager.write(file_id,
+                                '        ReThetat  ' + str(self.solver_properties['under_relaxation_turbulence']) +
+                                ';\n')
+        self.file_manager.write(file_id,
+                                '        gammaInt  ' + str(self.solver_properties['under_relaxation_turbulence']) +
+                                ';\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')

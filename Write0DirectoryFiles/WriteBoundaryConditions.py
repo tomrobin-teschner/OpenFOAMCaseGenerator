@@ -1,6 +1,8 @@
 from math import sqrt, pow
 import GlobalVariables as Parameters
 
+from math import pow
+
 
 class WriteBoundaryConditions:
     def __init__(self, file_manager, boundary_properties, flow_properties, solver_properties):
@@ -18,6 +20,12 @@ class WriteBoundaryConditions:
                                    self.flow_properties['reference_length'])
         self.freestream_nuTilda = (1.5 * self.velocity_magnitude * self.flow_properties['TKE_intensity'] *
                                    self.flow_properties['reference_length'])
+        self.freestream_ReThetat = 0
+        if self.flow_properties['TKE_intensity'] <= 0.013:
+            self.freestream_ReThetat = (1173.51 - 589.428 * self.flow_properties['TKE_intensity'] * 100 +
+                                       0.2196 / pow(self.flow_properties['TKE_intensity'] * 100, 2))
+        elif self.flow_properties['TKE_intensity'] > 0.013:
+            self.freestream_ReThetat = 331.5 / (self.flow_properties['TKE_intensity'] * 100 - 0.5658, 0.671)
 
     def __write_header(self, file_id, field_type, folder, variable_name, dimensions, internal_field):
         # create new boundary file
@@ -97,28 +105,29 @@ class WriteBoundaryConditions:
         self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', initial_field)
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.boundary_properties:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
-                    self.__kLowReWallFunction(file_id, initial_field)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__kqRWallFunction(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.OUTLET:
-                if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
+            if key != 'outlet_type':
+                self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+                if self.boundary_properties[key] == Parameters.WALL:
+                    if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                        self.__kLowReWallFunction(file_id, initial_field)
+                    elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                        self.__kqRWallFunction(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.OUTLET:
+                    if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
+                        self.__neumann(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
+                        self.__advective(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
+                        self.__inlet_outlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.SYMMETRY:
                     self.__neumann(file_id)
-                elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
-                    self.__advective(file_id)
-                elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
-                    self.__inlet_outlet(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif self.boundary_properties[key] == Parameters.INLET:
-                self.__dirichlet(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.boundary_properties[key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
+                elif self.boundary_properties[key] == Parameters.INLET:
+                    self.__dirichlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.CYCLIC:
+                    self.__periodic(file_id)
+                elif self.boundary_properties[key] == Parameters.EMPTY:
+                    self.__empty(file_id)
+                self.file_manager.write(file_id, '    }\n')
 
         self.file_manager.write(file_id, '}')
         self.file_manager.close_file(file_id)
@@ -129,28 +138,30 @@ class WriteBoundaryConditions:
         self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', initial_field)
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.boundary_properties:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+            if key != 'outlet_type':
+                self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+                if self.boundary_properties[key] == Parameters.WALL:
+                    if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                        self.__neumann(file_id)
+                    elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                        self.__epsilonWallFunction(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.OUTLET:
+                    if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
+                        self.__neumann(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
+                        self.__advective(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
+                        self.__inlet_outlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.SYMMETRY:
                     self.__neumann(file_id)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__epsilonWallFunction(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.OUTLET:
-                if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
-                    self.__neumann(file_id)
-                elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
-                    self.__advective(file_id)
-                elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
-                    self.__inlet_outlet(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif self.boundary_properties[key] == Parameters.INLET:
-                self.__dirichlet(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.boundary_properties[key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
+                elif self.boundary_properties[key] == Parameters.INLET:
+                    self.__dirichlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.CYCLIC:
+                    self.__periodic(file_id)
+                elif self.boundary_properties[key] == Parameters.EMPTY:
+                    self.__empty(file_id)
+                self.file_manager.write(file_id, '    }\n')
+
         self.file_manager.write(file_id, '}')
         self.file_manager.close_file(file_id)
 
@@ -160,28 +171,30 @@ class WriteBoundaryConditions:
         self.__write_header(file_id, 'volScalarField', '0', 'omega', '[0 0 -1 0 0 0 0]', initial_field)
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.boundary_properties:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+            if key != 'outlet_type':
+                self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+                if self.boundary_properties[key] == Parameters.WALL:
+                    if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                        self.__neumann(file_id)
+                    elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                        self.__omegaWallFunction(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.OUTLET:
+                    if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
+                        self.__neumann(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
+                        self.__advective(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
+                        self.__inlet_outlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.SYMMETRY:
                     self.__neumann(file_id)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__omegaWallFunction(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.OUTLET:
-                if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
-                    self.__neumann(file_id)
-                elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
-                    self.__advective(file_id)
-                elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
-                    self.__inlet_outlet(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif self.boundary_properties[key] == Parameters.INLET:
-                self.__dirichlet(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.boundary_properties[key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
+                elif self.boundary_properties[key] == Parameters.INLET:
+                    self.__dirichlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.CYCLIC:
+                    self.__periodic(file_id)
+                elif self.boundary_properties[key] == Parameters.EMPTY:
+                    self.__empty(file_id)
+                self.file_manager.write(file_id, '    }\n')
+
         self.file_manager.write(file_id, '}')
         self.file_manager.close_file(file_id)
 
@@ -191,28 +204,30 @@ class WriteBoundaryConditions:
         self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', initial_field)
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.boundary_properties:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+            if key != 'outlet_type':
+                self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+                if self.boundary_properties[key] == Parameters.WALL:
+                    if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                        self.__dirichlet(file_id, initial_field)
+                    elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                        self.__neumann(file_id)
+                elif self.boundary_properties[key] == Parameters.OUTLET:
+                    if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
+                        self.__neumann(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
+                        self.__advective(file_id)
+                    elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
+                        self.__inlet_outlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.SYMMETRY:
+                    self.__neumann(file_id)
+                elif self.boundary_properties[key] == Parameters.INLET:
                     self.__dirichlet(file_id, initial_field)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__neumann(file_id)
-            elif self.boundary_properties[key] == Parameters.OUTLET:
-                if self.boundary_properties['outlet_type'] == Parameters.NEUMANN:
-                    self.__neumann(file_id)
-                elif self.boundary_properties['outlet_type'] == Parameters.ADVECTIVE:
-                    self.__advective(file_id)
-                elif self.boundary_properties['outlet_type'] == Parameters.INLET_OUTLET:
-                    self.__inlet_outlet(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif self.boundary_properties[key] == Parameters.INLET:
-                self.__dirichlet(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.boundary_properties[key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
+                elif self.boundary_properties[key] == Parameters.CYCLIC:
+                    self.__periodic(file_id)
+                elif self.boundary_properties[key] == Parameters.EMPTY:
+                    self.__empty(file_id)
+                self.file_manager.write(file_id, '    }\n')
+
         self.file_manager.write(file_id, '}')
         self.file_manager.close_file(file_id)
 
@@ -222,19 +237,67 @@ class WriteBoundaryConditions:
         self.__write_header(file_id, 'volScalarField', '0', 'nut', '[0 2 -1 0 0 0 0]', initial_field)
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.boundary_properties:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
-                    self.__nutLowReWallFunction(file_id, initial_field)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__nutkWallFunction(file_id, initial_field)
-            elif self.boundary_properties[key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.boundary_properties[key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            else:
-                self.__zeroCalculated(file_id)
-            self.file_manager.write(file_id, '    }\n')
+            if key != 'outlet_type':
+                self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+                if self.boundary_properties[key] == Parameters.WALL:
+                    if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                        self.__nutLowReWallFunction(file_id, initial_field)
+                    elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                        self.__nutkWallFunction(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.CYCLIC:
+                    self.__periodic(file_id)
+                elif self.boundary_properties[key] == Parameters.EMPTY:
+                    self.__empty(file_id)
+                else:
+                    self.__zeroCalculated(file_id)
+                self.file_manager.write(file_id, '    }\n')
+
+        self.file_manager.write(file_id, '}')
+        self.file_manager.close_file(file_id)
+
+    def write_ReThetat(self):
+        file_id = self.file_manager.create_file('0', 'ReThetat')
+        initial_field = 'uniform ' + str(self.freestream_ReThetat)
+        self.__write_header(file_id, 'volScalarField', '0', 'ReThetat', '[0 0 0 0 0 0 0]', initial_field)
+        self.file_manager.write(file_id, 'boundaryField\n{\n')
+        for key in self.boundary_properties:
+            if key != 'outlet_type':
+                self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+                if self.boundary_properties[key] == Parameters.INLET:
+                    self.__dirichlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.SYMMETRY:
+                    self.__neumann(file_id)
+                elif self.boundary_properties[key] == Parameters.CYCLIC:
+                    self.__periodic(file_id)
+                elif self.boundary_properties[key] == Parameters.EMPTY:
+                    self.__empty(file_id)
+                else:
+                    self.__neumann(file_id)
+                self.file_manager.write(file_id, '    }\n')
+
+        self.file_manager.write(file_id, '}')
+        self.file_manager.close_file(file_id)
+
+    def write_gammaInt(self):
+        file_id = self.file_manager.create_file('0', 'gammaInt')
+        initial_field = 'uniform ' + str(1)
+        self.__write_header(file_id, 'volScalarField', '0', 'gammaInt', '[0 0 0 0 0 0 0]', initial_field)
+        self.file_manager.write(file_id, 'boundaryField\n{\n')
+        for key in self.boundary_properties:
+            if key != 'outlet_type':
+                self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+                if self.boundary_properties[key] == Parameters.INLET:
+                    self.__dirichlet(file_id, initial_field)
+                elif self.boundary_properties[key] == Parameters.SYMMETRY:
+                    self.__neumann(file_id)
+                elif self.boundary_properties[key] == Parameters.CYCLIC:
+                    self.__periodic(file_id)
+                elif self.boundary_properties[key] == Parameters.EMPTY:
+                    self.__empty(file_id)
+                else:
+                    self.__neumann(file_id)
+                self.file_manager.write(file_id, '    }\n')
+
         self.file_manager.write(file_id, '}')
         self.file_manager.close_file(file_id)
 

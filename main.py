@@ -22,9 +22,9 @@ def main():
         'case_name': 'naca_0012_y+_1',
 
         # path to folder where to copy test case to
-        'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
+        # 'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
         # 'run_directory': 'C:\\Users\\e802985\\Documents\\openfoam\\run',
-        # 'run_directory': '',
+        'run_directory': '',
 
         # version of openfoam to use (does not have an influence on the case setup, but will be used in headers)
         'version': 'v2006',
@@ -210,6 +210,8 @@ def main():
     boundary_conditions.write_omega()
     boundary_conditions.write_epsilon()
     boundary_conditions.write_nuTilda()
+    boundary_conditions.write_ReThetat()
+    boundary_conditions.write_gammaInt()
 
     # write transport properties to file
     transport_properties = Transport.TransportPropertiesFile(file_manager, flow_properties)
