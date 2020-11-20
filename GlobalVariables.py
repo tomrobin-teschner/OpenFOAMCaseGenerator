@@ -1,10 +1,13 @@
 # boundary condition ID
 INLET = 0
-OUTLET = 1
-WALL = 2
-EMPTY = 3
-SYMMETRY = 4
-CYCLIC = 5
+FREESTREAM = 1
+OUTLET = 2
+BACKFLOW_OUTLET = 3
+ADVECTIVE_OUTLET = 4
+WALL = 5
+EMPTY = 6
+SYMMETRY = 7
+CYCLIC = 8
 
 # outlet boundary condition ID
 NEUMANN = 0

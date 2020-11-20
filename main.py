@@ -33,18 +33,23 @@ def main():
     # define boundary conditions
     #   first  entry: name of boundary condition (specified in mesh generator)
     #   second entry: type of boundary condition
+    #
+    #   The following types are supported
+    #   INLET:            Standard inlet condition, dirichlet for velocity + turbulence, neumann for pressure
+    #   FREESTREAM:       Specify freestream condition globally (can be inlet and outlet)
+    #   OUTLET:           Standard outlet, fixed pressure and Neumann for velocity + turbulence (Reflective outlet)
+    #   BACKFLOW_OUTLET:  Same as outlet, but allows for flow to re-enter the domain (backflow at outlet)
+    #   ADVECTIVE_OUTLET: Quantities are forced / advected outside domain (Non-reflective outlet)
+    #   WALL:             Standard wall condition (ensure that mesh has wall boundary assigned instead of patch)
+    #   EMPTY:            Used for essentially 2D simulations on the symmetry plane
+    #   SYMMETRY:         Symmetry plane condition, i.e. wall with slip condition (Neumann condition for all quantities)
+    #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
     boundary_properties = {
-        'inlet': Parameters.INLET,
-        'outlet': Parameters.OUTLET,
+        'inlet': Parameters.FREESTREAM,
+        'outlet': Parameters.BACKFLOW_OUTLET,
         'upper': Parameters.WALL,
         'lower': Parameters.WALL,
-        'symmetry': Parameters.SYMMETRY,
-
-        # specify the outlet type
-        #   NEUMANN     : apply zero gradient (neumann) boundary condition (reflective boundary conditions)
-        #   ADVECTIVE   : transport any fluid outside the domain near outlet (non-reflective boundary condition)
-        #   INLET_OUTLET: allow for backflow at outlet, prescribe inlet (free-stream) condition for reverse flow
-        'outlet_type': Parameters.INLET_OUTLET,
+        'BaseAndTop': Parameters.EMPTY,
     }
 
     # physical properties of solver set-up
@@ -56,7 +61,7 @@ def main():
         'nu': 1e-6,
 
         # intensity of turbulent kinetic energy (between 0 - 1)
-        'TKE_intensity': 0.01,
+        'TKE_intensity': 0.0052,
 
         # reference length in simulation
         'reference_length': 1.0,
@@ -92,7 +97,7 @@ def main():
         'startTime': 0,
 
         # end time
-        'endTime': 1000,
+        'endTime': 3000,
 
         # flag indicating whether to dynamically caculate time step based on CFL criterion
         'CFLBasedTimeStepping': False,
@@ -135,13 +140,13 @@ def main():
         #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
         #   FIRST_ORDER: Implicit Euler (1st-order)
         #   SECOND_ORDER: Implicit backward Euler (2nd-order)
-        'time_integration': Parameters.SECOND_ORDER,
+        'time_integration': Parameters.STEADY_STATE,
 
         # spatial interpolation scheme for convective fluxes
         #   FIRST_ORDER: Upwind (1st-order)
         #   SECOND_ORDER: Upwind with Gradient correction (2nd-order)
         #   THIRD_ORDER: MUSCL scheme (3rd-order)
-        'convective_fluxes': Parameters.SECOND_ORDER,
+        'convective_fluxes': Parameters.FIRST_ORDER,
 
         # spatial interpolation of turbulent quantities for convective fluxes
         #   FIRST_ORDER: Upwind (1st-order)
