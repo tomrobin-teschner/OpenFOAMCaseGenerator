@@ -41,12 +41,14 @@ class ControlDictFile:
         self.file_manager.write(file_id, 'timeFormat        general;\n\n')
         self.file_manager.write(file_id, 'timePrecision     6;\n\n')
         self.file_manager.write(file_id, 'runTimeModifiable true;\n\n')
+        self.file_manager.write(file_id, 'functions\n')
+        self.file_manager.write(file_id, '{\n')
         if self.solver_properties['write_force_coefficients']:
-            self.file_manager.write(file_id, 'functions\n')
-            self.file_manager.write(file_id, '{\n')
             self.file_manager.write(file_id, '    #include "forceCoefficients"\n')
-            self.file_manager.write(file_id, '}\n')
-            self.file_manager.write(file_id, '\n')
+        if self.solver_properties['turbulence_type']:
+            self.file_manager.write(file_id, '    #include "yPlus"\n')
+        self.file_manager.write(file_id, '}\n')
+        self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
                                 '// ************************************************************************* //\n')
         self.file_manager.close_file(file_id)

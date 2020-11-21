@@ -3,8 +3,9 @@ from math import sqrt, pow
 
 import FileDirectoryIO.FileManager as IO
 import FileDirectoryIO.WriteUtilityScripts as UtilityScripts
-import FileDirectoryIO.WriteForceCoefficients as ForceCoefficients
-import FileDirectoryIO.WriteDecomposePar as DecomposeParDict
+import WriteSystemDirectoryFiles.WriteForceCoefficients as ForceCoefficients
+import WriteSystemDirectoryFiles.WriteDecomposePar as DecomposeParDict
+import WriteSystemDirectoryFiles.WriteYPlus as YPlus
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -189,7 +190,7 @@ def main():
     parallel_properties = {
         # flag indicating if simulation will be run in parallel. If true, additional information for domain
         # decomposition will be written (and Allrun script modified, accordingly)
-        'run_in_parallel': True,
+        'run_in_parallel': False,
 
         # number of processors that will be used to run case in parallel
         'number_of_processors': 4,
@@ -255,6 +256,10 @@ def main():
     if solver_properties['write_force_coefficients']:
         force_coefficients = ForceCoefficients.WriteForceCoefficients(file_manager, flow_properties)
         force_coefficients.write_force_coefficients()
+
+    if solver_properties['turbulence_type'] != Parameters.LAMINAR:
+        yplus = YPlus.WriteYPlus(file_manager, flow_properties)
+        yplus.write_y_plus()
 
     if parallel_properties['run_in_parallel']:
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(file_manager, parallel_properties)
