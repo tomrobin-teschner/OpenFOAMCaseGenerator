@@ -4,6 +4,7 @@ from math import sqrt, pow
 import FileDirectoryIO.FileManager as IO
 import FileDirectoryIO.WriteUtilityScripts as UtilityScripts
 import FileDirectoryIO.WriteForceCoefficients as ForceCoefficients
+import FileDirectoryIO.WriteDecomposePar as DecomposeParDict
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -72,7 +73,7 @@ def main():
         # the following entries are only used by the force coefficients. If forces are not calculated, ignore these.
 
         # reference area used to non-dimensionalise force coefficients
-        'reference_area': 1.0,
+        'reference_area': 0.051718,
 
         # direction of lift vector (normalised to unity)
         'lift_direction': [0, 1, 0],
@@ -185,6 +186,15 @@ def main():
         'write_force_coefficients': True,
     }
 
+    parallel_properties = {
+        # flag indicating if simulation will be run in parallel. If true, additional information for domain
+        # decomposition will be written (and Allrun script modified, accordingly)
+        'run_in_parallel': True,
+
+        # number of processors that will be used to run case in parallel
+        'number_of_processors': 4,
+    }
+
     # ------------------------------------------------------------------------------------------------------------------
     # add additional entries to dictionaries
 
@@ -246,8 +256,13 @@ def main():
         force_coefficients = ForceCoefficients.WriteForceCoefficients(file_manager, flow_properties)
         force_coefficients.write_force_coefficients()
 
+    if parallel_properties['run_in_parallel']:
+        decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(file_manager, parallel_properties)
+        decompose_par_dict.write_decompose_par_dict()
+
     # generate utility script class that produces useful scripts to run the simulation
-    utility_scripts = UtilityScripts.WriteUtilityScripts(file_properties, file_manager, solver_properties)
+    utility_scripts = UtilityScripts.WriteUtilityScripts(file_properties, file_manager, solver_properties,
+                                                         parallel_properties)
 
     # write Allrun file to execute case automatically
     utility_scripts.write_all_run_file()

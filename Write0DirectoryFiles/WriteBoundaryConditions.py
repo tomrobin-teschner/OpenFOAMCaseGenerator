@@ -208,7 +208,7 @@ class WriteBoundaryConditions:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
                 if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
-                    self.__dirichlet(file_id, initial_field)
+                    self.__dirichlet(file_id, 'uniform 0')
                 elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__neumann(file_id)
             elif self.boundary_properties[key] == Parameters.OUTLET:
