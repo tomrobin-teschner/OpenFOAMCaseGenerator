@@ -47,6 +47,7 @@ class ControlDictFile:
             self.file_manager.write(file_id, '    #include "forceCoefficients"\n')
         if self.solver_properties['turbulence_type']:
             self.file_manager.write(file_id, '    #include "yPlus"\n')
+        self.file_manager.write(file_id, '    #include "residuals"\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,

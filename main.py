@@ -6,6 +6,7 @@ import FileDirectoryIO.WriteUtilityScripts as UtilityScripts
 import WriteSystemDirectoryFiles.WriteForceCoefficients as ForceCoefficients
 import WriteSystemDirectoryFiles.WriteDecomposePar as DecomposeParDict
 import WriteSystemDirectoryFiles.WriteYPlus as YPlus
+import WriteSystemDirectoryFiles.WriteResiduals as Residuals
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -252,7 +253,7 @@ def main():
     fv_schemes = fvSchemes.fvSchemesFile(file_manager, solver_properties)
     fv_schemes.write_input_file()
 
-    # write additional files if required
+    # write additional files if required for on-the-fly post-processing
     if solver_properties['write_force_coefficients']:
         force_coefficients = ForceCoefficients.WriteForceCoefficients(file_manager, flow_properties)
         force_coefficients.write_force_coefficients()
@@ -264,6 +265,9 @@ def main():
     if parallel_properties['run_in_parallel']:
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(file_manager, parallel_properties)
         decompose_par_dict.write_decompose_par_dict()
+
+    residuals = Residuals.WriteResiduals(file_manager)
+    residuals.write_residuals()
 
     # generate utility script class that produces useful scripts to run the simulation
     utility_scripts = UtilityScripts.WriteUtilityScripts(file_properties, file_manager, solver_properties,

@@ -1,10 +1,9 @@
-class WriteYPlus:
-    def __init__(self, file_manager, flow_properties):
+class WriteResiduals:
+    def __init__(self, file_manager):
         self.file_manager = file_manager
-        self.flow_properties = flow_properties
 
-    def write_y_plus(self):
-        file_id = self.file_manager.create_file('system', 'yPlus')
+    def write_residuals(self):
+        file_id = self.file_manager.create_file('system', 'residuals')
         self.file_manager.write(file_id,
                                 '/*--------------------------------*- C++ -*----------------------------------*\\\n')
         self.file_manager.write(file_id,
@@ -21,20 +20,12 @@ class WriteYPlus:
         self.file_manager.write(file_id,
                                 '\*---------------------------------------------------------------------------*/\n')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'yPlus\n')
+
+        self.file_manager.write(file_id, 'residuals\n')
         self.file_manager.write(file_id, '{\n')
-        self.file_manager.write(file_id, '    type            yPlus;\n')
-        self.file_manager.write(file_id, '    libs            (fieldFunctionObjects);\n')
-        self.file_manager.write(file_id, '    writeControl    writeTime;\n')
-        if len(self.flow_properties['wall_boundaries']) == 1:
-            self.file_manager.write(file_id, '    patches         (' + self.flow_properties['wall_boundaries'][0] +
-                                    ');\n')
-        else:
-            self.file_manager.write(file_id, '    patches         (')
-            temp_str = ''
-            for boundary in self.flow_properties['wall_boundaries']:
-                temp_str += boundary + ' '
-            self.file_manager.write(file_id, temp_str[:-1] + ');\n')
+        self.file_manager.write(file_id, '    type            solverInfo;\n')
+        self.file_manager.write(file_id, '    libs            (utilityFunctionObjects);\n')
+        self.file_manager.write(file_id, '    fields          (".*");\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
