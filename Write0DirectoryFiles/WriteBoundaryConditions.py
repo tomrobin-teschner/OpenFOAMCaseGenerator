@@ -13,13 +13,14 @@ class WriteBoundaryConditions:
         self.velocity_magnitude = (sqrt(pow(self.flow_properties['inlet_velocity'][0], 2) +
                                         pow(self.flow_properties['inlet_velocity'][1], 2) +
                                         pow(self.flow_properties['inlet_velocity'][2], 2)))
+        self.turbulent_length_scale = 0.07 * self.flow_properties['reference_length']
         self.freestream_k = 1.5 * pow(self.velocity_magnitude * self.flow_properties['TKE_intensity'], 2)
         self.freestream_omega = (pow(Parameters.C_MU, -0.25) * pow(self.freestream_k, 0.5) /
-                                 (self.flow_properties['reference_length']) * 0.07 )
+                                 self.turbulent_length_scale)
         self.freestream_epsilon = (pow(Parameters.C_MU, 0.75) * pow(self.freestream_k, 1.5) /
-                                   (self.flow_properties['reference_length']) * 0.07 )
+                                   self.turbulent_length_scale)
         self.freestream_nuTilda = (1.5 * self.velocity_magnitude * self.flow_properties['TKE_intensity'] *
-                                   (self.flow_properties['reference_length']) * 0.07 )
+                                   self.turbulent_length_scale)
         self.freestream_ReThetat = 0
         if self.flow_properties['TKE_intensity'] <= 0.013:
             self.freestream_ReThetat = (1173.51 - 589.428 * self.flow_properties['TKE_intensity'] * 100 +

@@ -19,12 +19,12 @@ def main():
     # file properties
     file_properties = {
         # name of the case to use (will be used for the folder name)
-        'case_name': 'naca_0012_y+_1',
+        'case_name': 'naca_0012_y+_1_NASA',
 
         # path to folder where to copy test case to
-        # 'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
+        'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
         # 'run_directory': 'C:\\Users\\e802985\\Documents\\openfoam\\run',
-        'run_directory': '',
+        # 'run_directory': '',
 
         # version of openfoam to use (does not have an influence on the case setup, but will be used in headers)
         'version': 'v2006',
@@ -46,9 +46,11 @@ def main():
     #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
     boundary_properties = {
         'inlet': Parameters.FREESTREAM,
-        'outlet': Parameters.BACKFLOW_OUTLET,
+        'outlet': Parameters.FREESTREAM,
         'upper': Parameters.WALL,
         'lower': Parameters.WALL,
+        'top_symmetry': Parameters.FREESTREAM,
+        'bottom_symmetry': Parameters.FREESTREAM,
         'BaseAndTop': Parameters.EMPTY,
     }
 

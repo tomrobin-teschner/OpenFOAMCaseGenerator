@@ -1,3 +1,5 @@
+import GlobalVariables as Parameters
+
 class fvSolutionFile:
     def __init__(self, file_manager, solver_properties):
         self.file_manager = file_manager
@@ -45,7 +47,10 @@ class fvSolutionFile:
         self.file_manager.write(file_id, '{\n')
         self.file_manager.write(file_id, '    consistent                 yes;\n')
         self.file_manager.write(file_id, '    nCorrectors                2;\n')
-        self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   0;\n')
+        if self.solver_properties['numerical_schemes_correction'] == Parameters.NO_CORRECTION:
+            self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   0;\n')
+        else:
+            self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   2;\n')
         self.file_manager.write(file_id, '    pRefCell                   0;\n')
         self.file_manager.write(file_id, '    pRefValue                  0;\n')
         self.file_manager.write(file_id, '\n')
