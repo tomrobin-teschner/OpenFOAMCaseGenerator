@@ -13,7 +13,7 @@ class WriteBoundaryConditions:
         self.solver_properties = solver_properties
 
         # calculate freestream conditions
-        #   see https://www.cfd-online.com/Wiki/Turbulence_free-stream_boundary_conditions as a reference
+        # see https://www.cfd-online.com/Wiki/Turbulence_free-stream_boundary_conditions as a reference
         self.velocity_magnitude = self.flow_properties['velocity_magnitude']
         self.freestream_k = self.__calculate_freestream_k()
         self.freestream_omega = self.__calculate_freestream_omega()
