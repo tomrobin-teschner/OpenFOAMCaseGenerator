@@ -22,7 +22,7 @@ def main():
     # file properties
     file_properties = {
         # name of the case to use (will be used for the folder name)
-        'case_name': 'naca_0012_y+_1_NASA',
+        'case_name': 'naca_0012_y+_1',
 
         # path to folder where to copy test case to
         'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
@@ -65,8 +65,8 @@ def main():
         # specify the laminar viscosity
         'nu': 1e-6,
 
-        # intensity of turbulent kinetic energy (between 0 - 1)
-        'TKE_intensity': 0.0052,
+        # freestream turbulent intensity (between 0 - 1)
+        'freestream_turbulent_intensity': 0.00052,
 
         # reference length in simulation
         'reference_length': 1.0,
@@ -75,7 +75,7 @@ def main():
         # the following entries are only used by the force coefficients. If forces are not calculated, ignore these.
 
         # reference area used to non-dimensionalise force coefficients
-        'reference_area': 0.051718,
+        'reference_area': 1.0,
 
         # direction of lift vector (normalised to unity)
         'lift_direction': [0, 1, 0],
@@ -102,7 +102,7 @@ def main():
         'startTime': 0,
 
         # end time
-        'endTime': 3000,
+        'endTime': 2000,
 
         # flag indicating whether to dynamically caculate time step based on CFL criterion
         'CFLBasedTimeStepping': False,
@@ -118,7 +118,7 @@ def main():
         'maxDeltaT': 1,
 
         # frequency at which to write output files. Behaviour controlled through write control entry below.
-        'write_frequency': 10,
+        'write_frequency': 100,
 
         # write control, specify when to output results, the options are listed below
         #   TIME_STEP: write every 'write_frequency' time steps
@@ -141,6 +141,21 @@ def main():
         #   HIGH_RE : first cell-height near wall is of order y+ >  30
         'wall_modelling': Parameters.LOW_RE,
 
+        # select how to calculate turbulent quantities at inlet
+        #   INTERNAL  : Internal flow assumes the turbulent length scale to be limited by the channel / wind tunnel
+        #               height or diameter, expressed through the reference_length parameter. It is calculated as
+        #               0.07 * reference length
+        #   EXTERNAL  : External flow assumes the turbulent length scale to be limited by the scales within the
+        #               fully turbulent boundary layer and approximately equal to 40% of the boundary layer thickness
+        #   RATIO     : Alternatively, the turbulent to laminar viscosity ratio may be prescribed
+        #   RATIO_AUTO: In absence of any turbulent quantities, we may instead base the approximation of the turbulent
+        #               to laminar viscosity ratio entirely on the freestream turbulence intensity. Use this option if
+        #               any of the above are not suitable
+        'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
+
+        # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
+        'turbulent_to_laminar_ratio': 10,
+
         # time integration scheme, options are listed below
         #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
         #   FIRST_ORDER: Implicit Euler (1st-order)
@@ -151,7 +166,7 @@ def main():
         #   FIRST_ORDER: Upwind (1st-order)
         #   SECOND_ORDER: Upwind with Gradient correction (2nd-order)
         #   THIRD_ORDER: MUSCL scheme (3rd-order)
-        'convective_fluxes': Parameters.FIRST_ORDER,
+        'convective_fluxes': Parameters.SECOND_ORDER,
 
         # spatial interpolation of turbulent quantities for convective fluxes
         #   FIRST_ORDER: Upwind (1st-order)

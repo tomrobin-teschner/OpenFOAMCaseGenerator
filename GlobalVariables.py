@@ -26,6 +26,12 @@ LES = 2
 LOW_RE = 0
 HIGH_RE = 1
 
+# calculation of turbulent length scale
+INTERNAL = 0
+EXTERNAL = 1
+RATIO = 2
+RATIO_AUTO = 3
+
 # output write control
 TIME_STEP = 0
 RUN_TIME = 1

@@ -6,27 +6,87 @@ from math import pow
 
 class WriteBoundaryConditions:
     def __init__(self, file_manager, boundary_properties, flow_properties, solver_properties):
+        # assign private variables
         self.file_manager = file_manager
         self.boundary_properties = boundary_properties
         self.flow_properties = flow_properties
         self.solver_properties = solver_properties
-        self.velocity_magnitude = (sqrt(pow(self.flow_properties['inlet_velocity'][0], 2) +
-                                        pow(self.flow_properties['inlet_velocity'][1], 2) +
-                                        pow(self.flow_properties['inlet_velocity'][2], 2)))
-        self.turbulent_length_scale = 0.07 * self.flow_properties['reference_length']
-        self.freestream_k = 1.5 * pow(self.velocity_magnitude * self.flow_properties['TKE_intensity'], 2)
-        self.freestream_omega = (pow(Parameters.C_MU, -0.25) * pow(self.freestream_k, 0.5) /
-                                 self.turbulent_length_scale)
-        self.freestream_epsilon = (pow(Parameters.C_MU, 0.75) * pow(self.freestream_k, 1.5) /
-                                   self.turbulent_length_scale)
-        self.freestream_nuTilda = (1.5 * self.velocity_magnitude * self.flow_properties['TKE_intensity'] *
-                                   self.turbulent_length_scale)
-        self.freestream_ReThetat = 0
-        if self.flow_properties['TKE_intensity'] <= 0.013:
-            self.freestream_ReThetat = (1173.51 - 589.428 * self.flow_properties['TKE_intensity'] * 100 +
-                                       0.2196 / pow(self.flow_properties['TKE_intensity'] * 100, 2))
-        elif self.flow_properties['TKE_intensity'] > 0.013:
-            self.freestream_ReThetat = 331.5 / (self.flow_properties['TKE_intensity'] * 100 - 0.5658, 0.671)
+
+        # calculate freestream conditions
+        #   see https://www.cfd-online.com/Wiki/Turbulence_free-stream_boundary_conditions as a reference
+        self.velocity_magnitude = self.flow_properties['velocity_magnitude']
+        self.freestream_k = self.__calculate_freestream_k()
+        self.freestream_omega = self.__calculate_freestream_omega()
+        self.freestream_epsilon = self.__calculate_freestream_epsilon()
+        self.freestream_nuTilda = self.__calculate_freestream_nuTilda()
+        self.freestream_ReThetat = self.__calculate_ReThetaT()
+
+    def __calculate_turbulent_length_scale_for_internal_flows(self):
+        return 0.07 * self.flow_properties['reference_length']
+
+    def __calculate_turbulent_length_scale_for_external_flows(self):
+        Re = self.flow_properties['reynolds_number']
+        L = self.flow_properties['reference_length']
+        delta = 0.37 * L / pow(Re, 0.2)
+        return 0.4 * delta
+
+    def __calculate_turbulent_to_laminar_viscosity_ratio(self):
+        if self.flow_properties['freestream_turbulent_intensity'] < 0.01:
+            return 1
+        elif 0.01 <= self.flow_properties['freestream_turbulent_intensity'] < 0.05:
+            return 1 + 9 * (self.flow_properties['freestream_turbulent_intensity'] - 0.01) / 0.04
+        elif 0.05 <= self.flow_properties['freestream_turbulent_intensity'] < 0.1:
+            return 10 + 90 * (self.flow_properties['freestream_turbulent_intensity'] - 0.05) / 0.05
+        elif self.flow_properties['freestream_turbulent_intensity'] >= 0.1:
+            return 100
+
+    def __calculate_freestream_k(self):
+        return 1.5 * pow(self.velocity_magnitude * self.flow_properties['freestream_turbulent_intensity'], 2)
+
+    def __calculate_freestream_omega(self):
+        if self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
+            tls = self.__calculate_turbulent_length_scale_for_internal_flows()
+            return pow(Parameters.C_MU, -0.25) * pow(self.freestream_k, 0.5) / tls
+        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
+            tls = self.__calculate_turbulent_length_scale_for_external_flows()
+            return pow(Parameters.C_MU, -0.25) * pow(self.freestream_k, 0.5) / tls
+        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO:
+            return ((self.freestream_k / self.flow_properties['nu']) /
+                    self.solver_properties['turbulent_to_laminar_ratio'])
+        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO_AUTO:
+            ttlr = self.__calculate_turbulent_to_laminar_viscosity_ratio()
+            return (self.freestream_k / self.flow_properties['nu']) / ttlr
+
+    def __calculate_freestream_epsilon(self):
+        if self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
+            tls = self.__calculate_turbulent_length_scale_for_internal_flows()
+            return pow(Parameters.C_MU, 0.75) * pow(self.freestream_k, 1.5) / tls
+        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
+            tls = self.__calculate_turbulent_length_scale_for_external_flows()
+            return pow(Parameters.C_MU, 0.75) * pow(self.freestream_k, 1.5) / tls
+        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO:
+            return ((Parameters.C_MU * pow(self.freestream_k, 2) / self.flow_properties['nu']) /
+                    self.solver_properties['turbulent_to_laminar_ratio'])
+        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO_AUTO:
+            ttlr = self.__calculate_turbulent_to_laminar_viscosity_ratio()
+            return (Parameters.C_MU * pow(self.freestream_k, 2) / self.flow_properties['nu']) / ttlr
+
+    def __calculate_freestream_nuTilda(self):
+        if self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
+            tls = self.__calculate_turbulent_length_scale_for_internal_flows()
+            return 1.5 * self.velocity_magnitude * self.flow_properties['freestream_turbulent_intensity'] * tls
+        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
+            tls = self.__calculate_turbulent_length_scale_for_external_flows()
+            return 1.5 * self.velocity_magnitude * self.flow_properties['freestream_turbulent_intensity'] * tls
+        else:
+            return 5 * self.flow_properties['nu']
+
+    def __calculate_ReThetaT(self):
+        if self.flow_properties['freestream_turbulent_intensity'] <= 0.013:
+            return (1173.51 - 589.428 * self.flow_properties['freestream_turbulent_intensity'] * 100 +
+                    0.2196 / pow(self.flow_properties['freestream_turbulent_intensity'] * 100, 2))
+        elif self.flow_properties['freestream_turbulent_intensity'] > 0.013:
+            return 331.5 / pow((self.flow_properties['freestream_turbulent_intensity'] * 100 - 0.5658), 0.671)
 
     def __write_header(self, file_id, field_type, folder, variable_name, dimensions, internal_field):
         # create new boundary file
@@ -175,7 +235,7 @@ class WriteBoundaryConditions:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
                 if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
-                    self.__neumann(file_id)
+                    self.__omegaWallFunction(file_id, initial_field)
                 elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__omegaWallFunction(file_id, initial_field)
             elif self.boundary_properties[key] == Parameters.OUTLET:
@@ -208,7 +268,7 @@ class WriteBoundaryConditions:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
                 if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
-                    self.__dirichlet(file_id, 'uniform 0')
+                    self.__dirichlet(file_id, 'uniform ' + str(self.flow_properties['nu'] / 2))
                 elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__neumann(file_id)
             elif self.boundary_properties[key] == Parameters.OUTLET:
