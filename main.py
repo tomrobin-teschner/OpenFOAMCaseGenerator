@@ -17,9 +17,8 @@ import WriteSystemDirectoryFiles.WritefvSchemesFile as fvSchemes
 import Write0DirectoryFiles.WriteBoundaryConditions as BoundaryConditions
 
 
-def main():
+def case_properties():
 
-    # file properties
     file_properties = {
         # name of the case to use (will be used for the folder name)
         'case_name': 'naca_0012_y+_1',
@@ -206,7 +205,13 @@ def main():
         'number_of_processors': 4,
     }
 
-    # ------------------------------------------------------------------------------------------------------------------
+    return [file_properties, boundary_properties, flow_properties, solver_properties, parallel_properties]
+
+def main():
+
+    # get case specific dictionaries to set up case and write input files
+    file_properties, boundary_properties, flow_properties, solver_properties, parallel_properties = case_properties()
+
     # add additional entries to dictionaries
 
     # absolute path of text case location
