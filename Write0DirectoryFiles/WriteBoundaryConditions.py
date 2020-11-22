@@ -5,12 +5,13 @@ from math import pow
 
 
 class WriteBoundaryConditions:
-    def __init__(self, file_manager, boundary_properties, flow_properties, solver_properties):
+    def __init__(self, file_manager, boundary_properties, flow_properties, solver_properties, turbulence_properties):
         # assign private variables
         self.file_manager = file_manager
         self.boundary_properties = boundary_properties
         self.flow_properties = flow_properties
         self.solver_properties = solver_properties
+        self.turbulence_properties = turbulence_properties
 
         # calculate freestream conditions
         # see https://www.cfd-online.com/Wiki/Turbulence_free-stream_boundary_conditions as a reference
@@ -44,38 +45,38 @@ class WriteBoundaryConditions:
         return 1.5 * pow(self.velocity_magnitude * self.flow_properties['freestream_turbulent_intensity'], 2)
 
     def __calculate_freestream_omega(self):
-        if self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
+        if self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
             tls = self.__calculate_turbulent_length_scale_for_internal_flows()
             return pow(Parameters.C_MU, -0.25) * pow(self.freestream_k, 0.5) / tls
-        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
+        elif self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
             tls = self.__calculate_turbulent_length_scale_for_external_flows()
             return pow(Parameters.C_MU, -0.25) * pow(self.freestream_k, 0.5) / tls
-        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO:
+        elif self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO:
             return ((self.freestream_k / self.flow_properties['nu']) /
-                    self.solver_properties['turbulent_to_laminar_ratio'])
-        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO_AUTO:
+                    self.turbulence_properties['turbulent_to_laminar_ratio'])
+        elif self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO_AUTO:
             ttlr = self.__calculate_turbulent_to_laminar_viscosity_ratio()
             return (self.freestream_k / self.flow_properties['nu']) / ttlr
 
     def __calculate_freestream_epsilon(self):
-        if self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
+        if self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
             tls = self.__calculate_turbulent_length_scale_for_internal_flows()
             return pow(Parameters.C_MU, 0.75) * pow(self.freestream_k, 1.5) / tls
-        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
+        elif self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
             tls = self.__calculate_turbulent_length_scale_for_external_flows()
             return pow(Parameters.C_MU, 0.75) * pow(self.freestream_k, 1.5) / tls
-        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO:
+        elif self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO:
             return ((Parameters.C_MU * pow(self.freestream_k, 2) / self.flow_properties['nu']) /
-                    self.solver_properties['turbulent_to_laminar_ratio'])
-        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO_AUTO:
+                    self.turbulence_properties['turbulent_to_laminar_ratio'])
+        elif self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.RATIO_AUTO:
             ttlr = self.__calculate_turbulent_to_laminar_viscosity_ratio()
             return (Parameters.C_MU * pow(self.freestream_k, 2) / self.flow_properties['nu']) / ttlr
 
     def __calculate_freestream_nuTilda(self):
-        if self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
+        if self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
             tls = self.__calculate_turbulent_length_scale_for_internal_flows()
             return 1.5 * self.velocity_magnitude * self.flow_properties['freestream_turbulent_intensity'] * tls
-        elif self.solver_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
+        elif self.turbulence_properties['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
             tls = self.__calculate_turbulent_length_scale_for_external_flows()
             return 1.5 * self.velocity_magnitude * self.flow_properties['freestream_turbulent_intensity'] * tls
         else:
@@ -168,9 +169,9 @@ class WriteBoundaryConditions:
         for key in self.boundary_properties:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
                     self.__kLowReWallFunction(file_id, initial_field)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__kqRWallFunction(file_id, initial_field)
             elif self.boundary_properties[key] == Parameters.OUTLET:
                 self.__neumann(file_id)
@@ -201,9 +202,9 @@ class WriteBoundaryConditions:
         for key in self.boundary_properties:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
                     self.__neumann(file_id)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__epsilonWallFunction(file_id, initial_field)
             elif self.boundary_properties[key] == Parameters.OUTLET:
                 self.__neumann(file_id)
@@ -234,9 +235,9 @@ class WriteBoundaryConditions:
         for key in self.boundary_properties:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
                     self.__omegaWallFunction(file_id, initial_field)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__omegaWallFunction(file_id, initial_field)
             elif self.boundary_properties[key] == Parameters.OUTLET:
                 self.__neumann(file_id)
@@ -267,9 +268,9 @@ class WriteBoundaryConditions:
         for key in self.boundary_properties:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
                     self.__dirichlet(file_id, 'uniform ' + str(self.flow_properties['nu'] / 2))
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__neumann(file_id)
             elif self.boundary_properties[key] == Parameters.OUTLET:
                 self.__neumann(file_id)
@@ -300,9 +301,9 @@ class WriteBoundaryConditions:
         for key in self.boundary_properties:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
                     self.__nutLowReWallFunction(file_id, initial_field)
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__nutkWallFunction(file_id, initial_field)
             elif self.boundary_properties[key] == Parameters.CYCLIC:
                 self.__periodic(file_id)
@@ -372,9 +373,9 @@ class WriteBoundaryConditions:
         for key in self.boundary_properties:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
-                if self.solver_properties['wall_modelling'] == Parameters.LOW_RE:
+                if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
                     self.__dirichlet(file_id, 'uniform (0 0 0 0 0 0)')
-                elif self.solver_properties['wall_modelling'] == Parameters.HIGH_RE:
+                elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__kqRWallFunction(file_id, initial_field)
             elif self.boundary_properties[key] == Parameters.OUTLET:
                 self.__neumann(file_id)

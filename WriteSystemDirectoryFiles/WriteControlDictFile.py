@@ -11,7 +11,12 @@ class ControlDictFile:
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'controlDict')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, 'application       ' + self.solver_properties['solver'] + ';\n\n')
-        self.file_manager.write(file_id, 'startFrom         startTime;\n\n')
+        if self.solver_properties['startFrom'] == Parameters.START_TIME:
+            self.file_manager.write(file_id, 'startFrom         startTime;\n\n')
+        elif self.solver_properties['startFrom'] == Parameters.FIRST_TIME:
+            self.file_manager.write(file_id, 'startFrom         firstTime;\n\n')
+        elif self.solver_properties['startFrom'] == Parameters.LATEST_TIME:
+            self.file_manager.write(file_id, 'startFrom         latestTime;\n\n')
         self.file_manager.write(file_id, 'startTime         ' + str(self.solver_properties['startTime']) + ';\n\n')
         self.file_manager.write(file_id, 'stopAt            endTime;\n\n')
         self.file_manager.write(file_id, 'endTime           ' + str(self.solver_properties['endTime']) + ';\n\n')
@@ -45,8 +50,7 @@ class ControlDictFile:
         self.file_manager.write(file_id, '{\n')
         if self.solver_properties['write_force_coefficients']:
             self.file_manager.write(file_id, '    #include "forceCoefficients"\n')
-        if self.solver_properties['turbulence_type']:
-            self.file_manager.write(file_id, '    #include "yPlus"\n')
+        self.file_manager.write(file_id, '    #include "yPlus"\n')
         self.file_manager.write(file_id, '    #include "residuals"\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')

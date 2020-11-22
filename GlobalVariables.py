@@ -32,6 +32,11 @@ EXTERNAL = 1
 RATIO = 2
 RATIO_AUTO = 3
 
+# start time for simulation
+START_TIME = 0
+FIRST_TIME = 1
+LATEST_TIME = 2
+
 # output write control
 TIME_STEP = 0
 RUN_TIME = 1
@@ -48,3 +53,20 @@ DEFAULT = 0
 TVD = 1
 ROBUSTNESS = 2
 ACCURACY = 3
+
+# RANS models
+kEpsilon = 0
+realizableKE = 1
+RNGkEpsilon = 2
+LienLeschziner = 3
+LamBremhorstKE = 4
+LaunderSharmaKE = 5
+kOmega = 6
+kOmegaSST = 7
+kOmegaSSTLM = 8
+qZeta = 9
+SpalartAllmaras = 10
+LienCubicKE = 11
+ShihQuadraticKE = 12
+LRR = 13
+SSG = 14

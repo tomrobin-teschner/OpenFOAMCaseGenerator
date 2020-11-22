@@ -2,11 +2,17 @@ import GlobalVariables as Parameters
 
 
 class fvSchemesFile:
-    def __init__(self, file_manager, solver_properties):
+    def __init__(self, file_manager, solver_properties, turbulence_properties):
         self.file_manager = file_manager
         self.solver_properties = solver_properties
+        self.turbulence_properties = turbulence_properties
 
     def write_input_file(self):
+        # gradient reconstruction scheme to be used in divergence schemes, depends on turbulence model
+        gradient_scheme = 'default'
+        if self.turbulence_properties['use_phi_instead_of_grad_U']:
+            gradient_scheme = 'phi'
+
         file_id = self.file_manager.create_file('system', 'fvSchemes')
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'fvSchemes')
         self.file_manager.write(file_id, '\n')
@@ -46,21 +52,21 @@ class fvSchemesFile:
         self.file_manager.write(file_id, '{\n')
         if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
             if self.solver_properties['use_first_order_for_turbulence']:
-                self.file_manager.write(file_id, '    default         Gauss upwind default;\n')
+                self.file_manager.write(file_id, '    default         Gauss upwind ' + gradient_scheme + ';\n')
             else:
-                self.file_manager.write(file_id, '    default         Gauss linearUpwind default;\n')
+                self.file_manager.write(file_id, '    default         Gauss linearUpwind ' + gradient_scheme + ';\n')
             self.file_manager.write(file_id, '    div(phi,U)      Gauss linearUpwindV grad(U);\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
             if self.solver_properties['use_first_order_for_turbulence']:
-                self.file_manager.write(file_id, '    default         Gauss upwind default;\n')
+                self.file_manager.write(file_id, '    default         Gauss upwind ' + gradient_scheme + ';\n')
             else:
-                self.file_manager.write(file_id, '    default         Gauss Minmod default;\n')
+                self.file_manager.write(file_id, '    default         Gauss Minmod ' + gradient_scheme + ';\n')
             self.file_manager.write(file_id, '    div(phi,U)      Gauss MinmodV grad(U);\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
             self.file_manager.write(file_id, '    default         Gauss upwind;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
             if self.solver_properties['use_first_order_for_turbulence']:
-                self.file_manager.write(file_id, '    default         Gauss upwind default;\n')
+                self.file_manager.write(file_id, '    default         Gauss upwind ' + gradient_scheme + ';\n')
             else:
                 self.file_manager.write(file_id, '    default         Gauss limitedLinear 1;\n')
             self.file_manager.write(file_id, '    div(phi,U)      Gauss linear;\n')

@@ -101,7 +101,14 @@ def case_properties():
         'startTime': 0,
 
         # end time
-        'endTime': 3,
+        'endTime': 1000,
+
+        # specify from which time directory to start from
+        #   START_TIME:  Start from the folder that is defined in the startTime variable
+        #   FIRST_TIME:  Start from the first available (lowest time) directory
+        #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a simulation from the
+        #                last calculated solution
+        'startFrom': Parameters.START_TIME,
 
         # flag indicating whether to dynamically caculate time step based on CFL criterion
         'CFLBasedTimeStepping': False,
@@ -130,30 +137,6 @@ def case_properties():
 
         # specify how many solutions to keep (specify 0 to keep all)
         'purge_write': 0,
-
-        # turbulence treatment type
-        # options are: LAMINAR, RANS, LES
-        'turbulence_type': Parameters.RANS,
-
-        # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
-        #   LOW_RE  : first cell-height near wall is of order y+ <= 1
-        #   HIGH_RE : first cell-height near wall is of order y+ >  30
-        'wall_modelling': Parameters.LOW_RE,
-
-        # select how to calculate turbulent quantities at inlet
-        #   INTERNAL:    Internal flow assumes the turbulent length scale to be limited by the channel / wind tunnel
-        #                height or diameter, expressed through the reference_length parameter. It is calculated as
-        #                0.07 * reference length
-        #   EXTERNAL:    External flow assumes the turbulent length scale to be limited by the scales within the
-        #                fully turbulent boundary layer and approximately equal to 40% of the boundary layer thickness
-        #   RATIO:       Alternatively, the turbulent to laminar viscosity ratio may be prescribed
-        #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the turbulent
-        #                to laminar viscosity ratio entirely on the freestream turbulence intensity. Use this option if
-        #                any of the above are not suitable
-        'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
-
-        # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
-        'turbulent_to_laminar_ratio': 10,
 
         # time integration scheme, options are listed below
         #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
@@ -196,6 +179,64 @@ def case_properties():
         'write_force_coefficients': True,
     }
 
+    turbulence_properties = {
+        # turbulence treatment type
+        #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
+        #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
+        #   RANS:    Use this for scale modelled / averaged simulations (RANS)
+        'turbulence_type': Parameters.RANS,
+
+        # RANS turbulence model (will be ignored if turbulence_type != RANS)
+        #   Based on linear eddy viscosity:
+        #     kEpsilon:        standard k-epsilon model
+        #     realizableKE:    realizable version of the k-epsilon model
+        #     RNGkEpsilon:     renormalised group version of the k-epsilon model
+        #     LienLeschziner:  Lien-Leschziner k-epsilon model (incompressible only)
+        #     LamBremhorstKE:  Lam-Bremhorst k-epsilon model
+        #     LaunderSharmaKE: Launder-Sharma k-epsilon model
+        #
+        #     kOmega:          standard k-omega model
+        #     kOmegaSST:       standard k-omega SST model
+        #     kOmegaSSTLM:     gamma-Re,theta,t k-omega SST transition model
+        #
+        #     qZeta:           q-zeta model (incompressible only, no wall functions)
+        #
+        #     SpalartAllmaras: standard Spalart-Allmaras model
+        #
+        #   Based on non-linear eddy viscosity:
+        #     LienCubicKE:     Lien's k-epsilon model (incompressible only)
+        #     ShihQuadraticKE: Shih's k-epsilon model (incompressible only)
+        #
+        #   Based on Reynolds Stresses
+        #     LRR:             Reynolds stress model of Launder, Reece and Rodi
+        #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
+        'turbulence_model': Parameters.kOmegaSST,
+
+        # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
+        #   LOW_RE  : first cell-height near wall is of order y+ <= 1
+        #   HIGH_RE : first cell-height near wall is of order y+ >  30
+        'wall_modelling': Parameters.LOW_RE,
+
+        # select how to calculate turbulent quantities at inlet
+        #   INTERNAL:    Internal flow assumes the turbulent length scale to be limited by the channel / wind tunnel
+        #                height or diameter, expressed through the reference_length parameter. It is calculated as
+        #                0.07 * reference length
+        #   EXTERNAL:    External flow assumes the turbulent length scale to be limited by the scales within the
+        #                fully turbulent boundary layer and approximately equal to 40% of the boundary layer thickness
+        #   RATIO:       Alternatively, the turbulent to laminar viscosity ratio may be prescribed
+        #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the turbulent
+        #                to laminar viscosity ratio entirely on the freestream turbulence intensity. Use this option if
+        #                any of the above are not suitable
+        'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
+
+        # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
+        'turbulent_to_laminar_ratio': 10,
+
+        # do not overwrite setting here, used to set up numerical schemes correctly, depending on turbulence model
+        # will get adjusted in main function
+        'use_phi_instead_of_grad_U': False,
+    }
+
     parallel_properties = {
         # flag indicating if simulation will be run in parallel. If true, additional information for domain
         # decomposition will be written (and Allrun script modified, accordingly)
@@ -205,15 +246,16 @@ def case_properties():
         'number_of_processors': 4,
     }
 
-    return [file_properties, boundary_properties, flow_properties, solver_properties, parallel_properties]
+    return [file_properties, boundary_properties, flow_properties, solver_properties, turbulence_properties,
+            parallel_properties]
 
 def main():
 
     # get case specific dictionaries to set up case and write input files
-    file_properties, boundary_properties, flow_properties, solver_properties, parallel_properties = case_properties()
+    file_properties, boundary_properties, flow_properties, solver_properties, turbulence_properties,\
+        parallel_properties = case_properties()
 
     # add additional entries to dictionaries
-
     # absolute path of text case location
     file_properties['path'] = os.path.join(file_properties['run_directory'], file_properties['case_name'])
 
@@ -227,7 +269,12 @@ def main():
     reynolds_number = (velocity_magnitude * flow_properties['reference_length'] / flow_properties['nu'])
     flow_properties['reynolds_number'] = reynolds_number
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # correct use_phi_instead_of_grad_U entry based on current turbulence model
+    if (turbulence_properties['turbulence_model'] == Parameters.LienCubicKE or
+            turbulence_properties['turbulence_model'] == Parameters.ShihQuadraticKE or
+            turbulence_properties['turbulence_model'] == Parameters.LRR or
+            turbulence_properties['turbulence_model'] == Parameters.SSG):
+        turbulence_properties['use_phi_instead_of_grad_U'] = True
 
     # create the initial data structure for the case set-up
     file_manager = IO.FileManager(file_properties)
@@ -235,7 +282,7 @@ def main():
 
     # write out boundary conditions for all relevant flow properties
     boundary_conditions = BoundaryConditions.WriteBoundaryConditions(file_manager, boundary_properties, flow_properties,
-                                                                     solver_properties)
+                                                                     solver_properties, turbulence_properties)
     boundary_conditions.write_U()
     boundary_conditions.write_p()
     boundary_conditions.write_k()
@@ -248,12 +295,12 @@ def main():
     boundary_conditions.write_R()
 
     # write transport properties to file
-    transport_properties = Transport.TransportPropertiesFile(file_manager, flow_properties)
-    transport_properties.write_input_file()
+    transport_dict = Transport.TransportPropertiesFile(file_manager, flow_properties)
+    transport_dict.write_input_file()
 
     # write turbulence properties to file
-    turbulence_properties = Turbulence.TurbulencePropertiesFile(file_manager, solver_properties)
-    turbulence_properties.write_input_file()
+    turbulence_dict = Turbulence.TurbulencePropertiesFile(file_manager, turbulence_properties)
+    turbulence_dict.write_input_file()
 
     # write control dict file out
     control_dict = ControlDict.ControlDictFile(file_manager, solver_properties)
@@ -264,7 +311,7 @@ def main():
     fv_solution.write_input_file()
 
     # write fvSchemes
-    fv_schemes = fvSchemes.fvSchemesFile(file_manager, solver_properties)
+    fv_schemes = fvSchemes.fvSchemesFile(file_manager, solver_properties, turbulence_properties)
     fv_schemes.write_input_file()
 
     # write additional files if required for on-the-fly post-processing
@@ -272,13 +319,12 @@ def main():
         force_coefficients = ForceCoefficients.WriteForceCoefficients(file_manager, flow_properties)
         force_coefficients.write_force_coefficients()
 
-    if solver_properties['turbulence_type'] != Parameters.LAMINAR:
-        yplus = YPlus.WriteYPlus(file_manager, flow_properties)
-        yplus.write_y_plus()
-
     if parallel_properties['run_in_parallel']:
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(file_manager, parallel_properties)
         decompose_par_dict.write_decompose_par_dict()
+
+    yplus = YPlus.WriteYPlus(file_manager, flow_properties)
+    yplus.write_y_plus()
 
     residuals = Residuals.WriteResiduals(file_manager)
     residuals.write_residuals()
