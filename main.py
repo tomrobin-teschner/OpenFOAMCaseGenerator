@@ -102,7 +102,7 @@ def main():
         'startTime': 0,
 
         # end time
-        'endTime': 2000,
+        'endTime': 3,
 
         # flag indicating whether to dynamically caculate time step based on CFL criterion
         'CFLBasedTimeStepping': False,
@@ -121,12 +121,12 @@ def main():
         'write_frequency': 100,
 
         # write control, specify when to output results, the options are listed below
-        #   TIME_STEP: write every 'write_frequency' time steps
-        #   RUN_TIME: write data every 'write_frequency' seconds of simulated time
+        #   TIME_STEP:           write every 'write_frequency' time steps
+        #   RUN_TIME:            write data every 'write_frequency' seconds of simulated time
         #   ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values
         #                        (use with 'CFLBasedTimeStepping' = True)
-        #   CPU_TIME: write data every 'write_frequency' seconds of CPU time
-        #   CLOCK_TIME: write data every 'write_frequency' seconds of real time
+        #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
+        #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
         'write_control': Parameters.TIME_STEP,
 
         # specify how many solutions to keep (specify 0 to keep all)
@@ -142,15 +142,15 @@ def main():
         'wall_modelling': Parameters.LOW_RE,
 
         # select how to calculate turbulent quantities at inlet
-        #   INTERNAL  : Internal flow assumes the turbulent length scale to be limited by the channel / wind tunnel
-        #               height or diameter, expressed through the reference_length parameter. It is calculated as
-        #               0.07 * reference length
-        #   EXTERNAL  : External flow assumes the turbulent length scale to be limited by the scales within the
-        #               fully turbulent boundary layer and approximately equal to 40% of the boundary layer thickness
-        #   RATIO     : Alternatively, the turbulent to laminar viscosity ratio may be prescribed
-        #   RATIO_AUTO: In absence of any turbulent quantities, we may instead base the approximation of the turbulent
-        #               to laminar viscosity ratio entirely on the freestream turbulence intensity. Use this option if
-        #               any of the above are not suitable
+        #   INTERNAL:    Internal flow assumes the turbulent length scale to be limited by the channel / wind tunnel
+        #                height or diameter, expressed through the reference_length parameter. It is calculated as
+        #                0.07 * reference length
+        #   EXTERNAL:    External flow assumes the turbulent length scale to be limited by the scales within the
+        #                fully turbulent boundary layer and approximately equal to 40% of the boundary layer thickness
+        #   RATIO:       Alternatively, the turbulent to laminar viscosity ratio may be prescribed
+        #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the turbulent
+        #                to laminar viscosity ratio entirely on the freestream turbulence intensity. Use this option if
+        #                any of the above are not suitable
         'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
 
         # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
@@ -158,28 +158,22 @@ def main():
 
         # time integration scheme, options are listed below
         #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
-        #   FIRST_ORDER: Implicit Euler (1st-order)
-        #   SECOND_ORDER: Implicit backward Euler (2nd-order)
+        #   UNSTEADY:     Integrate in time and resolve  dU / dt
         'time_integration': Parameters.STEADY_STATE,
 
-        # spatial interpolation scheme for convective fluxes
-        #   FIRST_ORDER: Upwind (1st-order)
-        #   SECOND_ORDER: Upwind with Gradient correction (2nd-order)
-        #   THIRD_ORDER: MUSCL scheme (3rd-order)
-        'convective_fluxes': Parameters.SECOND_ORDER,
+        # Choose preset of numerical schemes based on accuracy and robustness requirements
+        #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to achieve
+        #               second-order accuracy.
+        #   TVD:        Same as DEFAULT, but use Total Variation Diminishing (TVD) schemes instead of upwind schemes.
+        #   ROBUSTNESS: Use this option if your simulation does not converge or your mesh has bad mesh quality metrics.
+        #               First-order accurate in space and time.
+        #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
+        #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate with
+        #               less limiting compared to DEFAULT and TVD.
+        'numerical_schemes_correction': Parameters.DEFAULT,
 
-        # spatial interpolation of turbulent quantities for convective fluxes
-        #   FIRST_ORDER: Upwind (1st-order)
-        #   SECOND_ORDER: Upwind with Gradient correction (2nd-order)
-        #   THIRD_ORDER: MUSCL scheme (3rd-order)
-        'turbulent_fluxes': Parameters.FIRST_ORDER,
-
-        # Choose level of corrections to be applied to numerical schemes in order to control stability and accuracy.
-        #   NO_CORRECTION: No correction to be applied, best for accuracy and regular (orthogonal / cartesian) meshes
-        #   SLIGHT_CORRECTION: Apply some correction. Best for unstructured meshes
-        #   MODERATE_CORRECTION: Apply even more correction. Best for cases with convergence problems
-        #   FULL_CORRECTION: Full correction is applied, best for poor quality meshes. Will reduce accuracy of solution
-        'numerical_schemes_correction': Parameters.SLIGHT_CORRECTION,
+        # flag to indicate if first order discretisation should be used for turbulent quantities
+        'use_first_order_for_turbulence': True,
 
         # absolute convergence criterion for implicit solvers
         'absolute_convergence_criterion': 1e-8,

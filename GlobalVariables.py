@@ -41,12 +41,10 @@ CLOCK_TIME = 4
 
 # numerical schemes
 STEADY_STATE = 0
-FIRST_ORDER = 1
-SECOND_ORDER = 2
-THIRD_ORDER = 3
+UNSTEADY = 1
 
 # stability controlling parameter for gradient schemes
-NO_CORRECTION = 0
-SLIGHT_CORRECTION = 1
-MODERATE_CORRECTION = 2
-FULL_CORRECTION = 3
+DEFAULT = 0
+TVD = 1
+ROBUSTNESS = 2
+ACCURACY = 3
