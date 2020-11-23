@@ -17,7 +17,7 @@ class WriteForceCoefficients:
                 str(self.flow_properties['center_of_roation'][1]) + ' ' +
                 str(self.flow_properties['center_of_roation'][2]) + ')')
 
-        file_id = self.file_manager.create_file('system', 'forceCoefficients')
+        file_id = self.file_manager.create_file('system/include', 'forceCoefficients')
         self.file_manager.write(file_id,
                                 '/*--------------------------------*- C++ -*----------------------------------*\\\n')
         self.file_manager.write(file_id,

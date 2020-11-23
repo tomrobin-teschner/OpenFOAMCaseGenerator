@@ -4,6 +4,7 @@ from math import sqrt, pow
 import FileDirectoryIO.FileManager as IO
 import FileDirectoryIO.WriteUtilityScripts as UtilityScripts
 import WriteSystemDirectoryFiles.WriteForceCoefficients as ForceCoefficients
+import WriteSystemDirectoryFiles.WritePressureCoefficient as PressureCoefficient
 import WriteSystemDirectoryFiles.WriteDecomposePar as DecomposeParDict
 import WriteSystemDirectoryFiles.WriteYPlus as YPlus
 import WriteSystemDirectoryFiles.WriteResiduals as Residuals
@@ -177,6 +178,9 @@ def case_properties():
 
         # write force coefficients flag
         'write_force_coefficients': True,
+
+        # write pressure coefficient (cp)
+        'write_pressure_coefficient': True,
     }
 
     turbulence_properties = {
@@ -318,6 +322,10 @@ def main():
     if solver_properties['write_force_coefficients']:
         force_coefficients = ForceCoefficients.WriteForceCoefficients(file_manager, flow_properties)
         force_coefficients.write_force_coefficients()
+
+    if solver_properties['write_pressure_coefficient']:
+        pressure_coefficient = PressureCoefficient.WritePressureCoefficient(file_manager, flow_properties)
+        pressure_coefficient.write_force_coefficients()
 
     if parallel_properties['run_in_parallel']:
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(file_manager, parallel_properties)

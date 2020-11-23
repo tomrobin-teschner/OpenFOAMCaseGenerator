@@ -10,6 +10,7 @@ class FileManager:
         self.__create_directory(os.path.join(self.file_properties['path'], '0'))
         self.__create_directory(os.path.join(self.file_properties['path'], 'constant'))
         self.__create_directory(os.path.join(self.file_properties['path'], 'system'))
+        self.__create_directory(os.path.join(self.file_properties['path'], 'system/include'))
         self.__create_case_file()
 
     def __create_directory(self, directory):

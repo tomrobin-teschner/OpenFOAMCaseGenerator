@@ -1,10 +1,13 @@
-class WriteYPlus:
+class WritePressureCoefficient:
     def __init__(self, file_manager, flow_properties):
         self.file_manager = file_manager
         self.flow_properties = flow_properties
 
-    def write_y_plus(self):
-        file_id = self.file_manager.create_file('system/include', 'yPlus')
+    def write_force_coefficients(self):
+        velocity = ('(' + str(self.flow_properties['inlet_velocity'][0]) + ' ' +
+                    str(self.flow_properties['inlet_velocity'][1]) + ' ' +
+                    str(self.flow_properties['inlet_velocity'][2]) + ')')
+        file_id = self.file_manager.create_file('system/include', 'pressureCoefficient')
         self.file_manager.write(file_id,
                                 '/*--------------------------------*- C++ -*----------------------------------*\\\n')
         self.file_manager.write(file_id,
@@ -21,20 +24,19 @@ class WriteYPlus:
         self.file_manager.write(file_id,
                                 '\*---------------------------------------------------------------------------*/\n')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'yPlus\n')
+        self.file_manager.write(file_id, 'pressureCoefficient\n')
         self.file_manager.write(file_id, '{\n')
-        self.file_manager.write(file_id, '    type            yPlus;\n')
+        self.file_manager.write(file_id, '    type            pressure;\n')
         self.file_manager.write(file_id, '    libs            (fieldFunctionObjects);\n')
+        self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    writeControl    writeTime;\n')
-        if len(self.flow_properties['wall_boundaries']) == 1:
-            self.file_manager.write(file_id, '    patches         (' + self.flow_properties['wall_boundaries'][0] +
-                                    ');\n')
-        else:
-            self.file_manager.write(file_id, '    patches         (')
-            temp_str = ''
-            for boundary in self.flow_properties['wall_boundaries']:
-                temp_str += boundary + ' '
-            self.file_manager.write(file_id, temp_str[:-1] + ');\n')
+        self.file_manager.write(file_id, '    mode            staticCoeff;\n')
+        self.file_manager.write(file_id, '    result          cp;\n')
+        self.file_manager.write(file_id, '\n')
+        self.file_manager.write(file_id, '    rho             rhoInf;\n')
+        self.file_manager.write(file_id, '    rhoInf          1;\n')
+        self.file_manager.write(file_id, '    pInf            0;\n')
+        self.file_manager.write(file_id, '    UInf            ' + velocity + ';\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,

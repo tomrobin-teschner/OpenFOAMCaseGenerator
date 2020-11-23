@@ -3,7 +3,7 @@ class WriteResiduals:
         self.file_manager = file_manager
 
     def write_residuals(self):
-        file_id = self.file_manager.create_file('system', 'residuals')
+        file_id = self.file_manager.create_file('system/include', 'residuals')
         self.file_manager.write(file_id,
                                 '/*--------------------------------*- C++ -*----------------------------------*\\\n')
         self.file_manager.write(file_id,
