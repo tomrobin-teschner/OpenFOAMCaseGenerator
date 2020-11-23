@@ -38,6 +38,8 @@ class TurbulencePropertiesFile:
                     self.file_manager.write(file_id, '    RASModel        kOmegaSST;\n')
                 elif self.turbulence_properties['turbulence_model'] == Parameters.kOmegaSSTLM:
                     self.file_manager.write(file_id, '    RASModel        kOmegaSSTLM;\n')
+                elif self.turbulence_properties['turbulence_model'] == Parameters.kkLOmega:
+                    self.file_manager.write(file_id, '    RASModel        kkLOmega;\n')
                 elif self.turbulence_properties['turbulence_model'] == Parameters.qZeta:
                     self.file_manager.write(file_id, '    RASModel        qZeta;\n')
                 elif self.turbulence_properties['turbulence_model'] == Parameters.SpalartAllmaras:

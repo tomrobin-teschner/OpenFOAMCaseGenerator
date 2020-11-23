@@ -49,11 +49,11 @@ class ControlDictFile:
         self.file_manager.write(file_id, 'functions\n')
         self.file_manager.write(file_id, '{\n')
         if self.solver_properties['write_force_coefficients']:
-            self.file_manager.write(file_id, '    #include "forceCoefficients"\n')
+            self.file_manager.write(file_id, '    #include "include/forceCoefficients"\n')
         if self.solver_properties['write_pressure_coefficient']:
-            self.file_manager.write(file_id, '    #include "pressureCoefficient"\n')
-        self.file_manager.write(file_id, '    #include "yPlus"\n')
-        self.file_manager.write(file_id, '    #include "residuals"\n')
+            self.file_manager.write(file_id, '    #include "include/pressureCoefficient"\n')
+        self.file_manager.write(file_id, '    #include "include/yPlus"\n')
+        self.file_manager.write(file_id, '    #include "include/residuals"\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,

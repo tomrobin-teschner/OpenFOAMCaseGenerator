@@ -194,6 +194,72 @@ class WriteBoundaryConditions:
         self.file_manager.write(file_id, '}')
         self.file_manager.close_file(file_id)
 
+    def write_kt(self):
+        file_id = self.file_manager.create_file('0', 'kt')
+        initial_field = 'uniform ' + str(self.freestream_k)
+        self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', initial_field)
+        self.file_manager.write(file_id, 'boundaryField\n{\n')
+        for key in self.boundary_properties:
+            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+            if self.boundary_properties[key] == Parameters.WALL:
+                if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
+                    self.__dirichlet(file_id, initial_field)
+                elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
+                    self.__kqRWallFunction(file_id, initial_field)
+            elif self.boundary_properties[key] == Parameters.OUTLET:
+                self.__neumann(file_id)
+            elif self.boundary_properties[key] == Parameters.BACKFLOW_OUTLET:
+                self.__inlet_outlet(file_id, initial_field)
+            elif self.boundary_properties[key] == Parameters.ADVECTIVE_OUTLET:
+                self.__advective(file_id)
+            elif self.boundary_properties[key] == Parameters.SYMMETRY:
+                self.__neumann(file_id)
+            elif self.boundary_properties[key] == Parameters.INLET:
+                self.__dirichlet(file_id, initial_field)
+            elif self.boundary_properties[key] == Parameters.FREESTREAM:
+                self.__freestream(file_id, initial_field)
+            elif self.boundary_properties[key] == Parameters.CYCLIC:
+                self.__periodic(file_id)
+            elif self.boundary_properties[key] == Parameters.EMPTY:
+                self.__empty(file_id)
+            self.file_manager.write(file_id, '    }\n')
+
+        self.file_manager.write(file_id, '}')
+        self.file_manager.close_file(file_id)
+
+    def write_kl(self):
+        file_id = self.file_manager.create_file('0', 'kl')
+        initial_field = 'uniform 0'
+        self.__write_header(file_id, 'volScalarField', '0', 'kl', '[0 2 -2 0 0 0 0]', initial_field)
+        self.file_manager.write(file_id, 'boundaryField\n{\n')
+        for key in self.boundary_properties:
+            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
+            if self.boundary_properties[key] == Parameters.WALL:
+                if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
+                    self.__dirichlet(file_id, initial_field)
+                elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
+                    self.__kqRWallFunction(file_id, initial_field)
+            elif self.boundary_properties[key] == Parameters.OUTLET:
+                self.__neumann(file_id)
+            elif self.boundary_properties[key] == Parameters.BACKFLOW_OUTLET:
+                self.__inlet_outlet(file_id, initial_field)
+            elif self.boundary_properties[key] == Parameters.ADVECTIVE_OUTLET:
+                self.__advective(file_id)
+            elif self.boundary_properties[key] == Parameters.SYMMETRY:
+                self.__neumann(file_id)
+            elif self.boundary_properties[key] == Parameters.INLET:
+                self.__dirichlet(file_id, initial_field)
+            elif self.boundary_properties[key] == Parameters.FREESTREAM:
+                self.__freestream(file_id, initial_field)
+            elif self.boundary_properties[key] == Parameters.CYCLIC:
+                self.__periodic(file_id)
+            elif self.boundary_properties[key] == Parameters.EMPTY:
+                self.__empty(file_id)
+            self.file_manager.write(file_id, '    }\n')
+
+        self.file_manager.write(file_id, '}')
+        self.file_manager.close_file(file_id)
+
     def write_epsilon(self):
         file_id = self.file_manager.create_file('0', 'epsilon')
         initial_field = 'uniform ' + str(self.freestream_epsilon)
@@ -236,7 +302,10 @@ class WriteBoundaryConditions:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
                 if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
-                    self.__omegaWallFunction(file_id, initial_field)
+                    if self.turbulence_properties['turbulence_model'] == Parameters.kkLOmega:
+                        self.__neumann(file_id)
+                    else:
+                        self.__omegaWallFunction(file_id, initial_field)
                 elif self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                     self.__omegaWallFunction(file_id, initial_field)
             elif self.boundary_properties[key] == Parameters.OUTLET:

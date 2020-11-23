@@ -201,11 +201,14 @@ def case_properties():
         #
         #     kOmega:          standard k-omega model
         #     kOmegaSST:       standard k-omega SST model
-        #     kOmegaSSTLM:     gamma-Re,theta,t k-omega SST transition model
         #
         #     qZeta:           q-zeta model (incompressible only, no wall functions)
         #
         #     SpalartAllmaras: standard Spalart-Allmaras model
+        #
+        #   Transition modelling
+        #     kOmegaSSTLM:     gamma-Re,theta,t k-omega SST correlation-based transition model
+        #     kkLOmega:        k_laminar, k_turbulent, omega physics-based transition model
         #
         #   Based on non-linear eddy viscosity:
         #     LienCubicKE:     Lien's k-epsilon model (incompressible only)
@@ -214,7 +217,7 @@ def case_properties():
         #   Based on Reynolds Stresses
         #     LRR:             Reynolds stress model of Launder, Reece and Rodi
         #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
-        'turbulence_model': Parameters.kOmegaSST,
+        'turbulence_model': Parameters.SSG,
 
         # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
         #   LOW_RE  : first cell-height near wall is of order y+ <= 1
@@ -290,6 +293,8 @@ def main():
     boundary_conditions.write_U()
     boundary_conditions.write_p()
     boundary_conditions.write_k()
+    boundary_conditions.write_kt()
+    boundary_conditions.write_kl()
     boundary_conditions.write_nut()
     boundary_conditions.write_omega()
     boundary_conditions.write_epsilon()
