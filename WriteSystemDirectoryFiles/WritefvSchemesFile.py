@@ -36,11 +36,11 @@ class fvSchemesFile:
         self.file_manager.write(file_id, 'gradSchemes\n')
         self.file_manager.write(file_id, '{\n')
         if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
-            self.file_manager.write(file_id, '    default         cellLimited Gauss linear 0.5;\n')
-            self.file_manager.write(file_id, '    grad(U)         cellLimited Gauss linear 1;\n')
+            self.file_manager.write(file_id, '    default         cellLimited Gauss linear 0.33;\n')
+            self.file_manager.write(file_id, '    grad(U)         cellLimited Gauss linear 0.33;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
-            self.file_manager.write(file_id, '    default         cellLimited Gauss linear 0.5;\n')
-            self.file_manager.write(file_id, '    grad(U)         cellLimited Gauss linear 1;\n')
+            self.file_manager.write(file_id, '    default         cellLimited Gauss linear 0.33;\n')
+            self.file_manager.write(file_id, '    grad(U)         cellLimited Gauss linear 0.33;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
             self.file_manager.write(file_id, '    default         cellLimited Gauss linear 1;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
@@ -77,13 +77,13 @@ class fvSchemesFile:
         self.file_manager.write(file_id, 'laplacianSchemes\n')
         self.file_manager.write(file_id, '{\n')
         if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
-            self.file_manager.write(file_id, '    default         Gauss linear limited 1;\n')
+            self.file_manager.write(file_id, '    default         Gauss linear limited 0.33;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
-            self.file_manager.write(file_id, '    default         Gauss linear limited 1;\n')
+            self.file_manager.write(file_id, '    default         Gauss linear limited 0.33;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
             self.file_manager.write(file_id, '    default         Gauss linear limited 1;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
-            self.file_manager.write(file_id, '    default         Gauss linear limited 0.5;\n')
+            self.file_manager.write(file_id, '    default         Gauss linear limited 0.33;\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
 
@@ -96,13 +96,13 @@ class fvSchemesFile:
         self.file_manager.write(file_id, 'snGradSchemes\n')
         self.file_manager.write(file_id, '{\n')
         if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
-            self.file_manager.write(file_id, '    default         limited 1;\n')
+            self.file_manager.write(file_id, '    default         limited 0.33;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
-            self.file_manager.write(file_id, '    default         limited 1;\n')
+            self.file_manager.write(file_id, '    default         limited 0.33;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
             self.file_manager.write(file_id, '    default         limited 1;\n')
         elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
-            self.file_manager.write(file_id, '    default         limited 0.5;\n')
+            self.file_manager.write(file_id, '    default         limited 0.33;\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
 
