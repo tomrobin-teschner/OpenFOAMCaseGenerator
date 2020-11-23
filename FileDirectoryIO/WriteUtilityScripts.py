@@ -1,4 +1,4 @@
-import os
+import GlobalVariables as Parameters
 
 
 class WriteUtilityScripts:
@@ -17,9 +17,23 @@ class WriteUtilityScripts:
         self.file_manager.write(file_id, '\n')
         if self.parallel_properties['run_in_parallel']:
             self.file_manager.write(file_id, 'decomposePar\n')
-            self.file_manager.write(file_id, 'foamJob -parallel ' + self.solver_properties['solver'] + '\n')
+            if self.solver_properties['solver'] == Parameters.simpleFoam:
+                self.file_manager.write(file_id, 'foamJob -parallel simpleFoam\n')
+            elif self.solver_properties['solver'] == Parameters.icoFoam:
+                self.file_manager.write(file_id, 'foamJob -parallel icoFoam\n')
+            elif self.solver_properties['solver'] == Parameters.pisoFoam:
+                self.file_manager.write(file_id, 'foamJob -parallel pisoFoam\n')
+            elif self.solver_properties['solver'] == Parameters.pimpleFoam:
+                self.file_manager.write(file_id, 'foamJob -parallel pimpleFoam\n')
         else:
-            self.file_manager.write(file_id, 'foamJob ' + self.solver_properties['solver'] + '\n')
+            if self.solver_properties['solver'] == Parameters.simpleFoam:
+                self.file_manager.write(file_id, 'foamJob simpleFoam\n')
+            elif self.solver_properties['solver'] == Parameters.icoFoam:
+                self.file_manager.write(file_id, 'foamJob icoFoam\n')
+            elif self.solver_properties['solver'] == Parameters.pisoFoam:
+                self.file_manager.write(file_id, 'foamJob pisoFoam\n')
+            elif self.solver_properties['solver'] == Parameters.pimpleFoam:
+                self.file_manager.write(file_id, 'foamJob pimpleFoam\n')
         self.file_manager.write(file_id, 'foamLog log\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '# ------------------------------------------------------------------------------\n')

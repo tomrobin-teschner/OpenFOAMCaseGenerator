@@ -1,8 +1,9 @@
-import os
+import os, sys, warnings
 from math import sqrt, pow
 
 import FileDirectoryIO.FileManager as IO
 import FileDirectoryIO.WriteUtilityScripts as UtilityScripts
+import CheckCase.CheckCase as CheckCase
 import WriteSystemDirectoryFiles.WriteForceCoefficients as ForceCoefficients
 import WriteSystemDirectoryFiles.WritePressureCoefficient as PressureCoefficient
 import WriteSystemDirectoryFiles.WriteDecomposePar as DecomposeParDict
@@ -19,7 +20,6 @@ import Write0DirectoryFiles.WriteBoundaryConditions as BoundaryConditions
 
 
 def case_properties():
-
     file_properties = {
         # name of the case to use (will be used for the folder name)
         'case_name': 'naca_0012_y+_1',
@@ -96,7 +96,13 @@ def case_properties():
 
     solver_properties = {
         # name of solver to use for simulation
-        'solver': 'simpleFoam',
+        #   incompressible:
+        #     simpleFoam: steady state, turbulent (RANS, LES) solver based on the SIMPLE algorithm
+        #     icoFoam:    unsteady, non-turbulent (only laminar) solver based on the PISO algorithm
+        #     pisoFoam:   unsteady, turbulent (RANS, LES) solver based on the PISO algorithm
+        #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use higher
+        #                 CFL numbers than pisoFoam while being more stable at the same time. Recommended in general
+        'solver': Parameters.pimpleFoam,
 
         # start time
         'startTime': 0,
@@ -153,7 +159,7 @@ def case_properties():
         #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
         #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate with
         #               less limiting compared to DEFAULT and TVD.
-        'numerical_schemes_correction': Parameters.DEFAULT,
+        'numerical_schemes_correction': Parameters.ACCURACY,
 
         # flag to indicate if first order discretisation should be used for turbulent quantities
         'use_first_order_for_turbulence': True,
@@ -176,6 +182,9 @@ def case_properties():
         # under-relaxation factor for turbulent quantities
         'under_relaxation_turbulence': 0.9,
 
+        # under-relaxation factor for Reynolds stresses
+        'under_relaxation_reynolds_stresses': 0.5,
+
         # write force coefficients flag
         'write_force_coefficients': True,
 
@@ -188,7 +197,7 @@ def case_properties():
         #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
         #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
         #   RANS:    Use this for scale modelled / averaged simulations (RANS)
-        'turbulence_type': Parameters.RANS,
+        'turbulence_type': Parameters.LES,
 
         # RANS turbulence model (will be ignored if turbulence_type != RANS)
         #   Based on linear eddy viscosity:
@@ -217,7 +226,7 @@ def case_properties():
         #   Based on Reynolds Stresses
         #     LRR:             Reynolds stress model of Launder, Reece and Rodi
         #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
-        'turbulence_model': Parameters.SSG,
+        'turbulence_model': Parameters.kOmegaSST,
 
         # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
         #   LOW_RE  : first cell-height near wall is of order y+ <= 1
@@ -257,10 +266,15 @@ def case_properties():
             parallel_properties]
 
 def main():
-
     # get case specific dictionaries to set up case and write input files
-    file_properties, boundary_properties, flow_properties, solver_properties, turbulence_properties,\
+    file_properties, boundary_properties, flow_properties, solver_properties, turbulence_properties, \
         parallel_properties = case_properties()
+
+    # check case (make sure that current set up will not produce any problem)
+    check_case = CheckCase.CheckCase(boundary_properties, solver_properties, turbulence_properties)
+    check_case.check_correct_turbulence_model_setup()
+    check_case.check_correct_boundary_condition_setup()
+    check_case.check_appropriate_numerical_scheme_combination()
 
     # add additional entries to dictionaries
     # absolute path of text case location

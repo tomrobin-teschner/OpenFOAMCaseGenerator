@@ -17,6 +17,12 @@ INLET_OUTLET = 2
 # turbulence constant
 C_MU = 0.09
 
+# solver to be used
+simpleFoam = 0
+icoFoam = 1
+pisoFoam = 2
+pimpleFoam = 3
+
 # simulation type
 LAMINAR = 0
 RANS = 1

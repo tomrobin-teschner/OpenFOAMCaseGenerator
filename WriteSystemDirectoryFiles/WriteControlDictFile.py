@@ -10,7 +10,14 @@ class ControlDictFile:
         file_id = self.file_manager.create_file('system', 'controlDict')
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'controlDict')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'application       ' + self.solver_properties['solver'] + ';\n\n')
+        if self.solver_properties['solver'] == Parameters.simpleFoam:
+            self.file_manager.write(file_id, 'application       simpleFoam;\n\n')
+        elif self.solver_properties['solver'] == Parameters.icoFoam:
+            self.file_manager.write(file_id, 'application       icoFoam;\n\n')
+        elif self.solver_properties['solver'] == Parameters.pisoFoam:
+            self.file_manager.write(file_id, 'application       pisoFoam;\n\n')
+        elif self.solver_properties['solver'] == Parameters.pimpleFoam:
+            self.file_manager.write(file_id, 'application       pimpleFoam;\n\n')
         if self.solver_properties['startFrom'] == Parameters.START_TIME:
             self.file_manager.write(file_id, 'startFrom         startTime;\n\n')
         elif self.solver_properties['startFrom'] == Parameters.FIRST_TIME:
