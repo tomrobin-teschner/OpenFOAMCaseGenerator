@@ -9,8 +9,8 @@ class CheckCase:
         self.turbulence_properties = turbulence_properties
 
     def check_correct_turbulence_model_setup(self):
-        if (self.turbulence_properties['turbulence_model'] == Parameters.kOmegaSSTLM or
-                self.turbulence_properties['turbulence_model'] == Parameters.kkLOmega):
+        if (self.turbulence_properties['RANS_model'] == Parameters.kOmegaSSTLM or
+                self.turbulence_properties['RANS_model'] == Parameters.kkLOmega):
             if self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                 sys.exit('\n===================================== ERROR =====================================\n' +
                          '\nTransition models can not be run with wall functions and require a mesh\n' +
@@ -18,7 +18,7 @@ class CheckCase:
                          'a low-Re wall modelling approach here.\n' +
                          '\n=================================== END ERROR ===================================\n')
 
-        if self.turbulence_properties['turbulence_model'] == Parameters.SpalartAllmaras:
+        if self.turbulence_properties['RANS_model'] == Parameters.SpalartAllmaras:
             if self.turbulence_properties['wall_modelling'] == Parameters.HIGH_RE:
                 warnings.showwarning(
                     '\n==================================== WARNING ====================================\n' +

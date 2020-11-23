@@ -115,7 +115,8 @@ class fvSolutionFile:
                                 '        kt        ' + str(self.solver_properties['under_relaxation_turbulence']) +
                                 ';\n')
         self.file_manager.write(file_id,
-                                '        R         ' + str(self.solver_properties['under_relaxation_turbulence']) +
+                                '        R         ' +
+                                str(self.solver_properties['under_relaxation_reynolds_stresses']) +
                                 ';\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '}\n')

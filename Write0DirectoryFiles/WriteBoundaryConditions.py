@@ -302,7 +302,7 @@ class WriteBoundaryConditions:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
             if self.boundary_properties[key] == Parameters.WALL:
                 if self.turbulence_properties['wall_modelling'] == Parameters.LOW_RE:
-                    if self.turbulence_properties['turbulence_model'] == Parameters.kkLOmega:
+                    if self.turbulence_properties['RANS_model'] == Parameters.kkLOmega:
                         self.__neumann(file_id)
                     else:
                         self.__omegaWallFunction(file_id, initial_field)

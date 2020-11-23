@@ -102,13 +102,13 @@ def case_properties():
         #     pisoFoam:   unsteady, turbulent (RANS, LES) solver based on the PISO algorithm
         #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use higher
         #                 CFL numbers than pisoFoam while being more stable at the same time. Recommended in general
-        'solver': Parameters.pimpleFoam,
+        'solver': Parameters.simpleFoam,
 
         # start time
         'startTime': 0,
 
         # end time
-        'endTime': 1000,
+        'endTime': 100,
 
         # specify from which time directory to start from
         #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -159,7 +159,7 @@ def case_properties():
         #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
         #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate with
         #               less limiting compared to DEFAULT and TVD.
-        'numerical_schemes_correction': Parameters.ACCURACY,
+        'numerical_schemes_correction': Parameters.DEFAULT,
 
         # flag to indicate if first order discretisation should be used for turbulent quantities
         'use_first_order_for_turbulence': True,
@@ -189,7 +189,7 @@ def case_properties():
         'write_force_coefficients': True,
 
         # write pressure coefficient (cp)
-        'write_pressure_coefficient': True,
+        'write_pressure_coefficient': False,
     }
 
     turbulence_properties = {
@@ -197,7 +197,12 @@ def case_properties():
         #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
         #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
         #   RANS:    Use this for scale modelled / averaged simulations (RANS)
-        'turbulence_type': Parameters.LES,
+        'turbulence_type': Parameters.RANS,
+
+        # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
+        #   LOW_RE  : first cell-height near wall is of order y+ <= 1
+        #   HIGH_RE : first cell-height near wall is of order y+ >  30
+        'wall_modelling': Parameters.LOW_RE,
 
         # RANS turbulence model (will be ignored if turbulence_type != RANS)
         #   Based on linear eddy viscosity:
@@ -226,12 +231,35 @@ def case_properties():
         #   Based on Reynolds Stresses
         #     LRR:             Reynolds stress model of Launder, Reece and Rodi
         #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
-        'turbulence_model': Parameters.kOmegaSST,
+        'RANS_model': Parameters.kOmegaSST,
 
-        # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
-        #   LOW_RE  : first cell-height near wall is of order y+ <= 1
-        #   HIGH_RE : first cell-height near wall is of order y+ >  30
-        'wall_modelling': Parameters.LOW_RE,
+        # LES / DES model
+        #   LES:
+        #     Smagorinsky:         Large Eddy Simulation based on classical Smagorinsky approach (fixed C_s)
+        #     kEqn:
+        #     dynamicKEqn:
+        #     dynamicLagrangian:
+        #     DeardorffDiffStress:
+        #     WALE:
+        #
+        #   DES:
+        #     SpalartAllmarasDES:   Detached Eddy Simulation based on the Spalart-Allmaras model
+        #     SpalartAllmarasDDES:  Delayed Detached Eddy Simulation based on the Spalart-llmaras model
+        #     SpalartAllmarasIDDES: Improved Delayed Detached Eddy Simulation based on the Spalart-Allmaras model
+        #     kOmegaSSTDES:         Detached Eddy Simulation based on the k-omega SST model
+        #     kOmegaSSTDDES:        Delayed Detached Eddy Simulation based on the k-omega SST model
+        #     kOmegaSSTIDDES:       Improved Delayed Detached Eddy Simulation based on the k-omega SST model
+        'LES_model': Parameters.Smagorinsky,
+
+        # model to calculate delta coefficient in LES / DES model
+        #   smooth:
+        #   Prandtl:
+        #   maxDeltaxyz:
+        #   cubeRootVol:
+        #   maxDeltaxyzCubeRoot:
+        #   vanDriest:
+        #   IDDESDelta:
+        'delta_model': Parameters.cubeRootVol,
 
         # select how to calculate turbulent quantities at inlet
         #   INTERNAL:    Internal flow assumes the turbulent length scale to be limited by the channel / wind tunnel
@@ -291,10 +319,10 @@ def main():
     flow_properties['reynolds_number'] = reynolds_number
 
     # correct use_phi_instead_of_grad_U entry based on current turbulence model
-    if (turbulence_properties['turbulence_model'] == Parameters.LienCubicKE or
-            turbulence_properties['turbulence_model'] == Parameters.ShihQuadraticKE or
-            turbulence_properties['turbulence_model'] == Parameters.LRR or
-            turbulence_properties['turbulence_model'] == Parameters.SSG):
+    if (turbulence_properties['RANS_model'] == Parameters.LienCubicKE or
+            turbulence_properties['RANS_model'] == Parameters.ShihQuadraticKE or
+            turbulence_properties['RANS_model'] == Parameters.LRR or
+            turbulence_properties['RANS_model'] == Parameters.SSG):
         turbulence_properties['use_phi_instead_of_grad_U'] = True
 
     # create the initial data structure for the case set-up

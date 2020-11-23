@@ -77,3 +77,26 @@ LienCubicKE = 12
 ShihQuadraticKE = 13
 LRR = 14
 SSG = 15
+
+# LES models
+Smagorinsky = 0
+kEqn = 1
+dynamicKEqn = 2
+dynamicLagrangian = 3
+DeardorffDiffStress = 4
+WALE = 5
+SpalartAllmarasDES = 6
+SpalartAllmarasDDES = 7
+SpalartAllmarasIDDES = 8
+kOmegaSSTDES = 9
+kOmegaSSTDDES = 10
+kOmegaSSTIDDES = 11
+
+# delta models
+smooth = 0
+Prandtl = 1
+maxDeltaxyz = 2
+cubeRootVol = 3
+maxDeltaxyzCubeRoot = 4
+vanDriest = 5
+IDDESDelta = 6
