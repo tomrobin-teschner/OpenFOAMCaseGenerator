@@ -9,6 +9,7 @@ import WriteSystemDirectoryFiles.WritePressureCoefficient as PressureCoefficient
 import WriteSystemDirectoryFiles.WriteDecomposePar as DecomposeParDict
 import WriteSystemDirectoryFiles.WriteYPlus as YPlus
 import WriteSystemDirectoryFiles.WriteResiduals as Residuals
+import WriteSystemDirectoryFiles.WriteForceCoefficientConvergence as ForceCoefficientTrigger
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -108,7 +109,7 @@ def case_properties():
         'startTime': 0,
 
         # end time
-        'endTime': 100,
+        'endTime': 1000,
 
         # specify from which time directory to start from
         #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -170,8 +171,28 @@ def case_properties():
         # relative convergence criterion for implicit solvers
         'relative_convergence_criterion': 0.01,
 
-        # convergence criterion for flow solution
+        # convergence criterion for residuals
         'convergence_threshold': 1e-6,
+
+        # check if integral quantities have converged
+        #   NONE:                 Don't write any force coefficient based stopping criterion
+        #   C_D:                  Convergence criterion based on the drag force coefficient
+        #   C_L:                  Convergence criterion based on the lift force coefficient
+        #   C_S:                  Convergence criterion based on the side force coefficient
+        #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
+        #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
+        #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
+        'integral_convergence_criterion': Parameters.C_D,
+
+        # if integral quantities are checked for convergence, specify for how many timesteps their average should be
+        # calculated to check if, on average, the quantity has converged
+        'averaging_time_steps': 20,
+
+        # specify the convergence threshold for the integral quantities
+        'integral_quantities_convergence_threshold': 1e-4,
+
+        # specify how many iterations to wait before checking convergence criterion
+        'time_steps_to_wait_before_checking_convergence': 100,
 
         # under-relaxation factor for pressure
         'under_relaxation_p': 0.5,
@@ -190,6 +211,9 @@ def case_properties():
 
         # write pressure coefficient (cp)
         'write_pressure_coefficient': False,
+
+        # write wall shear stresses (can be used to obtain skin friction coefficient)
+        'write_wall_shear_stresses': True,
     }
 
     turbulence_properties = {
@@ -369,6 +393,11 @@ def main():
     if solver_properties['write_force_coefficients']:
         force_coefficients = ForceCoefficients.WriteForceCoefficients(file_manager, flow_properties)
         force_coefficients.write_force_coefficients()
+
+    if solver_properties['integral_convergence_criterion'] != Parameters.NONE:
+        force_coefficient_trigger =\
+            ForceCoefficientTrigger.WriteForceCoefficientConvergence(file_manager, solver_properties)
+        force_coefficient_trigger.write_triggers()
 
     if solver_properties['write_pressure_coefficient']:
         pressure_coefficient = PressureCoefficient.WritePressureCoefficient(file_manager, flow_properties)

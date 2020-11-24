@@ -20,7 +20,6 @@ class WriteResiduals:
         self.file_manager.write(file_id,
                                 '\*---------------------------------------------------------------------------*/\n')
         self.file_manager.write(file_id, '\n')
-
         self.file_manager.write(file_id, 'residuals\n')
         self.file_manager.write(file_id, '{\n')
         self.file_manager.write(file_id, '    type            solverInfo;\n')

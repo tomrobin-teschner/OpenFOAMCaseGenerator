@@ -23,20 +23,16 @@ icoFoam = 1
 pisoFoam = 2
 pimpleFoam = 3
 
-# simulation type
-LAMINAR = 0
-RANS = 1
-LES = 2
-
-# wall modelling type
-LOW_RE = 0
-HIGH_RE = 1
-
-# calculation of turbulent length scale
-INTERNAL = 0
-EXTERNAL = 1
-RATIO = 2
-RATIO_AUTO = 3
+# integral quantities used for convergence checking
+NONE = -1
+C_D = 0
+C_L = 1
+C_S = 2
+C_M_YAW = 3
+C_M_ROLL = 4
+C_M_PITCH = 5
+COEFFICIENTS_ALL = 6
+COEFFICIENTS_ALL_ANY = 7
 
 # start time for simulation
 START_TIME = 0
@@ -59,6 +55,21 @@ DEFAULT = 0
 TVD = 1
 ROBUSTNESS = 2
 ACCURACY = 3
+
+# simulation type
+LAMINAR = 0
+RANS = 1
+LES = 2
+
+# wall modelling type
+LOW_RE = 0
+HIGH_RE = 1
+
+# calculation of turbulent length scale
+INTERNAL = 0
+EXTERNAL = 1
+RATIO = 2
+RATIO_AUTO = 3
 
 # RANS models
 kEpsilon = 0

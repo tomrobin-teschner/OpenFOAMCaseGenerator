@@ -57,10 +57,14 @@ class ControlDictFile:
         self.file_manager.write(file_id, '{\n')
         if self.solver_properties['write_force_coefficients']:
             self.file_manager.write(file_id, '    #include "include/forceCoefficients"\n')
+        if self.solver_properties['integral_convergence_criterion'] != Parameters.NONE:
+            self.file_manager.write(file_id, '    #include "include/forceCoefficientTrigger"\n')
         if self.solver_properties['write_pressure_coefficient']:
             self.file_manager.write(file_id, '    #include "include/pressureCoefficient"\n')
         self.file_manager.write(file_id, '    #include "include/yPlus"\n')
         self.file_manager.write(file_id, '    #include "include/residuals"\n')
+        if self.solver_properties['write_wall_shear_stresses']:
+            self.file_manager.write(file_id, '    #includeFunc "wallShearStress"\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
