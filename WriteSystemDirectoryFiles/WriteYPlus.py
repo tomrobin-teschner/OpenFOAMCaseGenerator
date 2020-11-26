@@ -26,13 +26,13 @@ class WriteYPlus:
         self.file_manager.write(file_id, '    type            yPlus;\n')
         self.file_manager.write(file_id, '    libs            (fieldFunctionObjects);\n')
         self.file_manager.write(file_id, '    writeControl    writeTime;\n')
-        if len(self.properties['flow_properties']['wall_boundaries']) == 1:
+        if len(self.properties['dimensionless_coefficients']['wall_boundaries']) == 1:
             self.file_manager.write(file_id, '    patches         (' +
-                                    self.properties['flow_properties']['wall_boundaries'][0] + ');\n')
+                                    self.properties['dimensionless_coefficients']['wall_boundaries'][0] + ');\n')
         else:
             self.file_manager.write(file_id, '    patches         (')
             temp_str = ''
-            for boundary in self.properties['flow_properties']['wall_boundaries']:
+            for boundary in self.properties['dimensionless_coefficients']['wall_boundaries']:
                 temp_str += boundary + ' '
             self.file_manager.write(file_id, temp_str[:-1] + ');\n')
         self.file_manager.write(file_id, '}\n')

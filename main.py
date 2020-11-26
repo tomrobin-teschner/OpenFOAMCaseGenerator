@@ -47,7 +47,8 @@ def case_properties():
         #   ADVECTIVE_OUTLET: Quantities are forced / advected outside domain (Non-reflective outlet)
         #   WALL:             Standard wall condition (ensure that mesh has wall boundary assigned instead of patch)
         #   EMPTY:            Used for essentially 2D simulations on the symmetry plane
-        #   SYMMETRY:         Symmetry plane condition, i.e. wall with slip condition (Neumann condition for all quantities)
+        #   SYMMETRY:         Symmetry plane condition, i.e. wall with slip condition
+        #                     (Neumann condition for all quantities)
         #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
         'boundary_properties': {
             'inlet': Parameters.FREESTREAM,
@@ -71,10 +72,9 @@ def case_properties():
 
             # reference length in simulation
             'reference_length': 2.0,
+        },
 
-            # --------------------------------------------------------------------------------------------------------------
-            # the following entries are only used by the force coefficients. If forces are not calculated, ignore these.
-
+        'dimensionless_coefficients': {
             # reference area used to non-dimensionalise force coefficients
             'reference_area': 1.0,
 
@@ -91,8 +91,16 @@ def case_properties():
             'center_of_roation': [-0.25, 0, 0],
 
             # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-            'wall_boundaries': ['wall']
-            # --------------------------------------------------------------------------------------------------------------
+            'wall_boundaries': ['wall'],
+
+            # write force coefficients flag
+            'write_force_coefficients': False,
+
+            # write pressure coefficient (cp)
+            'write_pressure_coefficient': True,
+
+            # write wall shear stresses (can be used to obtain skin friction coefficient)
+            'write_wall_shear_stresses': True,
         },
 
         'solver_properties': {
@@ -101,8 +109,8 @@ def case_properties():
             #     simpleFoam: steady state, turbulent (RANS) solver based on the SIMPLE algorithm
             #     icoFoam:    unsteady, non-turbulent (only laminar) solver based on the PISO algorithm
             #     pisoFoam:   unsteady, turbulent (RANS, LES) solver based on the PISO algorithm
-            #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use higher
-            #                 CFL numbers than pisoFoam while being more stable at the same time. Recommended in general
+            #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use
+            #                 higher CFL numbers than pisoFoam while being more stable. Recommended in general
             'solver': Parameters.simpleFoam,
 
             # start time
@@ -114,8 +122,8 @@ def case_properties():
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
             #   FIRST_TIME:  Start from the first available (lowest time) directory
-            #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a simulation from the
-            #                last calculated solution
+            #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a simulation from
+            #                the last calculated solution
             'startFrom': Parameters.START_TIME,
 
             # flag indicating whether to dynamically calculate time step based on CFL criterion
@@ -157,15 +165,6 @@ def case_properties():
 
             # under-relaxation factor for Reynolds stresses
             'under_relaxation_reynolds_stresses': 0.5,
-
-            # write force coefficients flag
-            'write_force_coefficients': False,
-
-            # write pressure coefficient (cp)
-            'write_pressure_coefficient': True,
-
-            # write wall shear stresses (can be used to obtain skin friction coefficient)
-            'write_wall_shear_stresses': True,
         },
 
         'numerical_discretisation': {
@@ -175,14 +174,14 @@ def case_properties():
             'time_integration': Parameters.STEADY_STATE,
 
             # Choose preset of numerical schemes based on accuracy and robustness requirements
-            #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to achieve
-            #               second-order accuracy.
-            #   TVD:        Same as DEFAULT, but use Total Variation Diminishing (TVD) schemes instead of upwind schemes.
-            #   ROBUSTNESS: Use this option if your simulation does not converge or your mesh has bad mesh quality metrics.
-            #               First-order accurate in space and time.
+            #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
+            #               achieve second-order accuracy.
+            #   TVD:        Same as DEFAULT, but use Total Variation Diminishing (TVD) schemes instead of upwind schemes
+            #   ROBUSTNESS: Use this option if your simulation does not converge or your mesh has bad mesh quality
+            #               metrics. First-order accurate in space and time
             #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
-            #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate with
-            #               less limiting compared to DEFAULT and TVD.
+            #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate
+            #               with less limiting compared to DEFAULT and TVD.
             'numerical_schemes_correction': Parameters.DEFAULT,
 
             # flag to indicate if first order discretisation should be used for turbulent quantities
@@ -263,11 +262,12 @@ def case_properties():
             #                height or diameter, expressed through the reference_length parameter. It is calculated as
             #                0.07 * reference length
             #   EXTERNAL:    External flow assumes the turbulent length scale to be limited by the scales within the
-            #                fully turbulent boundary layer and approximately equal to 40% of the boundary layer thickness
+            #                fully turbulent boundary layer and approximately equal to 40% of the boundary layer
+            #                thickness
             #   RATIO:       Alternatively, the turbulent to laminar viscosity ratio may be prescribed
-            #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the turbulent
-            #                to laminar viscosity ratio entirely on the freestream turbulence intensity. Use this option if
-            #                any of the above are not suitable
+            #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the
+            #                turbulent to laminar viscosity ratio entirely on the freestream turbulence intensity.
+            #                Use this option if any of the above are not suitable
             'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
 
             # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
@@ -388,7 +388,7 @@ def main():
     fv_schemes.write_input_file()
 
     # write additional files if required for on-the-fly post-processing
-    if properties['solver_properties']['write_force_coefficients']:
+    if properties['dimensionless_coefficients']['write_force_coefficients']:
         force_coefficients = ForceCoefficients.WriteForceCoefficients(properties, file_manager)
         force_coefficients.write_force_coefficients()
 
@@ -396,7 +396,7 @@ def main():
         force_coefficient_trigger = ForceCoefficientTrigger.WriteForceCoefficientConvergence(properties, file_manager)
         force_coefficient_trigger.write_triggers()
 
-    if properties['solver_properties']['write_pressure_coefficient']:
+    if properties['dimensionless_coefficients']['write_pressure_coefficient']:
         pressure_coefficient = PressureCoefficient.WritePressureCoefficient(properties, file_manager)
         pressure_coefficient.write_force_coefficients()
 
