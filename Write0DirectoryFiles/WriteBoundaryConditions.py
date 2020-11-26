@@ -99,6 +99,20 @@ class WriteBoundaryConditions:
         self.file_manager.write(file_id, '\ndimensions      ' + dimensions + ';\n\n')
         self.file_manager.write(file_id, 'internalField   ' + internal_field + ';\n\n')
 
+    def write_all_appropriate_boundary_conditions(self):
+        self.write_U()
+        self.write_p()
+        self.write_k()
+        self.write_kt()
+        self.write_kl()
+        self.write_nut()
+        self.write_omega()
+        self.write_epsilon()
+        self.write_nuTilda()
+        self.write_ReThetat()
+        self.write_gammaInt()
+        self.write_R()
+
     def write_U(self):
         file_id = self.file_manager.create_file('0', 'U')
 

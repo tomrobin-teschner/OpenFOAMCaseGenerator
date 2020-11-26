@@ -313,19 +313,10 @@ def case_properties():
 
     return properties
 
-def main():
-    # get case specific dictionaries to set up case and write input files
-    properties = case_properties()
 
-    # check case (make sure that current set up will not produce any problem)
-    check_case = CheckCase.CheckCase(properties)
-    check_case.check_correct_turbulence_model_setup()
-    check_case.check_correct_boundary_condition_setup()
-    check_case.check_appropriate_numerical_scheme_combination()
-
-    # add additional entries to dictionaries
+def add_default_properties(properties):
     # absolute path of text case location
-    properties['file_properties']['path'] =\
+    properties['file_properties']['path'] = \
         os.path.join(properties['file_properties']['run_directory'], properties['file_properties']['case_name'])
 
     # velocity magnitude
@@ -347,24 +338,29 @@ def main():
             properties['turbulence_properties']['RANS_model'] == Parameters.SSG):
         properties['turbulence_properties']['use_phi_instead_of_grad_U'] = True
 
+    return properties
+
+
+def main():
+    # get case specific dictionaries to set up case and write input files
+    properties = case_properties()
+
+    # check case (make sure that current set up will not produce any problem)
+    check_case = CheckCase.CheckCase(properties)
+    check_case.check_correct_turbulence_model_setup()
+    check_case.check_correct_boundary_condition_setup()
+    check_case.check_appropriate_numerical_scheme_combination()
+
+    # add additional entries to dictionaries
+    add_default_properties(properties)
+
     # create the initial data structure for the case set-up
     file_manager = IO.FileManager(properties)
     file_manager.create_directory_structure()
 
     # write out boundary conditions for all relevant flow properties
     boundary_conditions = BoundaryConditions.WriteBoundaryConditions(properties, file_manager)
-    boundary_conditions.write_U()
-    boundary_conditions.write_p()
-    boundary_conditions.write_k()
-    boundary_conditions.write_kt()
-    boundary_conditions.write_kl()
-    boundary_conditions.write_nut()
-    boundary_conditions.write_omega()
-    boundary_conditions.write_epsilon()
-    boundary_conditions.write_nuTilda()
-    boundary_conditions.write_ReThetat()
-    boundary_conditions.write_gammaInt()
-    boundary_conditions.write_R()
+    boundary_conditions.write_all_appropriate_boundary_conditions()
 
     # write transport properties to file
     transport_dict = Transport.TransportPropertiesFile(properties, file_manager)
@@ -403,8 +399,8 @@ def main():
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(properties, file_manager)
         decompose_par_dict.write_decompose_par_dict()
 
-    yplus = YPlus.WriteYPlus(properties, file_manager)
-    yplus.write_y_plus()
+    y_plus = YPlus.WriteYPlus(properties, file_manager)
+    y_plus.write_y_plus()
 
     residuals = Residuals.WriteResiduals(file_manager)
     residuals.write_residuals()
@@ -420,7 +416,7 @@ def main():
 
     # output diagnostics
     print('Generated case : ' + properties['file_properties']['path'])
-    print('Reynolds number: ' + str(reynolds_number))
+    print('Reynolds number: ' + str(properties['flow_properties']['reynolds_number']))
 
 
 if __name__ == '__main__':
