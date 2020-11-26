@@ -1,12 +1,12 @@
 class WritePressureCoefficient:
-    def __init__(self, file_manager, flow_properties):
+    def __init__(self, properties, file_manager):
+        self.properties = properties
         self.file_manager = file_manager
-        self.flow_properties = flow_properties
 
     def write_force_coefficients(self):
-        velocity = ('(' + str(self.flow_properties['inlet_velocity'][0]) + ' ' +
-                    str(self.flow_properties['inlet_velocity'][1]) + ' ' +
-                    str(self.flow_properties['inlet_velocity'][2]) + ')')
+        velocity = ('(' + str(self.properties['flow_properties']['inlet_velocity'][0]) + ' ' +
+                    str(self.properties['flow_properties']['inlet_velocity'][1]) + ' ' +
+                    str(self.properties['flow_properties']['inlet_velocity'][2]) + ')')
         file_id = self.file_manager.create_file('system/include', 'pressureCoefficient')
         self.file_manager.write(file_id,
                                 '/*--------------------------------*- C++ -*----------------------------------*\\\n')

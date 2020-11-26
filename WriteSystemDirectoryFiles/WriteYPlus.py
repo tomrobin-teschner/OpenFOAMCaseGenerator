@@ -1,7 +1,7 @@
 class WriteYPlus:
-    def __init__(self, file_manager, flow_properties):
+    def __init__(self, properties, file_manager):
+        self.properties = properties
         self.file_manager = file_manager
-        self.flow_properties = flow_properties
 
     def write_y_plus(self):
         file_id = self.file_manager.create_file('system/include', 'yPlus')
@@ -26,13 +26,13 @@ class WriteYPlus:
         self.file_manager.write(file_id, '    type            yPlus;\n')
         self.file_manager.write(file_id, '    libs            (fieldFunctionObjects);\n')
         self.file_manager.write(file_id, '    writeControl    writeTime;\n')
-        if len(self.flow_properties['wall_boundaries']) == 1:
-            self.file_manager.write(file_id, '    patches         (' + self.flow_properties['wall_boundaries'][0] +
-                                    ');\n')
+        if len(self.properties['flow_properties']['wall_boundaries']) == 1:
+            self.file_manager.write(file_id, '    patches         (' +
+                                    self.properties['flow_properties']['wall_boundaries'][0] + ');\n')
         else:
             self.file_manager.write(file_id, '    patches         (')
             temp_str = ''
-            for boundary in self.flow_properties['wall_boundaries']:
+            for boundary in self.properties['flow_properties']['wall_boundaries']:
                 temp_str += boundary + ' '
             self.file_manager.write(file_id, temp_str[:-1] + ');\n')
         self.file_manager.write(file_id, '}\n')

@@ -2,15 +2,14 @@ import GlobalVariables as Parameters
 
 
 class fvSchemesFile:
-    def __init__(self, file_manager, solver_properties, turbulence_properties):
+    def __init__(self, properties, file_manager):
+        self.properties = properties
         self.file_manager = file_manager
-        self.solver_properties = solver_properties
-        self.turbulence_properties = turbulence_properties
 
     def write_input_file(self):
         # gradient reconstruction scheme to be used in divergence schemes, depends on turbulence model
         gradient_scheme = 'default'
-        if self.turbulence_properties['use_phi_instead_of_grad_U']:
+        if self.properties['turbulence_properties']['use_phi_instead_of_grad_U']:
             gradient_scheme = 'phi'
 
         file_id = self.file_manager.create_file('system', 'fvSchemes')
@@ -19,53 +18,53 @@ class fvSchemesFile:
 
         self.file_manager.write(file_id, 'ddtSchemes\n')
         self.file_manager.write(file_id, '{\n')
-        if self.solver_properties['time_integration'] == Parameters.STEADY_STATE:
+        if self.properties['solver_properties']['time_integration'] == Parameters.STEADY_STATE:
             self.file_manager.write(file_id, '    default         steadyState;\n')
         else:
-            if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
+            if self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.DEFAULT:
                 self.file_manager.write(file_id, '    default         CrankNicolson 0.5;\n')
-            elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
+            elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.TVD:
                 self.file_manager.write(file_id, '    default         CrankNicolson 0.5;\n')
-            elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+            elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
                 self.file_manager.write(file_id, '    default         Euler;\n')
-            elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
+            elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ACCURACY:
                 self.file_manager.write(file_id, '    default         backward;\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
 
         self.file_manager.write(file_id, 'gradSchemes\n')
         self.file_manager.write(file_id, '{\n')
-        if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
+        if self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.DEFAULT:
             self.file_manager.write(file_id, '    default         cellLimited Gauss linear 0.33;\n')
             self.file_manager.write(file_id, '    grad(U)         cellLimited Gauss linear 0.33;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.TVD:
             self.file_manager.write(file_id, '    default         cellLimited Gauss linear 0.33;\n')
             self.file_manager.write(file_id, '    grad(U)         cellLimited Gauss linear 0.33;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
             self.file_manager.write(file_id, '    default         cellLimited Gauss linear 1;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ACCURACY:
             self.file_manager.write(file_id, '    default         Gauss linear;\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
 
         self.file_manager.write(file_id, 'divSchemes\n')
         self.file_manager.write(file_id, '{\n')
-        if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
-            if self.solver_properties['use_first_order_for_turbulence']:
+        if self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.DEFAULT:
+            if self.properties['solver_properties']['use_first_order_for_turbulence']:
                 self.file_manager.write(file_id, '    default         Gauss upwind ' + gradient_scheme + ';\n')
             else:
                 self.file_manager.write(file_id, '    default         Gauss linearUpwind ' + gradient_scheme + ';\n')
             self.file_manager.write(file_id, '    div(phi,U)      Gauss linearUpwindV grad(U);\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
-            if self.solver_properties['use_first_order_for_turbulence']:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.TVD:
+            if self.properties['solver_properties']['use_first_order_for_turbulence']:
                 self.file_manager.write(file_id, '    default         Gauss upwind ' + gradient_scheme + ';\n')
             else:
                 self.file_manager.write(file_id, '    default         Gauss Minmod ' + gradient_scheme + ';\n')
             self.file_manager.write(file_id, '    div(phi,U)      Gauss MinmodV grad(U);\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
             self.file_manager.write(file_id, '    default         Gauss upwind;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
-            if self.solver_properties['use_first_order_for_turbulence']:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ACCURACY:
+            if self.properties['solver_properties']['use_first_order_for_turbulence']:
                 self.file_manager.write(file_id, '    default         Gauss upwind ' + gradient_scheme + ';\n')
             else:
                 self.file_manager.write(file_id, '    default         Gauss limitedLinear 1;\n')
@@ -76,13 +75,13 @@ class fvSchemesFile:
 
         self.file_manager.write(file_id, 'laplacianSchemes\n')
         self.file_manager.write(file_id, '{\n')
-        if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
+        if self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.DEFAULT:
             self.file_manager.write(file_id, '    default         Gauss linear limited 0.33;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.TVD:
             self.file_manager.write(file_id, '    default         Gauss linear limited 0.33;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
             self.file_manager.write(file_id, '    default         Gauss linear limited 1;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ACCURACY:
             self.file_manager.write(file_id, '    default         Gauss linear limited 0.33;\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
@@ -95,13 +94,13 @@ class fvSchemesFile:
 
         self.file_manager.write(file_id, 'snGradSchemes\n')
         self.file_manager.write(file_id, '{\n')
-        if self.solver_properties['numerical_schemes_correction'] == Parameters.DEFAULT:
+        if self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.DEFAULT:
             self.file_manager.write(file_id, '    default         limited 0.33;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.TVD:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.TVD:
             self.file_manager.write(file_id, '    default         limited 0.33;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
             self.file_manager.write(file_id, '    default         limited 1;\n')
-        elif self.solver_properties['numerical_schemes_correction'] == Parameters.ACCURACY:
+        elif self.properties['solver_properties']['numerical_schemes_correction'] == Parameters.ACCURACY:
             self.file_manager.write(file_id, '    default         limited 0.33;\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
