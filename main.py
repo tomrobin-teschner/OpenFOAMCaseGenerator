@@ -146,25 +146,6 @@ def case_properties():
             # specify how many solutions to keep (specify 0 to keep all)
             'purge_write': 0,
 
-            # time integration scheme, options are listed below
-            #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
-            #   UNSTEADY:     Integrate in time and resolve  dU / dt
-            'time_integration': Parameters.STEADY_STATE,
-
-            # Choose preset of numerical schemes based on accuracy and robustness requirements
-            #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to achieve
-            #               second-order accuracy.
-            #   TVD:        Same as DEFAULT, but use Total Variation Diminishing (TVD) schemes instead of upwind schemes.
-            #   ROBUSTNESS: Use this option if your simulation does not converge or your mesh has bad mesh quality metrics.
-            #               First-order accurate in space and time.
-            #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
-            #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate with
-            #               less limiting compared to DEFAULT and TVD.
-            'numerical_schemes_correction': Parameters.DEFAULT,
-
-            # flag to indicate if first order discretisation should be used for turbulent quantities
-            'use_first_order_for_turbulence': True,
-
             # absolute convergence criterion for implicit solvers
             'absolute_convergence_criterion': 1e-8,
 
@@ -214,6 +195,27 @@ def case_properties():
 
             # write wall shear stresses (can be used to obtain skin friction coefficient)
             'write_wall_shear_stresses': True,
+        },
+
+        'numerical_discretisation': {
+            # time integration scheme, options are listed below
+            #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
+            #   UNSTEADY:     Integrate in time and resolve  dU / dt
+            'time_integration': Parameters.STEADY_STATE,
+
+            # Choose preset of numerical schemes based on accuracy and robustness requirements
+            #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to achieve
+            #               second-order accuracy.
+            #   TVD:        Same as DEFAULT, but use Total Variation Diminishing (TVD) schemes instead of upwind schemes.
+            #   ROBUSTNESS: Use this option if your simulation does not converge or your mesh has bad mesh quality metrics.
+            #               First-order accurate in space and time.
+            #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
+            #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate with
+            #               less limiting compared to DEFAULT and TVD.
+            'numerical_schemes_correction': Parameters.DEFAULT,
+
+            # flag to indicate if first order discretisation should be used for turbulent quantities
+            'use_first_order_for_turbulence': True,
         },
 
         'turbulence_properties': {

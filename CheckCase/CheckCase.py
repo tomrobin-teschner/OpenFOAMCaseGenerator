@@ -48,7 +48,7 @@ class CheckCase:
                          '\n=================================== END ERROR ===================================\n')
 
     def check_appropriate_numerical_scheme_combination(self):
-        if (self.properties['solver_properties']['numerical_schemes_correction'] != Parameters.ACCURACY and
+        if (self.properties['numerical_discretisation']['numerical_schemes_correction'] != Parameters.ACCURACY and
                 self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES):
             warnings.showwarning(
                 '\n==================================== WARNING ====================================\n' +
