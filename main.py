@@ -24,7 +24,7 @@ def case_properties():
     properties = {
         'file_properties': {
             # name of the case to use (will be used for the folder name)
-            'case_name': 'flatPlateTransition_Re=20000',
+            'case_name': 'cylinder_Re=10000_SAS',
 
             # path to folder where to copy test case to
             'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
@@ -51,12 +51,11 @@ def case_properties():
         #                     (Neumann condition for all quantities)
         #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
         'boundary_properties': {
-            'inlet': Parameters.FREESTREAM,
-            'outlet': Parameters.FREESTREAM,
-            'wall': Parameters.WALL,
-            'symmetry': Parameters.SYMMETRY,
-            'top': Parameters.FREESTREAM,
-            'BaseAndTop': Parameters.EMPTY,
+            'freestream': Parameters.FREESTREAM,
+            'outlet': Parameters.ADVECTIVE_OUTLET,
+            'cylinder': Parameters.WALL,
+            'left': Parameters.CYCLIC,
+            'right': Parameters.CYCLIC,
         },
 
         # physical properties of solver set-up
@@ -65,18 +64,18 @@ def case_properties():
             'inlet_velocity': [1, 0, 0],
 
             # specify the laminar viscosity
-            'nu': 1e-5,
+            'nu': 1e-4,
 
             # freestream turbulent intensity (between 0 - 1)
             'freestream_turbulent_intensity': 0.0005,
 
             # reference length in simulation
-            'reference_length': 2.0,
+            'reference_length': 1.0,
         },
 
         'dimensionless_coefficients': {
             # reference area used to non-dimensionalise force coefficients
-            'reference_area': 1.0,
+            'reference_area': 2.0,
 
             # direction of lift vector (normalised to unity)
             'lift_direction': [0, 1, 0],
@@ -88,19 +87,19 @@ def case_properties():
             'pitch_axis_direction': [0, 0, 1],
 
             # center of rotation for momentum coefficient
-            'center_of_roation': [-0.25, 0, 0],
+            'center_of_roation': [0, 0, 0],
 
             # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-            'wall_boundaries': ['wall'],
+            'wall_boundaries': ['cylinder'],
 
             # write force coefficients flag
-            'write_force_coefficients': False,
+            'write_force_coefficients': True,
 
             # write pressure coefficient (cp)
             'write_pressure_coefficient': True,
 
             # write wall shear stresses (can be used to obtain skin friction coefficient)
-            'write_wall_shear_stresses': True,
+            'write_wall_shear_stresses': False,
         },
 
         'solver_properties': {
@@ -111,13 +110,13 @@ def case_properties():
             #     pisoFoam:   unsteady, turbulent (RANS, LES) solver based on the PISO algorithm
             #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use
             #                 higher CFL numbers than pisoFoam while being more stable. Recommended in general
-            'solver': Parameters.simpleFoam,
+            'solver': Parameters.pimpleFoam,
 
             # start time
             'startTime': 0,
 
             # end time
-            'endTime': 1000,
+            'endTime': 10,
 
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -127,20 +126,20 @@ def case_properties():
             'startFrom': Parameters.START_TIME,
 
             # flag indicating whether to dynamically calculate time step based on CFL criterion
-            'CFLBasedTimeStepping': False,
+            'CFLBasedTimeStepping': True,
 
             # CFL number
             'CFL': 1.0,
 
             # time step to be used (will be ignored if CFL-based time steppng is chosen)
             # WARNING: solver needs to support adjustable deltaT calculation
-            'deltaT': 1,
+            'deltaT': 5e-4,
 
             # largest allowable time step
-            'maxDeltaT': 1,
+            'maxDeltaT': 2,
 
             # frequency at which to write output files. Behaviour controlled through write control entry below.
-            'write_frequency': 10,
+            'write_frequency': 0.01,
 
             # write control, specify when to output results, the options are listed below
             #   TIME_STEP:           write every 'write_frequency' time steps
@@ -149,7 +148,7 @@ def case_properties():
             #                        (use with 'CFLBasedTimeStepping' = True)
             #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
             #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
-            'write_control': Parameters.TIME_STEP,
+            'write_control': Parameters.ADJUSTABLE_RUN_TIME,
 
             # specify how many solutions to keep (specify 0 to keep all)
             'purge_write': 0,
@@ -158,10 +157,10 @@ def case_properties():
             'under_relaxation_p': 0.5,
 
             # under-relaxation factor for velocity
-            'under_relaxation_U': 0.9,
+            'under_relaxation_U': 0.8,
 
             # under-relaxation factor for turbulent quantities
-            'under_relaxation_turbulence': 0.9,
+            'under_relaxation_turbulence': 0.8,
 
             # under-relaxation factor for Reynolds stresses
             'under_relaxation_reynolds_stresses': 0.5,
@@ -171,7 +170,7 @@ def case_properties():
             # time integration scheme, options are listed below
             #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
             #   UNSTEADY:     Integrate in time and resolve  dU / dt
-            'time_integration': Parameters.STEADY_STATE,
+            'time_integration': Parameters.UNSTEADY,
 
             # Choose preset of numerical schemes based on accuracy and robustness requirements
             #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
@@ -182,7 +181,7 @@ def case_properties():
             #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
             #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate
             #               with less limiting compared to DEFAULT and TVD.
-            'numerical_schemes_correction': Parameters.DEFAULT,
+            'numerical_schemes_correction': Parameters.TVD,
 
             # flag to indicate if first order discretisation should be used for turbulent quantities
             'use_first_order_for_turbulence': True,
@@ -220,6 +219,9 @@ def case_properties():
             #     kOmegaSSTLM:     gamma-Re,theta,t k-omega SST correlation-based transition model
             #     kkLOmega:        k_laminar, k_turbulent, omega physics-based transition model
             #
+            #   Scale-Adaptive modelling
+            #     kOmegaSSTSAS:    Scale-adaptive version of the k-omega SST model
+            #
             #   Based on non-linear eddy viscosity:
             #     LienCubicKE:     Lien's k-epsilon model (incompressible only)
             #     ShihQuadraticKE: Shih's k-epsilon model (incompressible only)
@@ -227,16 +229,16 @@ def case_properties():
             #   Based on Reynolds Stresses
             #     LRR:             Reynolds stress model of Launder, Reece and Rodi
             #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
-            'RANS_model': Parameters.kOmegaSSTLM,
+            'RANS_model': Parameters.kOmegaSSTSAS,
 
             # LES / DES model
             #   LES:
             #     Smagorinsky:         Large Eddy Simulation based on classical Smagorinsky approach (fixed C_s)
-            #     kEqn:
+            #     kEqn:                solve transport equation for sub-grid scale kinetic energy k_sgs
             #     dynamicKEqn:
             #     dynamicLagrangian:
             #     DeardorffDiffStress:
-            #     WALE:
+            #     WALE:                Wall adapting local eddy (WALE)
             #
             #   DES:
             #     SpalartAllmarasDES:   Detached Eddy Simulation based on the Spalart-Allmaras model
@@ -251,9 +253,9 @@ def case_properties():
             #   smooth:
             #   Prandtl:
             #   maxDeltaxyz:
-            #   cubeRootVol:
+            #   cubeRootVol:         Take the cube root of the volume as delta
             #   maxDeltaxyzCubeRoot:
-            #   vanDriest:
+            #   vanDriest:           Applies van Driest damping function close to the wall
             #   IDDESDelta:
             'delta_model': Parameters.cubeRootVol,
 
@@ -276,10 +278,10 @@ def case_properties():
 
         'convergence_control': {
             # convergence criterion for residuals (used to judge if a simulation has converged)
-            'convergence_threshold': 1e-6,
+            'convergence_threshold': 1e-4,
 
             # absolute convergence criterion for implicit solvers (used to judge if the current iteration has converged)
-            'absolute_convergence_criterion': 1e-8,
+            'absolute_convergence_criterion': 1e-6,
 
             # relative convergence criterion for implicit solvers (used to judge if the current iteration has converged)
             'relative_convergence_criterion': 0.01,
@@ -309,7 +311,7 @@ def case_properties():
         'parallel_properties': {
             # flag indicating if simulation will be run in parallel. If true, additional information for domain
             # decomposition will be written (and Allrun script modified, accordingly)
-            'run_in_parallel': False,
+            'run_in_parallel': True,
 
             # number of processors that will be used to run case in parallel
             'number_of_processors': 4,

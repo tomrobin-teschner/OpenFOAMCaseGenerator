@@ -82,12 +82,13 @@ kOmega = 6
 kOmegaSST = 7
 kOmegaSSTLM = 8
 kkLOmega = 9
-qZeta = 10
-SpalartAllmaras = 11
-LienCubicKE = 12
-ShihQuadraticKE = 13
-LRR = 14
-SSG = 15
+kOmegaSSTSAS = 10
+qZeta = 11
+SpalartAllmaras = 12
+LienCubicKE = 13
+ShihQuadraticKE = 14
+LRR = 15
+SSG = 16
 
 # LES models
 Smagorinsky = 0

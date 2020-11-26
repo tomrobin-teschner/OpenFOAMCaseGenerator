@@ -4,18 +4,18 @@ class WriteForceCoefficients:
         self.properties = properties
 
     def write_force_coefficients(self):
-        lift_dir = ('(' + str(self.properties['flow_properties']['lift_direction'][0]) + ' ' +
-                    str(self.properties['flow_properties']['lift_direction'][1]) + ' ' +
-                    str(self.properties['flow_properties']['lift_direction'][2]) + ')')
-        drag_dir = ('(' + str(self.properties['flow_properties']['drag_direction'][0]) + ' ' +
-                    str(self.properties['flow_properties']['drag_direction'][1]) + ' ' +
-                    str(self.properties['flow_properties']['drag_direction'][2]) + ')')
-        pitch_dir = ('(' + str(self.properties['flow_properties']['pitch_axis_direction'][0]) + ' ' +
-                     str(self.properties['flow_properties']['pitch_axis_direction'][1]) + ' ' +
-                     str(self.properties['flow_properties']['pitch_axis_direction'][2]) + ')')
-        cofr = ('(' + str(self.properties['flow_properties']['center_of_roation'][0]) + ' ' +
-                str(self.properties['flow_properties']['center_of_roation'][1]) + ' ' +
-                str(self.properties['flow_properties']['center_of_roation'][2]) + ')')
+        lift_dir = ('(' + str(self.properties['dimensionless_coefficients']['lift_direction'][0]) + ' ' +
+                    str(self.properties['dimensionless_coefficients']['lift_direction'][1]) + ' ' +
+                    str(self.properties['dimensionless_coefficients']['lift_direction'][2]) + ')')
+        drag_dir = ('(' + str(self.properties['dimensionless_coefficients']['drag_direction'][0]) + ' ' +
+                    str(self.properties['dimensionless_coefficients']['drag_direction'][1]) + ' ' +
+                    str(self.properties['dimensionless_coefficients']['drag_direction'][2]) + ')')
+        pitch_dir = ('(' + str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][0]) + ' ' +
+                     str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][1]) + ' ' +
+                     str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][2]) + ')')
+        cofr = ('(' + str(self.properties['dimensionless_coefficients']['center_of_roation'][0]) + ' ' +
+                str(self.properties['dimensionless_coefficients']['center_of_roation'][1]) + ' ' +
+                str(self.properties['dimensionless_coefficients']['center_of_roation'][2]) + ')')
 
         file_id = self.file_manager.create_file('system/include', 'forceCoefficients')
         self.file_manager.write(file_id,
@@ -45,13 +45,13 @@ class WriteForceCoefficients:
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    log             yes;\n')
         self.file_manager.write(file_id, '\n')
-        if len(self.properties['flow_properties']['wall_boundaries']) == 1:
+        if len(self.properties['dimensionless_coefficients']['wall_boundaries']) == 1:
             self.file_manager.write(file_id, '    patches         (' +
-                                    self.properties['flow_properties']['wall_boundaries'][0] + ');\n')
+                                    self.properties['dimensionless_coefficients']['wall_boundaries'][0] + ');\n')
         else:
             self.file_manager.write(file_id, '    patches         (')
             temp_str = ''
-            for boundary in self.properties['flow_properties']['wall_boundaries']:
+            for boundary in self.properties['dimensionless_coefficients']['wall_boundaries']:
                 temp_str += boundary + ' '
             self.file_manager.write(file_id, temp_str[:-1] + ');\n')
         self.file_manager.write(file_id, '    rho             rhoInf;\n')
@@ -65,7 +65,7 @@ class WriteForceCoefficients:
         self.file_manager.write(file_id, '    lRef            ' +
                                 str(self.properties['flow_properties']['reference_length']) + ';\n')
         self.file_manager.write(file_id, '    Aref            ' +
-                                str(self.properties['flow_properties']['reference_area']) + ';\n')
+                                str(self.properties['dimensionless_coefficients']['reference_area']) + ';\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,

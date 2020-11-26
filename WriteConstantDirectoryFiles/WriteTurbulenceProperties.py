@@ -48,6 +48,8 @@ class TurbulencePropertiesFile:
             self.file_manager.write(file_id, '    RASModel        kOmegaSSTLM;\n')
         elif self.properties['turbulence_properties']['RANS_model'] == Parameters.kkLOmega:
             self.file_manager.write(file_id, '    RASModel        kkLOmega;\n')
+        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSSTSAS:
+            self.file_manager.write(file_id, '    RASModel        kOmegaSSTSAS;\n')
         elif self.properties['turbulence_properties']['RANS_model'] == Parameters.qZeta:
             self.file_manager.write(file_id, '    RASModel        qZeta;\n')
         elif self.properties['turbulence_properties']['RANS_model'] == Parameters.SpalartAllmaras:
@@ -64,6 +66,8 @@ class TurbulencePropertiesFile:
         self.file_manager.write(file_id, '    turbulence      on;\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    printCoeffs     on;\n')
+        if self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSSTSAS:
+            self.__write_delta_model(file_id)
         self.file_manager.write(file_id, '}\n\n')
 
     def __write_LES(self, file_id):
@@ -97,6 +101,10 @@ class TurbulencePropertiesFile:
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    printCoeffs     on;\n')
         self.file_manager.write(file_id, '\n')
+        self.__write_delta_model(file_id)
+        self.file_manager.write(file_id, '}\n\n')
+
+    def __write_delta_model(self, file_id):
         if self.properties['turbulence_properties']['delta_model'] == Parameters.smooth:
             self.file_manager.write(file_id, '    delta           smooth;\n')
         elif self.properties['turbulence_properties']['delta_model'] == Parameters.Prandtl:
@@ -172,4 +180,3 @@ class TurbulencePropertiesFile:
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '        maxDeltaRatio   1.1;\n')
         self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '}\n\n')
