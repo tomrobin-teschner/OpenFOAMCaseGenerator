@@ -146,35 +146,6 @@ def case_properties():
             # specify how many solutions to keep (specify 0 to keep all)
             'purge_write': 0,
 
-            # absolute convergence criterion for implicit solvers
-            'absolute_convergence_criterion': 1e-8,
-
-            # relative convergence criterion for implicit solvers
-            'relative_convergence_criterion': 0.01,
-
-            # convergence criterion for residuals
-            'convergence_threshold': 1e-6,
-
-            # check if integral quantities have converged
-            #   NONE:                 Don't write any force coefficient based stopping criterion
-            #   C_D:                  Convergence criterion based on the drag force coefficient
-            #   C_L:                  Convergence criterion based on the lift force coefficient
-            #   C_S:                  Convergence criterion based on the side force coefficient
-            #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
-            #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
-            #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
-            'integral_convergence_criterion': Parameters.NONE,
-
-            # if integral quantities are checked for convergence, specify for how many timesteps their average should be
-            # calculated to check if, on average, the quantity has converged
-            'averaging_time_steps': 20,
-
-            # specify the convergence threshold for the integral quantities
-            'integral_quantities_convergence_threshold': 1e-4,
-
-            # specify how many iterations to wait before checking convergence criterion
-            'time_steps_to_wait_before_checking_convergence': 100,
-
             # under-relaxation factor for pressure
             'under_relaxation_p': 0.5,
 
@@ -303,6 +274,38 @@ def case_properties():
             'turbulent_to_laminar_ratio': 10,
         },
 
+        'convergence_control': {
+            # convergence criterion for residuals (used to judge if a simulation has converged)
+            'convergence_threshold': 1e-6,
+
+            # absolute convergence criterion for implicit solvers (used to judge if the current iteration has converged)
+            'absolute_convergence_criterion': 1e-8,
+
+            # relative convergence criterion for implicit solvers (used to judge if the current iteration has converged)
+            'relative_convergence_criterion': 0.01,
+
+            # check if an integral quantity has converged instead of just checking the residuals
+            # recommended if such a integral quantity can be easily defined for the current simulation
+            #   NONE:                 Don't write any force coefficient based stopping criterion
+            #   C_D:                  Convergence criterion based on the drag force coefficient
+            #   C_L:                  Convergence criterion based on the lift force coefficient
+            #   C_S:                  Convergence criterion based on the side force coefficient
+            #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
+            #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
+            #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
+            'integral_convergence_criterion': Parameters.NONE,
+
+            # if integral quantities are checked for convergence, specify for how many timesteps their average should be
+            # calculated to check if, on average, the quantity has converged
+            'averaging_time_steps': 20,
+
+            # specify the convergence threshold for the integral quantities
+            'integral_quantities_convergence_threshold': 1e-4,
+
+            # specify how many iterations to wait before checking convergence criterion
+            'time_steps_to_wait_before_checking_convergence': 100,
+        },
+
         'parallel_properties': {
             # flag indicating if simulation will be run in parallel. If true, additional information for domain
             # decomposition will be written (and Allrun script modified, accordingly)
@@ -389,7 +392,7 @@ def main():
         force_coefficients = ForceCoefficients.WriteForceCoefficients(properties, file_manager)
         force_coefficients.write_force_coefficients()
 
-    if properties['solver_properties']['integral_convergence_criterion'] != Parameters.NONE:
+    if properties['convergence_control']['integral_convergence_criterion'] != Parameters.NONE:
         force_coefficient_trigger = ForceCoefficientTrigger.WriteForceCoefficientConvergence(properties, file_manager)
         force_coefficient_trigger.write_triggers()
 
