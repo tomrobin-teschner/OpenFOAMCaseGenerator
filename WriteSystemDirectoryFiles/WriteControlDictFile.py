@@ -67,6 +67,8 @@ class ControlDictFile:
             self.file_manager.write(file_id, '    #include "include/forceCoefficientTrigger"\n')
         if self.properties['dimensionless_coefficients']['write_pressure_coefficient']:
             self.file_manager.write(file_id, '    #include "include/pressureCoefficient"\n')
+        if self.properties['pointProbes']['write_point_probes']:
+            self.file_manager.write(file_id, '    #include "include/pointProbes"\n')
         self.file_manager.write(file_id, '    #include "include/yPlus"\n')
         self.file_manager.write(file_id, '    #include "include/residuals"\n')
         if self.properties['dimensionless_coefficients']['write_wall_shear_stresses']:

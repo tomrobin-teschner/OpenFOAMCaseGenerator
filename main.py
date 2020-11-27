@@ -10,6 +10,7 @@ import WriteSystemDirectoryFiles.WriteDecomposePar as DecomposeParDict
 import WriteSystemDirectoryFiles.WriteYPlus as YPlus
 import WriteSystemDirectoryFiles.WriteResiduals as Residuals
 import WriteSystemDirectoryFiles.WriteForceCoefficientConvergence as ForceCoefficientTrigger
+import WriteSystemDirectoryFiles.WritePointProbes as PointProbes
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -24,7 +25,7 @@ def case_properties():
     properties = {
         'file_properties': {
             # name of the case to use (will be used for the folder name)
-            'case_name': 'cylinder_Re=10000_SAS',
+            'case_name': 'naca_0012_y+_1',
 
             # path to folder where to copy test case to
             'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
@@ -33,6 +34,16 @@ def case_properties():
 
             # version of openfoam to use (does not have an influence on the case setup, but will be used in headers)
             'version': 'v2006',
+        },
+
+        # setting up simulation for parallel processing
+        'parallel_properties': {
+            # flag indicating if simulation will be run in parallel. If true, additional information for domain
+            # decomposition will be written (and Allrun script modified, accordingly)
+            'run_in_parallel': False,
+
+            # number of processors that will be used to run case in parallel
+            'number_of_processors': 4,
         },
 
         # define boundary conditions
@@ -51,23 +62,25 @@ def case_properties():
         #                     (Neumann condition for all quantities)
         #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
         'boundary_properties': {
-            'freestream': Parameters.FREESTREAM,
-            'outlet': Parameters.ADVECTIVE_OUTLET,
-            'cylinder': Parameters.WALL,
-            'left': Parameters.CYCLIC,
-            'right': Parameters.CYCLIC,
+            'inlet': Parameters.INLET,
+            'outlet': Parameters.BACKFLOW_OUTLET,
+            'upper': Parameters.WALL,
+            'lower': Parameters.WALL,
+            'top_symmetry': Parameters.SYMMETRY,
+            'bottom_symmetry': Parameters.SYMMETRY,
+            'BaseAndTop': Parameters.EMPTY,
         },
 
         # physical properties of solver set-up
         'flow_properties': {
             # specify the inlet boundary condition (free stream velocity)
-            'inlet_velocity': [1, 0, 0],
+            'inlet_velocity': [6, 0, 0],
 
             # specify the laminar viscosity
-            'nu': 1e-4,
+            'nu': 1e-6,
 
             # freestream turbulent intensity (between 0 - 1)
-            'freestream_turbulent_intensity': 0.0005,
+            'freestream_turbulent_intensity': 0.00051,
 
             # reference length in simulation
             'reference_length': 1.0,
@@ -75,7 +88,7 @@ def case_properties():
 
         'dimensionless_coefficients': {
             # reference area used to non-dimensionalise force coefficients
-            'reference_area': 2.0,
+            'reference_area': 1.0,
 
             # direction of lift vector (normalised to unity)
             'lift_direction': [0, 1, 0],
@@ -90,7 +103,7 @@ def case_properties():
             'center_of_roation': [0, 0, 0],
 
             # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-            'wall_boundaries': ['cylinder'],
+            'wall_boundaries': ['upper', 'lower'],
 
             # write force coefficients flag
             'write_force_coefficients': True,
@@ -110,13 +123,13 @@ def case_properties():
             #     pisoFoam:   unsteady, turbulent (RANS, LES) solver based on the PISO algorithm
             #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use
             #                 higher CFL numbers than pisoFoam while being more stable. Recommended in general
-            'solver': Parameters.pimpleFoam,
+            'solver': Parameters.simpleFoam,
 
             # start time
             'startTime': 0,
 
             # end time
-            'endTime': 10,
+            'endTime': 1000,
 
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -126,20 +139,20 @@ def case_properties():
             'startFrom': Parameters.START_TIME,
 
             # flag indicating whether to dynamically calculate time step based on CFL criterion
-            'CFLBasedTimeStepping': True,
+            'CFLBasedTimeStepping': False,
 
             # CFL number
             'CFL': 1.0,
 
             # time step to be used (will be ignored if CFL-based time steppng is chosen)
             # WARNING: solver needs to support adjustable deltaT calculation
-            'deltaT': 5e-4,
+            'deltaT': 1,
 
             # largest allowable time step
-            'maxDeltaT': 2,
+            'maxDeltaT': 1,
 
             # frequency at which to write output files. Behaviour controlled through write control entry below.
-            'write_frequency': 0.01,
+            'write_frequency': 100,
 
             # write control, specify when to output results, the options are listed below
             #   TIME_STEP:           write every 'write_frequency' time steps
@@ -148,7 +161,7 @@ def case_properties():
             #                        (use with 'CFLBasedTimeStepping' = True)
             #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
             #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
-            'write_control': Parameters.ADJUSTABLE_RUN_TIME,
+            'write_control': Parameters.TIME_STEP,
 
             # specify how many solutions to keep (specify 0 to keep all)
             'purge_write': 0,
@@ -157,10 +170,10 @@ def case_properties():
             'under_relaxation_p': 0.5,
 
             # under-relaxation factor for velocity
-            'under_relaxation_U': 0.8,
+            'under_relaxation_U': 0.9,
 
             # under-relaxation factor for turbulent quantities
-            'under_relaxation_turbulence': 0.8,
+            'under_relaxation_turbulence': 0.9,
 
             # under-relaxation factor for Reynolds stresses
             'under_relaxation_reynolds_stresses': 0.5,
@@ -170,7 +183,7 @@ def case_properties():
             # time integration scheme, options are listed below
             #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
             #   UNSTEADY:     Integrate in time and resolve  dU / dt
-            'time_integration': Parameters.UNSTEADY,
+            'time_integration': Parameters.STEADY_STATE,
 
             # Choose preset of numerical schemes based on accuracy and robustness requirements
             #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
@@ -181,7 +194,7 @@ def case_properties():
             #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
             #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate
             #               with less limiting compared to DEFAULT and TVD.
-            'numerical_schemes_correction': Parameters.TVD,
+            'numerical_schemes_correction': Parameters.DEFAULT,
 
             # flag to indicate if first order discretisation should be used for turbulent quantities
             'use_first_order_for_turbulence': True,
@@ -229,7 +242,7 @@ def case_properties():
             #   Based on Reynolds Stresses
             #     LRR:             Reynolds stress model of Launder, Reece and Rodi
             #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
-            'RANS_model': Parameters.kOmegaSSTSAS,
+            'RANS_model': Parameters.kOmegaSST,
 
             # LES / DES model
             #   LES:
@@ -278,10 +291,10 @@ def case_properties():
 
         'convergence_control': {
             # convergence criterion for residuals (used to judge if a simulation has converged)
-            'convergence_threshold': 1e-4,
+            'convergence_threshold': 1e-5,
 
             # absolute convergence criterion for implicit solvers (used to judge if the current iteration has converged)
-            'absolute_convergence_criterion': 1e-6,
+            'absolute_convergence_criterion': 1e-8,
 
             # relative convergence criterion for implicit solvers (used to judge if the current iteration has converged)
             'relative_convergence_criterion': 0.01,
@@ -295,11 +308,11 @@ def case_properties():
             #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
             #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
             #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
-            'integral_convergence_criterion': Parameters.NONE,
+            'integral_convergence_criterion': Parameters.C_D,
 
             # if integral quantities are checked for convergence, specify for how many timesteps their average should be
             # calculated to check if, on average, the quantity has converged
-            'averaging_time_steps': 20,
+            'averaging_time_steps': 100,
 
             # specify the convergence threshold for the integral quantities
             'integral_quantities_convergence_threshold': 1e-4,
@@ -308,14 +321,20 @@ def case_properties():
             'time_steps_to_wait_before_checking_convergence': 100,
         },
 
-        'parallel_properties': {
-            # flag indicating if simulation will be run in parallel. If true, additional information for domain
-            # decomposition will be written (and Allrun script modified, accordingly)
-            'run_in_parallel': True,
+        # specify 0-D point probes to which will output flow variables at each timestep at a given location x, y and z
+        'pointProbes': {
+            # specify the lication at which to output information, can be more than 1
+            'location': [
+                [1, 0.01, 0],
+                [2, 0, 0],
+            ],
 
-            # number of processors that will be used to run case in parallel
-            'number_of_processors': 4,
-        },
+            # specify variables that should be monitored
+            'variables_to_monitor': ['U', 'p'],
+
+            # flag indicating if point probes should be active (written to file)
+            'write_point_probes': True,
+        }
     }
 
     return properties
@@ -401,6 +420,10 @@ def main():
     if properties['dimensionless_coefficients']['write_pressure_coefficient']:
         pressure_coefficient = PressureCoefficient.WritePressureCoefficient(properties, file_manager)
         pressure_coefficient.write_force_coefficients()
+
+    if properties['pointProbes']['write_point_probes']:
+        point_probes = PointProbes.WritePointProbes(properties, file_manager)
+        point_probes.write_point_probes()
 
     if properties['parallel_properties']['run_in_parallel']:
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(properties, file_manager)
