@@ -7,7 +7,8 @@ class WriteForceCoefficientConvergence:
         self.file_manager = file_manager
 
     def write_triggers(self):
-        wait_n_time_steps = str(self.properties['solver_properties']['time_steps_to_wait_before_checking_convergence'])
+        wait_n_time_steps =\
+            str(self.properties['convergence_control']['time_steps_to_wait_before_checking_convergence'])
         file_id = self.file_manager.create_file('system/include', 'forceCoefficientTrigger')
         self.file_manager.write(file_id,
                                 '/*--------------------------------*- C++ -*----------------------------------*\\\n')
@@ -33,17 +34,17 @@ class WriteForceCoefficientConvergence:
         self.file_manager.write(file_id, '    triggerStart    1;\n')
         self.file_manager.write(file_id, '    conditions\n')
         self.file_manager.write(file_id, '    {\n')
-        if self.properties['solver_properties']['integral_convergence_criterion'] == Parameters.C_D:
+        if self.properties['convergence_control']['integral_convergence_criterion'] == Parameters.C_D:
             self.__write_trigger(file_id, 'Cd')
-        elif self.properties['solver_properties']['integral_convergence_criterion'] == Parameters.C_L:
+        elif self.properties['convergence_control']['integral_convergence_criterion'] == Parameters.C_L:
             self.__write_trigger(file_id, 'Cl')
-        elif self.properties['solver_properties']['integral_convergence_criterion'] == Parameters.C_S:
+        elif self.properties['convergence_control']['integral_convergence_criterion'] == Parameters.C_S:
             self.__write_trigger(file_id, 'Cs')
-        elif self.properties['solver_properties']['integral_convergence_criterion'] == Parameters.C_M_YAW:
+        elif self.properties['convergence_control']['integral_convergence_criterion'] == Parameters.C_M_YAW:
             self.__write_trigger(file_id, 'CmYaw')
-        elif self.properties['solver_properties']['integral_convergence_criterion'] == Parameters.C_M_ROLL:
+        elif self.properties['convergence_control']['integral_convergence_criterion'] == Parameters.C_M_ROLL:
             self.__write_trigger(file_id, 'CmRoll')
-        elif self.properties['solver_properties']['integral_convergence_criterion'] == Parameters.C_M_PITCH:
+        elif self.properties['convergence_control']['integral_convergence_criterion'] == Parameters.C_M_PITCH:
             self.__write_trigger(file_id, 'CmPitch')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '}\n')
@@ -67,8 +68,8 @@ class WriteForceCoefficientConvergence:
                                 '// ************************************************************************* //\n')
 
     def __write_trigger(self, file_id, quantity_to_write):
-        convergence = str(self.properties['solver_properties']['integral_quantities_convergence_threshold'])
-        averaging_time = str(self.properties['solver_properties']['averaging_time_steps'])
+        convergence = str(self.properties['convergence_control']['integral_quantities_convergence_threshold'])
+        averaging_time = str(self.properties['convergence_control']['averaging_time_steps'])
 
         self.file_manager.write(file_id, '        condition1\n')
         self.file_manager.write(file_id, '        {\n')
