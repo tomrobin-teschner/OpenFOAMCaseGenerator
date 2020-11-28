@@ -25,7 +25,6 @@ class WritePointProbes:
         self.file_manager.write(file_id, '{\n')
         self.file_manager.write(file_id, '    type            probes;\n')
         self.file_manager.write(file_id, '    libs            (fieldFunctionObjects);\n')
-        self.file_manager.write(file_id, '    fields          (".*");\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    writeControl    timeStep;\n')
         self.file_manager.write(file_id, '    writeInterval   1;\n')

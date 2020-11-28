@@ -11,6 +11,7 @@ import WriteSystemDirectoryFiles.WriteYPlus as YPlus
 import WriteSystemDirectoryFiles.WriteResiduals as Residuals
 import WriteSystemDirectoryFiles.WriteForceCoefficientConvergence as ForceCoefficientTrigger
 import WriteSystemDirectoryFiles.WritePointProbes as PointProbes
+import WriteSystemDirectoryFiles.WriteLineProbes as LineProbes
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -323,18 +324,44 @@ def case_properties():
 
         # specify 0-D point probes to which will output flow variables at each timestep at a given location x, y and z
         'pointProbes': {
-            # specify the lication at which to output information, can be more than 1
+            # specify the location at which to output information, can be more than 1
             'location': [
                 [1, 0.01, 0],
                 [2, 0, 0],
             ],
 
-            # specify variables that should be monitored
+            # specify variables that should be monitored at the specified point
             'variables_to_monitor': ['U', 'p'],
 
             # flag indicating if point probes should be active (written to file)
             'write_point_probes': True,
-        }
+        },
+
+        # specify 1-D line probes
+        'lineProbes': {
+            # specify the start and end point where line should be placed, can be more than 1
+            'location': [
+                {
+                    'name': 'x=2',
+                    'start': [2, 1, 0.5],
+                    'end': [2, -1, 0.5],
+                },
+                {
+                    'name': 'x=5',
+                    'start': [5, 1, 0.5],
+                    'end': [5, -1, 0.5],
+                },
+            ],
+
+            # number of points along line
+            'number_of_samples_on_line': 100,
+
+            # specify variables that should be monitored along line
+            'variables_to_monitor': ['U', 'p'],
+
+            # flag indicating if point probes should be active (written to file)
+            'write_line_probes': True,
+        },
     }
 
     return properties
@@ -424,6 +451,10 @@ def main():
     if properties['pointProbes']['write_point_probes']:
         point_probes = PointProbes.WritePointProbes(properties, file_manager)
         point_probes.write_point_probes()
+
+    if properties['lineProbes']['write_line_probes']:
+        line_probes = LineProbes.WriteLineProbes(properties, file_manager)
+        line_probes.write_line_probes()
 
     if properties['parallel_properties']['run_in_parallel']:
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(properties, file_manager)
