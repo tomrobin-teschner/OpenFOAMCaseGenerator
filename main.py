@@ -12,6 +12,7 @@ import WriteSystemDirectoryFiles.WriteResiduals as Residuals
 import WriteSystemDirectoryFiles.WriteForceCoefficientConvergence as ForceCoefficientTrigger
 import WriteSystemDirectoryFiles.WritePointProbes as PointProbes
 import WriteSystemDirectoryFiles.WriteLineProbes as LineProbes
+import WriteSystemDirectoryFiles.WriteCuttingPlanes as CuttingPlanes
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -113,7 +114,7 @@ def case_properties():
             'write_pressure_coefficient': True,
 
             # write wall shear stresses (can be used to obtain skin friction coefficient)
-            'write_wall_shear_stresses': False,
+            'write_wall_shear_stresses': True,
         },
 
         'solver_properties': {
@@ -362,6 +363,29 @@ def case_properties():
             # flag indicating if point probes should be active (written to file)
             'write_line_probes': True,
         },
+
+        # specify 2-D cutting planes
+        'cuttingPlanes': {
+            # specify the origin and normal vector of cutting plane, can be more than 1
+            'location': [
+                {
+                    'name': 'plane_z=5',
+                    'origin': [0, 0, 0.5],
+                    'normal': [0, 0, 1],
+                },
+                {
+                    'name': 'plane_y=5',
+                    'origin': [-1, 0, 0.5],
+                    'normal': [0, 1, 0],
+                },
+            ],
+
+            # specify variables that should be monitored along line
+            'variables_to_monitor': ['U', 'p'],
+
+            # flag indicating if point probes should be active (written to file)
+            'write_cutting_planes': True,
+        },
     }
 
     return properties
@@ -455,6 +479,10 @@ def main():
     if properties['lineProbes']['write_line_probes']:
         line_probes = LineProbes.WriteLineProbes(properties, file_manager)
         line_probes.write_line_probes()
+
+    if properties['cuttingPlanes']['write_cutting_planes']:
+        cutting_planes = CuttingPlanes.WriteCuttingPlanes(properties, file_manager)
+        cutting_planes.write_cutting_planes()
 
     if properties['parallel_properties']['run_in_parallel']:
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(properties, file_manager)
