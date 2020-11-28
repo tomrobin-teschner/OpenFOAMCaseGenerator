@@ -4,21 +4,7 @@ class WriteResiduals:
 
     def write_residuals(self):
         file_id = self.file_manager.create_file('system/include', 'residuals')
-        self.file_manager.write(file_id,
-                                '/*--------------------------------*- C++ -*----------------------------------*\\\n')
-        self.file_manager.write(file_id,
-                                '| =========                 |                                                 |\n')
-        self.file_manager.write(file_id,
-                                '| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n')
-        self.file_manager.write(file_id,
-                                '|  \\\    /   O peration     | Version:  ' + self.file_manager.get_version() +
-                                '                                 |\n')
-        self.file_manager.write(file_id,
-                                '|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n')
-        self.file_manager.write(file_id,
-                                '|    \\\/     M anipulation  |                                                 |\n')
-        self.file_manager.write(file_id,
-                                '\*---------------------------------------------------------------------------*/\n')
+        self.file_manager.write_header(file_id, 'dictionary', 'system', 'residuals')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, 'residuals\n')
         self.file_manager.write(file_id, '{\n')

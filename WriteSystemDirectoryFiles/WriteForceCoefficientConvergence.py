@@ -10,21 +10,7 @@ class WriteForceCoefficientConvergence:
         wait_n_time_steps =\
             str(self.properties['convergence_control']['time_steps_to_wait_before_checking_convergence'])
         file_id = self.file_manager.create_file('system/include', 'forceCoefficientTrigger')
-        self.file_manager.write(file_id,
-                                '/*--------------------------------*- C++ -*----------------------------------*\\\n')
-        self.file_manager.write(file_id,
-                                '| =========                 |                                                 |\n')
-        self.file_manager.write(file_id,
-                                '| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n')
-        self.file_manager.write(file_id,
-                                '|  \\\    /   O peration     | Version:  ' + self.file_manager.get_version() +
-                                '                                 |\n')
-        self.file_manager.write(file_id,
-                                '|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n')
-        self.file_manager.write(file_id,
-                                '|    \\\/     M anipulation  |                                                 |\n')
-        self.file_manager.write(file_id,
-                                '\*---------------------------------------------------------------------------*/\n')
+        self.file_manager.write_header(file_id, 'dictionary', 'system', 'forceCoefficientConvergenceTrigger')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, 'runTimeControl1\n')
         self.file_manager.write(file_id, '{\n')

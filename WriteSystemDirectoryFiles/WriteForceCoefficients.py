@@ -18,21 +18,7 @@ class WriteForceCoefficients:
                 str(self.properties['dimensionless_coefficients']['center_of_roation'][2]) + ')')
 
         file_id = self.file_manager.create_file('system/include', 'forceCoefficients')
-        self.file_manager.write(file_id,
-                                '/*--------------------------------*- C++ -*----------------------------------*\\\n')
-        self.file_manager.write(file_id,
-                                '| =========                 |                                                 |\n')
-        self.file_manager.write(file_id,
-                                '| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n')
-        self.file_manager.write(file_id,
-                                '|  \\\    /   O peration     | Version:  ' + self.file_manager.get_version() +
-                                '                                 |\n')
-        self.file_manager.write(file_id,
-                                '|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n')
-        self.file_manager.write(file_id,
-                                '|    \\\/     M anipulation  |                                                 |\n')
-        self.file_manager.write(file_id,
-                                '\*---------------------------------------------------------------------------*/\n')
+        self.file_manager.write_header(file_id, 'dictionary', 'system', 'forceCoefficiens')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, 'forceCoeffs1\n')
         self.file_manager.write(file_id, '{\n')
