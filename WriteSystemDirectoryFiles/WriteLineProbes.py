@@ -17,8 +17,11 @@ class WriteLineProbes:
             self.file_manager.write(file_id, '\n')
             self.file_manager.write(file_id, '    setFormat             raw;\n')
             self.file_manager.write(file_id, '\n')
-            self.file_manager.write(file_id, '    writeControl          timeStep;\n')
-            self.file_manager.write(file_id, '    writeInterval         1;\n')
+            if self.properties['lineProbes']['output_probe_at_every_timestep']:
+                self.file_manager.write(file_id, '    writeControl    timeStep;\n')
+                self.file_manager.write(file_id, '    writeInterval   1;\n')
+            else:
+                self.file_manager.write(file_id, '    writeControl    writeTime;\n')
             self.file_manager.write(file_id, '\n')
             self.file_manager.write(file_id, '    log                   no;\n')
             self.file_manager.write(file_id, '\n')

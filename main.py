@@ -336,6 +336,10 @@ def case_properties():
 
             # flag indicating if point probes should be active (written to file)
             'write_point_probes': True,
+
+            # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only be
+            # written according to the settings int he controlDict (i.e. every time a new time directory is generated)
+            'output_probe_at_every_timestep': True,
         },
 
         # specify 1-D line probes
@@ -362,6 +366,10 @@ def case_properties():
 
             # flag indicating if point probes should be active (written to file)
             'write_line_probes': True,
+
+            # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only be
+            # written according to the settings int he controlDict (i.e. every time a new time directory is generated)
+            'output_probe_at_every_timestep': False,
         },
 
         # specify 2-D cutting planes
@@ -385,6 +393,11 @@ def case_properties():
 
             # flag indicating if point probes should be active (written to file)
             'write_cutting_planes': True,
+
+            # if flag is set to true, solution will be written at every time step. Otherwise, the cutting plane will
+            # only be written according to the settings int he controlDict (i.e. every time a new time directory is
+            # generated)
+            'output_cutting_plane_at_every_timestep': False,
         },
     }
 
