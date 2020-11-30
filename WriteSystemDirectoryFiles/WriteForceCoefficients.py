@@ -20,7 +20,7 @@ class WriteForceCoefficients:
         file_id = self.file_manager.create_file('system/include', 'forceCoefficients')
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'forceCoefficiens')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'forceCoeffs1\n')
+        self.file_manager.write(file_id, 'forceCoeffs\n')
         self.file_manager.write(file_id, '{\n')
         self.file_manager.write(file_id, '    type            forceCoeffs;\n')
         self.file_manager.write(file_id, '\n')

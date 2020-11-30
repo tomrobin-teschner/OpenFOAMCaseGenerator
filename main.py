@@ -14,6 +14,7 @@ import WriteSystemDirectoryFiles.WritePointProbes as PointProbes
 import WriteSystemDirectoryFiles.WriteLineProbes as LineProbes
 import WriteSystemDirectoryFiles.WriteCuttingPlanes as CuttingPlanes
 import WriteSystemDirectoryFiles.WriteFields as AdditionalFields
+import WriteSystemDirectoryFiles.WriteIsoSurfaces as IsoSurfaces
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -324,6 +325,23 @@ def case_properties():
             'write_wall_shear_stresses': True,
         },
 
+        # write out additional fields of interest
+        'additional_fields': {
+            # list of additional fields to write, can be more than 1
+            #   Q:         Write out the Q-criterion, useful for isoSurfaces to visualise turbulence structures
+            #   VORTICITY: Write out vorticity field
+            #   LAMBDA_2:  Write out the Lambda-2 criterion, useful for vortex core detection
+            #   ENSTROPHY: Write out enstrophy field (useful for turbulent studies)
+            'fields': [
+                Parameters.Q,
+                Parameters.LAMBDA_2,
+            ],
+
+            # flag indicating if additional fields should be active (written to file). Will be written with all other
+            # variables to file at the same time.
+            'write_additional_fields': True,
+        },
+
         # specify 0-D point probes to which will output flow variables at each timestep at a given location x, y and z
         'pointProbes': {
             # specify the location at which to output information, can be more than 1
@@ -339,7 +357,7 @@ def case_properties():
             'write_point_probes': True,
 
             # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only be
-            # written according to the settings int he controlDict (i.e. every time a new time directory is generated)
+            # written according to the settings in the controlDict (i.e. every time a new time directory is generated)
             'output_probe_at_every_timestep': True,
         },
 
@@ -369,7 +387,7 @@ def case_properties():
             'write_line_probes': True,
 
             # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only be
-            # written according to the settings int he controlDict (i.e. every time a new time directory is generated)
+            # written according to the settings in the controlDict (i.e. every time a new time directory is generated)
             'output_probe_at_every_timestep': False,
         },
 
@@ -396,26 +414,27 @@ def case_properties():
             'write_cutting_planes': True,
 
             # if flag is set to true, solution will be written at every time step. Otherwise, the cutting plane will
-            # only be written according to the settings int he controlDict (i.e. every time a new time directory is
+            # only be written according to the settings in the controlDict (i.e. every time a new time directory is
             # generated)
             'output_cutting_plane_at_every_timestep': False,
         },
 
-        # write out additional fields of interest
-        'additional_fields': {
-            # list of additional fields to write, can be more than 1
-            #   Q:         Write out the Q-criterion, useful for isoSurfaces to visualise turbulence structures
-            #   VORTICITY: Write out vorticity field
-            #   LAMBDA_2:  Write out the Lambda-2 criterion, useful for vortex core detection
-            #   ENSTROPHY: Write out enstrophy field (useful for turbulent studies)
-            'fields': [
-                Parameters.Q,
-                Parameters.LAMBDA_2,
-            ],
+        # write iso surfaces of variables during calculation
+        'iso_surfaces': {
+            # variables of which to write iso surfaces
+            'flow_variable': ['Q', 'Lambda2'],
 
-            # flag indicating if additional fields should be active (written to file). Will be written with all other
-            # variables to file at the same time.
-            'write_additional_fields': True,
+            # iso value at which point the surface should be written. List entry correspond to order specified in
+            # flow_variable list
+            'iso_value': [1e-5, 0],
+
+            # flag indicating if iso-surfaces should be active (written to file)
+            'write_iso_surfaces': True,
+
+            # if flag is set to true, iso-surfaces will be written at every time step. Otherwise, the iso surfaces will
+            # only be written according to the settings in the controlDict (i.e. every time a new time directory is
+            # generated)
+            'output_iso_surfaces_at_every_timestep': True,
         },
     }
 
@@ -514,6 +533,10 @@ def main():
     if properties['cuttingPlanes']['write_cutting_planes']:
         cutting_planes = CuttingPlanes.WriteCuttingPlanes(properties, file_manager)
         cutting_planes.write_cutting_planes()
+
+    if properties['iso_surfaces']['write_iso_surfaces']:
+        iso_surfaces = IsoSurfaces.WriteIsoSurfaces(properties, file_manager)
+        iso_surfaces.write_iso_surfaces()
 
     if properties['additional_fields']['write_additional_fields']:
         fields = AdditionalFields.WriteFields(properties, file_manager)

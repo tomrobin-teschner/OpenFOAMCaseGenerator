@@ -75,6 +75,8 @@ class ControlDictFile:
             self.file_manager.write(file_id, '    #include "include/lineProbes"\n')
         if self.properties['cuttingPlanes']['write_cutting_planes']:
             self.file_manager.write(file_id, '    #include "include/cuttingPlanes"\n')
+        if self.properties['iso_surfaces']['write_iso_surfaces']:
+            self.file_manager.write(file_id, '    #include "include/isoSurfaces"\n')
         self.file_manager.write(file_id, '    #include "include/yPlus"\n')
         self.file_manager.write(file_id, '    #include "include/residuals"\n')
         if self.properties['dimensionless_coefficients']['write_wall_shear_stresses']:
