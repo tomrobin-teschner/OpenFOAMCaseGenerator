@@ -61,6 +61,8 @@ class ControlDictFile:
         self.file_manager.write(file_id, 'runTimeModifiable true;\n\n')
         self.file_manager.write(file_id, 'functions\n')
         self.file_manager.write(file_id, '{\n')
+        if self.properties['additional_fields']['write_additional_fields']:
+            self.file_manager.write(file_id, '    #include "include/fields"\n')
         if self.properties['dimensionless_coefficients']['write_force_coefficients']:
             self.file_manager.write(file_id, '    #include "include/forceCoefficients"\n')
         if self.properties['convergence_control']['integral_convergence_criterion'] != Parameters.NONE:

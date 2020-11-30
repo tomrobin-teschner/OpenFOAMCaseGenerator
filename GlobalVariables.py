@@ -112,3 +112,9 @@ cubeRootVol = 3
 maxDeltaxyzCubeRoot = 4
 vanDriest = 5
 IDDESDelta = 6
+
+# additional fields to write out during post-processing
+Q = 0
+VORTICITY = 1
+LAMBDA_2 = 2
+ENSTROPHY = 3

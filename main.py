@@ -13,6 +13,7 @@ import WriteSystemDirectoryFiles.WriteForceCoefficientConvergence as ForceCoeffi
 import WriteSystemDirectoryFiles.WritePointProbes as PointProbes
 import WriteSystemDirectoryFiles.WriteLineProbes as LineProbes
 import WriteSystemDirectoryFiles.WriteCuttingPlanes as CuttingPlanes
+import WriteSystemDirectoryFiles.WriteFields as AdditionalFields
 import GlobalVariables as Parameters
 
 import WriteConstantDirectoryFiles.WriteTransportProperties as Transport
@@ -29,7 +30,7 @@ def case_properties():
             # name of the case to use (will be used for the folder name)
             'case_name': 'naca_0012_y+_1',
 
-            # path to folder where to copy test case to
+            # path to where the currently generated case should be copied to (parent directory)
             'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
             # 'run_directory': 'C:\\Users\\e802985\\Documents\\openfoam\\run',
             # 'run_directory': '',
@@ -50,7 +51,7 @@ def case_properties():
 
         # define boundary conditions
         #   first  entry: name of boundary condition (specified in mesh generator)
-        #   second entry: type of boundary condition
+        #   second entry: type of boundary condition (see below)
         #
         #   The following types are supported
         #   INLET:            Standard inlet condition, dirichlet for velocity + turbulence, neumann for pressure
@@ -86,35 +87,6 @@ def case_properties():
 
             # reference length in simulation
             'reference_length': 1.0,
-        },
-
-        'dimensionless_coefficients': {
-            # reference area used to non-dimensionalise force coefficients
-            'reference_area': 1.0,
-
-            # direction of lift vector (normalised to unity)
-            'lift_direction': [0, 1, 0],
-
-            # direction of drag vector (normalised to unity)
-            'drag_direction': [1, 0, 0],
-
-            # direction of pitch axis for momentum coefficient (normalised to unity)
-            'pitch_axis_direction': [0, 0, 1],
-
-            # center of rotation for momentum coefficient
-            'center_of_roation': [0, 0, 0],
-
-            # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-            'wall_boundaries': ['upper', 'lower'],
-
-            # write force coefficients flag
-            'write_force_coefficients': True,
-
-            # write pressure coefficient (cp)
-            'write_pressure_coefficient': True,
-
-            # write wall shear stresses (can be used to obtain skin friction coefficient)
-            'write_wall_shear_stresses': True,
         },
 
         'solver_properties': {
@@ -323,6 +295,35 @@ def case_properties():
             'time_steps_to_wait_before_checking_convergence': 100,
         },
 
+        'dimensionless_coefficients': {
+            # reference area used to non-dimensionalise force coefficients
+            'reference_area': 1.0,
+
+            # direction of lift vector (normalised to unity)
+            'lift_direction': [0, 1, 0],
+
+            # direction of drag vector (normalised to unity)
+            'drag_direction': [1, 0, 0],
+
+            # direction of pitch axis for momentum coefficient (normalised to unity)
+            'pitch_axis_direction': [0, 0, 1],
+
+            # center of rotation for momentum coefficient
+            'center_of_roation': [0, 0, 0],
+
+            # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
+            'wall_boundaries': ['upper', 'lower'],
+
+            # write force coefficients flag
+            'write_force_coefficients': True,
+
+            # write pressure coefficient (cp)
+            'write_pressure_coefficient': True,
+
+            # write wall shear stresses (can be used to obtain skin friction coefficient)
+            'write_wall_shear_stresses': True,
+        },
+
         # specify 0-D point probes to which will output flow variables at each timestep at a given location x, y and z
         'pointProbes': {
             # specify the location at which to output information, can be more than 1
@@ -398,6 +399,23 @@ def case_properties():
             # only be written according to the settings int he controlDict (i.e. every time a new time directory is
             # generated)
             'output_cutting_plane_at_every_timestep': False,
+        },
+
+        # write out additional fields of interest
+        'additional_fields': {
+            # list of additional fields to write, can be more than 1
+            #   Q:         Write out the Q-criterion, useful for isoSurfaces to visualise turbulence structures
+            #   VORTICITY: Write out vorticity field
+            #   LAMBDA_2:  Write out the Lambda-2 criterion, useful for vortex core detection
+            #   ENSTROPHY: Write out enstrophy field (useful for turbulent studies)
+            'fields': [
+                Parameters.Q,
+                Parameters.LAMBDA_2,
+            ],
+
+            # flag indicating if additional fields should be active (written to file). Will be written with all other
+            # variables to file at the same time.
+            'write_additional_fields': True,
         },
     }
 
@@ -496,6 +514,10 @@ def main():
     if properties['cuttingPlanes']['write_cutting_planes']:
         cutting_planes = CuttingPlanes.WriteCuttingPlanes(properties, file_manager)
         cutting_planes.write_cutting_planes()
+
+    if properties['additional_fields']['write_additional_fields']:
+        fields = AdditionalFields.WriteFields(properties, file_manager)
+        fields.write_field()
 
     if properties['parallel_properties']['run_in_parallel']:
         decompose_par_dict = DecomposeParDict.WriteDecomposeParDictionary(properties, file_manager)
