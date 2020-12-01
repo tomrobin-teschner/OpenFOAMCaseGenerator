@@ -171,6 +171,9 @@ def case_properties():
             #               with less limiting compared to DEFAULT and TVD.
             'numerical_schemes_correction': Parameters.DEFAULT,
 
+            # choose the amount of limiter to use. A high value may limit more strongly but can slow down convergence
+            #
+
             # flag to indicate if first order discretisation should be used for turbulent quantities
             'use_first_order_for_turbulence': True,
         },
@@ -428,13 +431,16 @@ def case_properties():
             # flow_variable list
             'iso_value': [1e-5, 0],
 
+            # additional fields to write (can be more than 1, can be used to colour iso-surface in post-processing)
+            'additional_field_to_write': ['p'],
+
             # flag indicating if iso-surfaces should be active (written to file)
             'write_iso_surfaces': True,
 
             # if flag is set to true, iso-surfaces will be written at every time step. Otherwise, the iso surfaces will
             # only be written according to the settings in the controlDict (i.e. every time a new time directory is
             # generated)
-            'output_iso_surfaces_at_every_timestep': True,
+            'output_iso_surfaces_at_every_timestep': False,
         },
     }
 
@@ -538,7 +544,7 @@ def main():
         iso_surfaces = IsoSurfaces.WriteIsoSurfaces(properties, file_manager)
         iso_surfaces.write_iso_surfaces()
 
-    if properties['additional_fields']['write_additional_fields']:
+    if properties['additional_fields']['write_additional_fields'] or properties['iso_surfaces']['write_iso_surfaces']:
         fields = AdditionalFields.WriteFields(properties, file_manager)
         fields.write_field()
 

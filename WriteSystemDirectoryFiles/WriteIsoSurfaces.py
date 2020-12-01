@@ -47,6 +47,8 @@ class WriteIsoSurfaces:
         self.file_manager.write(file_id, '    fields\n')
         self.file_manager.write(file_id, '    (\n')
         self.file_manager.write(file_id, '        ' + field + '\n')
+        for additional_field in self.properties['iso_surfaces']['additional_field_to_write']:
+            self.file_manager.write(file_id, '        ' + additional_field + '\n')
         self.file_manager.write(file_id, '    );\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
