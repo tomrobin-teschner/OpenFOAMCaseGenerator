@@ -7,7 +7,7 @@ class WriteLineProbes:
         file_id = self.file_manager.create_file('system/include', 'lineProbes')
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'sampling')
         self.file_manager.write(file_id, '\n')
-        for line in self.properties['lineProbes']['location']:
+        for line in self.properties['line_probes']['location']:
             self.file_manager.write(file_id, line['name'] + '\n')
             self.file_manager.write(file_id, '{\n')
             self.file_manager.write(file_id, '    type                  sets;\n')
@@ -17,7 +17,7 @@ class WriteLineProbes:
             self.file_manager.write(file_id, '\n')
             self.file_manager.write(file_id, '    setFormat             raw;\n')
             self.file_manager.write(file_id, '\n')
-            if self.properties['lineProbes']['output_probe_at_every_timestep']:
+            if self.properties['line_probes']['output_probe_at_every_timestep']:
                 self.file_manager.write(file_id, '    writeControl    timeStep;\n')
                 self.file_manager.write(file_id, '    writeInterval   1;\n')
             else:
@@ -38,13 +38,13 @@ class WriteLineProbes:
                                     str(line['end'][0]) + ' ' + str(line['end'][1]) + ' ' + str(line['end'][2]) +
                                     ');\n')
             self.file_manager.write(file_id, '            nPoints       ' +
-                                    str(self.properties['lineProbes']['number_of_samples_on_line']) + ';\n')
+                                    str(self.properties['line_probes']['number_of_samples_on_line']) + ';\n')
             self.file_manager.write(file_id, '        }\n')
             self.file_manager.write(file_id, '    );\n')
             self.file_manager.write(file_id, '\n')
             self.file_manager.write(file_id, '    fields\n')
             self.file_manager.write(file_id, '    (\n')
-            for variable in self.properties['lineProbes']['variables_to_monitor']:
+            for variable in self.properties['line_probes']['variables_to_monitor']:
                 self.file_manager.write(file_id, '        ' + variable + '\n')
             self.file_manager.write(file_id, '    );\n')
             self.file_manager.write(file_id, '}\n')

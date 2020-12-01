@@ -29,12 +29,11 @@ def case_properties():
     properties = {
         'file_properties': {
             # name of the case to use (will be used for the folder name)
-            'case_name': 'naca_0012_y+_1',
+            'case_name': 'case_name',
 
             # path to where the currently generated case should be copied to (parent directory)
-            'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
-            # 'run_directory': 'C:\\Users\\e802985\\Documents\\openfoam\\run',
-            # 'run_directory': '',
+            # if left empty, the case will be written into the current directory
+            'run_directory': '',
 
             # version of openfoam to use (does not have an influence on the case setup, but will be used in headers)
             'version': 'v2006',
@@ -346,7 +345,7 @@ def case_properties():
         },
 
         # specify 0-D point probes to which will output flow variables at each timestep at a given location x, y and z
-        'pointProbes': {
+        'point_probes': {
             # specify the location at which to output information, can be more than 1
             'location': [
                 [1, 0.01, 0],
@@ -365,7 +364,7 @@ def case_properties():
         },
 
         # specify 1-D line probes
-        'lineProbes': {
+        'line_probes': {
             # specify the start and end point where line should be placed, can be more than 1
             'location': [
                 {
@@ -395,7 +394,7 @@ def case_properties():
         },
 
         # specify 2-D cutting planes
-        'cuttingPlanes': {
+        'cutting_planes': {
             # specify the origin and normal vector of cutting plane, can be more than 1
             'location': [
                 {
@@ -528,15 +527,15 @@ def main():
         pressure_coefficient = PressureCoefficient.WritePressureCoefficient(properties, file_manager)
         pressure_coefficient.write_force_coefficients()
 
-    if properties['pointProbes']['write_point_probes']:
+    if properties['point_probes']['write_point_probes']:
         point_probes = PointProbes.WritePointProbes(properties, file_manager)
         point_probes.write_point_probes()
 
-    if properties['lineProbes']['write_line_probes']:
+    if properties['line_probes']['write_line_probes']:
         line_probes = LineProbes.WriteLineProbes(properties, file_manager)
         line_probes.write_line_probes()
 
-    if properties['cuttingPlanes']['write_cutting_planes']:
+    if properties['cutting_planes']['write_cutting_planes']:
         cutting_planes = CuttingPlanes.WriteCuttingPlanes(properties, file_manager)
         cutting_planes.write_cutting_planes()
 
