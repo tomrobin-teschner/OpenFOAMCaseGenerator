@@ -63,7 +63,7 @@ class WriteForceCoefficientConvergence:
         self.file_manager.write(file_id, '            functionObject  forceCoeffs1;\n')
         self.file_manager.write(file_id, '            fields          (' + quantity_to_write + ');\n')
         self.file_manager.write(file_id, '            tolerance       ' + convergence + ';\n')
-        self.file_manager.write(file_id, '            tolerance       ' + averaging_time + ';\n')
+        self.file_manager.write(file_id, '            window          ' + averaging_time + ';\n')
         self.file_manager.write(file_id, '            windowType      approximate;\n')
         self.file_manager.write(file_id, '        }\n')
 
