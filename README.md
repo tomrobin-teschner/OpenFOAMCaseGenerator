@@ -61,20 +61,3 @@ There will be, unavoidably, bugs that will come up with certain parameter combin
 While validation cases were run to ensure the correctness of most settings, it is impossible to test all possible combinations.
 Should you feel that some things are incorrectly set-up, please open an issue here on git-hub for others to benefit from.
 You may also want to open a pull-request if you feel you have done some modifications that can be useful for others to have.
-
-## TODO
-
-The following topics are currently worked on and will be added shortly.
-If you feel additional features are required please open a issue and describe what you feel is required / need and I can see if that is of use and should be added to this list.
-
-:black_square_button: Adding wall-bounded streamlines for visualisation purposes
-
-:black_square_button: Adding additional post-processing scripts that generate *.pvd files that can automatically open all generated cuttingPlanes / iso-surfaces that were generated during the calculation
-
-:black_square_button: Add a python script that can plot the residuals
-
-:black_square_button: Add compressible flow calculations. This will require additional files to be written to the **0/** directory, the thermalProperties file in the **constant/** directory and potentially new boundary conditions that need to be made available.
-
-:black_square_button: Allow for custom code initialisation template. This can be used if non-uniform flow initialisation is required.
-
-:black_square_button: Add synthetic turbulence boundary conditions at the inlet for LES simulations
