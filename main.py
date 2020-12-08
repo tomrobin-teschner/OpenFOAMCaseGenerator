@@ -29,7 +29,7 @@ def case_properties():
     properties = {
         'file_properties': {
             # name of the case to use (will be used for the folder name)
-            'case_name': 'case_name',
+            'case_name': '',
 
             # path to where the currently generated case should be copied to (parent directory)
             # if left empty, the case will be written into the current directory
@@ -66,27 +66,29 @@ def case_properties():
         #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
         'boundary_properties': {
             'inlet': Parameters.INLET,
-            'outlet': Parameters.BACKFLOW_OUTLET,
-            'upper': Parameters.WALL,
-            'lower': Parameters.WALL,
-            'top_symmetry': Parameters.SYMMETRY,
-            'bottom_symmetry': Parameters.SYMMETRY,
+            'outlet': Parameters.OUTLET,
+            'wall': Parameters.WALL,
+            'leadingEdge': Parameters.WALL,
+            'symmetry': Parameters.SYMMETRY,
             'BaseAndTop': Parameters.EMPTY,
         },
 
         # physical properties of solver set-up
         'flow_properties': {
             # specify the inlet boundary condition (free stream velocity)
-            'inlet_velocity': [6, 0, 0],
+            'inlet_velocity': [30, 0, 0],
+
+            # set initial velocity field everywhere to inlet velocity?
+            'initial_velocity_field_is_inlet_velocity': False,
 
             # specify the laminar viscosity
-            'nu': 1e-6,
+            'nu': 1.47e-5,
 
             # freestream turbulent intensity (between 0 - 1)
             'freestream_turbulent_intensity': 0.00051,
 
             # reference length in simulation
-            'reference_length': 1.0,
+            'reference_length': 1.5,
         },
 
         'solver_properties': {
@@ -103,7 +105,7 @@ def case_properties():
             'startTime': 0,
 
             # end time
-            'endTime': 1000,
+            'endTime': 10000,
 
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -126,7 +128,7 @@ def case_properties():
             'maxDeltaT': 1,
 
             # frequency at which to write output files. Behaviour controlled through write control entry below.
-            'write_frequency': 100,
+            'write_frequency': 10,
 
             # write control, specify when to output results, the options are listed below
             #   TIME_STEP:           write every 'write_frequency' time steps
@@ -141,16 +143,16 @@ def case_properties():
             'purge_write': 0,
 
             # under-relaxation factor for pressure
-            'under_relaxation_p': 0.5,
+            'under_relaxation_p': 0.1,
 
             # under-relaxation factor for velocity
-            'under_relaxation_U': 0.9,
+            'under_relaxation_U': 0.1,
 
             # under-relaxation factor for turbulent quantities
-            'under_relaxation_turbulence': 0.9,
+            'under_relaxation_turbulence': 0.1,
 
             # under-relaxation factor for Reynolds stresses
-            'under_relaxation_reynolds_stresses': 0.5,
+            'under_relaxation_reynolds_stresses': 0.1,
         },
 
         'numerical_discretisation': {
@@ -168,7 +170,7 @@ def case_properties():
             #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
             #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate
             #               with less limiting compared to DEFAULT and TVD.
-            'numerical_schemes_correction': Parameters.DEFAULT,
+            'numerical_schemes_correction': Parameters.ROBUSTNESS,
 
             # choose the amount of limiter to use. A high value may limit more strongly but can slow down convergence
             #
@@ -285,11 +287,11 @@ def case_properties():
             #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
             #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
             #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
-            'integral_convergence_criterion': Parameters.C_D,
+            'integral_convergence_criterion': Parameters.NONE,
 
             # if integral quantities are checked for convergence, specify for how many timesteps their average should be
             # calculated to check if, on average, the quantity has converged
-            'averaging_time_steps': 100,
+            'averaging_time_steps': 20,
 
             # specify the convergence threshold for the integral quantities
             'integral_quantities_convergence_threshold': 1e-4,
@@ -300,7 +302,7 @@ def case_properties():
 
         'dimensionless_coefficients': {
             # reference area used to non-dimensionalise force coefficients
-            'reference_area': 1.0,
+            'reference_area': 3.78378e-3,
 
             # direction of lift vector (normalised to unity)
             'lift_direction': [0, 1, 0],
@@ -315,16 +317,16 @@ def case_properties():
             'center_of_roation': [0, 0, 0],
 
             # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-            'wall_boundaries': ['upper', 'lower'],
+            'wall_boundaries': ['wall', 'leadingEdge'],
 
             # write force coefficients flag
             'write_force_coefficients': True,
 
             # write pressure coefficient (cp)
-            'write_pressure_coefficient': True,
+            'write_pressure_coefficient': False,
 
             # write wall shear stresses (can be used to obtain skin friction coefficient)
-            'write_wall_shear_stresses': True,
+            'write_wall_shear_stresses': False,
         },
 
         # write out additional fields of interest
@@ -334,14 +336,11 @@ def case_properties():
             #   VORTICITY: Write out vorticity field
             #   LAMBDA_2:  Write out the Lambda-2 criterion, useful for vortex core detection
             #   ENSTROPHY: Write out enstrophy field (useful for turbulent studies)
-            'fields': [
-                Parameters.Q,
-                Parameters.LAMBDA_2,
-            ],
+            'fields': [Parameters.Q],
 
             # flag indicating if additional fields should be active (written to file). Will be written with all other
             # variables to file at the same time.
-            'write_additional_fields': True,
+            'write_additional_fields': False,
         },
 
         # specify 0-D point probes to which will output flow variables at each timestep at a given location x, y and z
@@ -356,7 +355,7 @@ def case_properties():
             'variables_to_monitor': ['U', 'p'],
 
             # flag indicating if point probes should be active (written to file)
-            'write_point_probes': True,
+            'write_point_probes': False,
 
             # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only be
             # written according to the settings in the controlDict (i.e. every time a new time directory is generated)
@@ -386,7 +385,7 @@ def case_properties():
             'variables_to_monitor': ['U', 'p'],
 
             # flag indicating if point probes should be active (written to file)
-            'write_line_probes': True,
+            'write_line_probes': False,
 
             # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only be
             # written according to the settings in the controlDict (i.e. every time a new time directory is generated)
@@ -413,7 +412,7 @@ def case_properties():
             'variables_to_monitor': ['U', 'p'],
 
             # flag indicating if point probes should be active (written to file)
-            'write_cutting_planes': True,
+            'write_cutting_planes': False,
 
             # if flag is set to true, solution will be written at every time step. Otherwise, the cutting plane will
             # only be written according to the settings in the controlDict (i.e. every time a new time directory is
@@ -434,7 +433,7 @@ def case_properties():
             'additional_field_to_write': ['p'],
 
             # flag indicating if iso-surfaces should be active (written to file)
-            'write_iso_surfaces': True,
+            'write_iso_surfaces': False,
 
             # if flag is set to true, iso-surfaces will be written at every time step. Otherwise, the iso surfaces will
             # only be written according to the settings in the controlDict (i.e. every time a new time directory is

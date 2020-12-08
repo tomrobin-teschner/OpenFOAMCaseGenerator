@@ -120,7 +120,11 @@ class WriteBoundaryConditions:
                          str(self.properties['flow_properties']['inlet_velocity'][1]) + ' ' +
                          str(self.properties['flow_properties']['inlet_velocity'][2]) + ')')
 
-        self.__write_header(file_id, 'volVectorField', '0', 'U', '[0 1 -1 0 0 0 0]', initial_field)
+        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+            self.__write_header(file_id, 'volVectorField', '0', 'U', '[0 1 -1 0 0 0 0]', initial_field)
+        else:
+            self.__write_header(file_id, 'volVectorField', '0', 'U', '[0 1 -1 0 0 0 0]', 'uniform (0 0 0)')
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
@@ -179,7 +183,12 @@ class WriteBoundaryConditions:
     def write_k(self):
         file_id = self.file_manager.create_file('0', 'k')
         initial_field = 'uniform ' + str(self.freestream_k)
-        self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', initial_field)
+
+        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+            self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', initial_field)
+        else:
+            self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', 'uniform 0')
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
@@ -212,7 +221,12 @@ class WriteBoundaryConditions:
     def write_kt(self):
         file_id = self.file_manager.create_file('0', 'kt')
         initial_field = 'uniform ' + str(self.freestream_k)
-        self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', initial_field)
+
+        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+            self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', initial_field)
+        else:
+            self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', 'uniform 0')
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
@@ -278,7 +292,12 @@ class WriteBoundaryConditions:
     def write_epsilon(self):
         file_id = self.file_manager.create_file('0', 'epsilon')
         initial_field = 'uniform ' + str(self.freestream_epsilon)
-        self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', initial_field)
+
+        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+            self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', initial_field)
+        else:
+            self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', 'uniform 0')
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
@@ -311,7 +330,9 @@ class WriteBoundaryConditions:
     def write_omega(self):
         file_id = self.file_manager.create_file('0', 'omega')
         initial_field = 'uniform ' + str(self.freestream_omega)
+
         self.__write_header(file_id, 'volScalarField', '0', 'omega', '[0 0 -1 0 0 0 0]', initial_field)
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
@@ -347,7 +368,12 @@ class WriteBoundaryConditions:
     def write_nuTilda(self):
         file_id = self.file_manager.create_file('0', 'nuTilda')
         initial_field = 'uniform ' + str(self.freestream_nuTilda)
-        self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', initial_field)
+
+        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+            self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', initial_field)
+        else:
+            self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', 'uniform 0')
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
@@ -452,7 +478,12 @@ class WriteBoundaryConditions:
         file_id = self.file_manager.create_file('0', 'R')
         uiui = (2.0/3.0)*self.freestream_k
         initial_field = 'uniform (' + str(uiui) + ' 0 0 ' + str(uiui) + ' 0 ' + str(uiui) + ')'
-        self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', initial_field)
+
+        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+            self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', initial_field)
+        else:
+            self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', 'uniform (0 0 0 0 0 0)')
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
