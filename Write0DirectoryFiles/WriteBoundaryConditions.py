@@ -139,7 +139,10 @@ class WriteBoundaryConditions:
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.INLET:
-                self.__dirichlet(file_id, initial_field)
+                if self.properties['flow_properties']['custom_velocity_inlet_profile']:
+                    self.__custom_velocity_inlet_profile(file_id, initial_field)
+                else:
+                    self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream_velocity(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
@@ -577,3 +580,47 @@ class WriteBoundaryConditions:
     def __freestream(self, file_id, initial_field):
         file_id.write('        type            freestream;\n')
         file_id.write('        freestreamValue ' + initial_field + ';\n')
+
+    def __custom_velocity_inlet_profile(self, file_id, initial_field):
+        file_id.write('        type            codedFixedValue;\n')
+        file_id.write('        value           ' + initial_field + ';\n')
+        file_id.write('\n')
+        file_id.write('        name            customInletVelocityProfile; // ensure name does not already exist as boundary patch\n')
+        file_id.write('        code\n')
+        file_id.write('        #{\n')
+        file_id.write('            // get access to the boundary patch\n')
+        file_id.write('            const fvPatch& boundaryPatch = patch();\n')
+        file_id.write('\n')
+        file_id.write('            // get all boundary faces on the current boundary condition\n')
+        file_id.write('            const vectorField& boundaryFaces = boundaryPatch.Cf();\n')
+        file_id.write('\n')
+        file_id.write('            // get access the current field on this boundary condition\n')
+        file_id.write('            vectorField field = *this;\n')
+        file_id.write('\n')
+        file_id.write('            // current (total) time\n')
+        file_id.write('            const scalar currentTime = this->db().time().value();\n')
+        file_id.write('\n')
+        file_id.write('            // loop over all boundary faces if requires\n')
+        file_id.write('            forAll(boundaryFaces, faceI)\n')
+        file_id.write('            {\n')
+        file_id.write('                // access to boundary face coordinates\n')
+        file_id.write('                const auto x = boundaryFaces[faceI].x();\n')
+        file_id.write('                const auto y = boundaryFaces[faceI].y();\n')
+        file_id.write('                const auto z = boundaryFaces[faceI].z();\n')
+        file_id.write('\n')
+        file_id.write('                // set field scalar / vector based on location in space as required\n')
+        file_id.write('                if (y > 0.5)\n')
+        file_id.write('                {\n')
+        file_id.write('                    field[faceI] = vector(0.01 * currentTime,0,0);\n')
+        file_id.write('                }\n')
+        file_id.write('                else\n')
+        file_id.write('                {\n')
+        file_id.write('                    field[faceI] = vector(0,0,0);\n')
+        file_id.write('                }\n')
+        file_id.write('            }\n')
+        file_id.write('\n')
+        file_id.write('            // set boundary values to those computed values of "field"\n')
+        file_id.write('            *this==(field);\n')
+        file_id.write('        #};\n')
+
+

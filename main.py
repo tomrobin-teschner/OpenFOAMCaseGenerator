@@ -68,13 +68,16 @@ def case_properties():
             'inlet': Parameters.INLET,
             'outlet': Parameters.OUTLET,
             'wall': Parameters.WALL,
-            'leadingEdge': Parameters.WALL,
-            'symmetry': Parameters.SYMMETRY,
+            'symmetry': Parameters.OUTLET,
             'BaseAndTop': Parameters.EMPTY,
         },
 
         # physical properties of solver set-up
         'flow_properties': {
+            # use custom velocity inlet? Some template code will be written to the 0/U file which needs to be modified
+            # make sure to keep a copy of the custom code as it may be overwritten by this script if it is run again!
+            'custom_velocity_inlet_profile': False,
+
             # specify the inlet boundary condition (free stream velocity)
             'inlet_velocity': [30, 0, 0],
 
@@ -105,14 +108,14 @@ def case_properties():
             'startTime': 0,
 
             # end time
-            'endTime': 10000,
+            'endTime': 20000,
 
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
             #   FIRST_TIME:  Start from the first available (lowest time) directory
             #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a simulation from
             #                the last calculated solution
-            'startFrom': Parameters.START_TIME,
+            'startFrom': Parameters.LATEST_TIME,
 
             # flag indicating whether to dynamically calculate time step based on CFL criterion
             'CFLBasedTimeStepping': False,
@@ -128,7 +131,7 @@ def case_properties():
             'maxDeltaT': 1,
 
             # frequency at which to write output files. Behaviour controlled through write control entry below.
-            'write_frequency': 10,
+            'write_frequency': 250,
 
             # write control, specify when to output results, the options are listed below
             #   TIME_STEP:           write every 'write_frequency' time steps
