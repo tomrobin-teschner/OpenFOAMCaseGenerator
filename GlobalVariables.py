@@ -118,3 +118,13 @@ Q = 0
 VORTICITY = 1
 LAMBDA_2 = 2
 ENSTROPHY = 3
+
+# initial conditions
+BOUNDARY_CONDITIONED_BASED = 0
+ZERO_VELOCITY = 1
+CUSTOM = 2
+
+# field type
+SCALAR = 0
+VECTOR = 1
+TENSOR = 2

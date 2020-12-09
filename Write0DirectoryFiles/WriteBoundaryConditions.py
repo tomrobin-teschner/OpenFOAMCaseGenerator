@@ -1,6 +1,6 @@
-from math import sqrt, pow
 import GlobalVariables as Parameters
 
+import sys
 from math import pow
 
 
@@ -95,7 +95,6 @@ class WriteBoundaryConditions:
         self.file_manager.write_header(file_id, field_type, folder, variable_name)
 
         # write dimensions and internal-field
-        initial_field = internal_field
         self.file_manager.write(file_id, '\ndimensions      ' + dimensions + ';\n\n')
         self.file_manager.write(file_id, 'internalField   ' + internal_field + ';\n\n')
 
@@ -120,10 +119,23 @@ class WriteBoundaryConditions:
                          str(self.properties['flow_properties']['inlet_velocity'][1]) + ' ' +
                          str(self.properties['flow_properties']['inlet_velocity'][2]) + ')')
 
-        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
-            self.__write_header(file_id, 'volVectorField', '0', 'U', '[0 1 -1 0 0 0 0]', initial_field)
-        else:
-            self.__write_header(file_id, 'volVectorField', '0', 'U', '[0 1 -1 0 0 0 0]', 'uniform (0 0 0)')
+        self.file_manager.write_header(file_id, 'volVectorField', '0', 'U')
+        self.file_manager.write(file_id, '\ndimensions      [0 1 -1 0 0 0 0];\n\n')
+
+        if self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
+            if 'U' in self.properties['flow_properties']['custom_initial_conditions']['variables']:
+                self.__custom_initial_conditions(file_id, Parameters.VECTOR)
+            else:
+                if (self.properties['flow_properties']['custom_initial_conditions']
+                        ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
+                    self.file_manager.write(file_id, 'internalField   ' + initial_field + ';\n\n')
+                elif (self.properties['flow_properties']['custom_initial_conditions']
+                        ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
+                    self.file_manager.write(file_id, 'internalField   uniform (0 0 0);\n\n')
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
+            self.file_manager.write(file_id, 'internalField   ' + initial_field + ';\n\n')
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
+            self.file_manager.write(file_id, 'internalField   uniform (0 0 0);\n\n')
 
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
@@ -156,7 +168,18 @@ class WriteBoundaryConditions:
     def write_p(self):
         file_id = self.file_manager.create_file('0', 'p')
         initial_field = 'uniform ' + str(0)
-        self.__write_header(file_id, 'volScalarField', '0', 'p', '[0 2 -2 0 0 0 0]', initial_field)
+
+        self.file_manager.write_header(file_id, 'volScalarField', '0', 'p')
+        self.file_manager.write(file_id, '\ndimensions      [0 2 -2 0 0 0 0];\n\n')
+
+        if self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
+            if 'p' in self.properties['flow_properties']['custom_initial_conditions']['variables']:
+                self.__custom_initial_conditions(file_id, Parameters.SCALAR)
+            else:
+                self.file_manager.write(file_id, 'internalField   ' + initial_field + ';\n\n')
+        else:
+            self.file_manager.write(file_id, 'internalField   ' + initial_field + ';\n\n')
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
@@ -187,10 +210,22 @@ class WriteBoundaryConditions:
         file_id = self.file_manager.create_file('0', 'k')
         initial_field = 'uniform ' + str(self.freestream_k)
 
-        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
             self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', initial_field)
-        else:
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
             self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', 'uniform 0')
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
+            if (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
+                self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', initial_field)
+            elif (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
+                self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', 'uniform 0')
+            else:
+                sys.exit('\n===================================== ERROR =====================================\n' +
+                         '\nInitial condition for k not recognised. Use either BOUNDARY_CONDITIONED_BASED\n' +
+                         'or ZERO_VELOCITY and restart the solver.\n' +
+                         '\n=================================== END ERROR ===================================\n')
 
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
@@ -225,10 +260,22 @@ class WriteBoundaryConditions:
         file_id = self.file_manager.create_file('0', 'kt')
         initial_field = 'uniform ' + str(self.freestream_k)
 
-        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
             self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', initial_field)
-        else:
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
             self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', 'uniform 0')
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
+            if (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
+                self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', initial_field)
+            elif (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
+                self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', 'uniform 0')
+            else:
+                sys.exit('\n===================================== ERROR =====================================\n' +
+                         '\nInitial condition for kt not recognised. Use either BOUNDARY_CONDITIONED_BASED\n' +
+                         'or ZERO_VELOCITY and restart the solver.\n' +
+                         '\n=================================== END ERROR ===================================\n')
 
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
@@ -262,7 +309,9 @@ class WriteBoundaryConditions:
     def write_kl(self):
         file_id = self.file_manager.create_file('0', 'kl')
         initial_field = 'uniform 0'
+
         self.__write_header(file_id, 'volScalarField', '0', 'kl', '[0 2 -2 0 0 0 0]', initial_field)
+
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
@@ -296,10 +345,22 @@ class WriteBoundaryConditions:
         file_id = self.file_manager.create_file('0', 'epsilon')
         initial_field = 'uniform ' + str(self.freestream_epsilon)
 
-        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
             self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', initial_field)
-        else:
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
             self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', 'uniform 0')
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
+            if (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
+                self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', initial_field)
+            elif (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
+                self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', 'uniform 0')
+            else:
+                sys.exit('\n===================================== ERROR =====================================\n' +
+                         '\nInitial condition for epsilon not recognised. Use either\n' +
+                         'BOUNDARY_CONDITIONED_BASED or ZERO_VELOCITY and restart the solver.\n' +
+                         '\n=================================== END ERROR ===================================\n')
 
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
@@ -372,10 +433,22 @@ class WriteBoundaryConditions:
         file_id = self.file_manager.create_file('0', 'nuTilda')
         initial_field = 'uniform ' + str(self.freestream_nuTilda)
 
-        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
             self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', initial_field)
-        else:
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
             self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', 'uniform 0')
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
+            if (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
+                self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', initial_field)
+            elif (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
+                self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', 'uniform 0')
+            else:
+                sys.exit('\n===================================== ERROR =====================================\n' +
+                         '\nInitial condition for nuTilda not recognised. Use either\n' +
+                         'BOUNDARY_CONDITIONED_BASED or ZERO_VELOCITY and restart the solver.\n' +
+                         '\n=================================== END ERROR ===================================\n')
 
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
@@ -482,10 +555,23 @@ class WriteBoundaryConditions:
         uiui = (2.0/3.0)*self.freestream_k
         initial_field = 'uniform (' + str(uiui) + ' 0 0 ' + str(uiui) + ' 0 ' + str(uiui) + ')'
 
-        if self.properties['flow_properties']['initial_velocity_field_is_inlet_velocity']:
+        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
             self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', initial_field)
-        else:
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
             self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', 'uniform (0 0 0 0 0 0)')
+        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
+            if (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
+                self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', initial_field)
+            elif (self.properties['flow_properties']['custom_initial_conditions']
+                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
+                self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]',
+                                    'uniform (0 0 0 0 0 0)')
+            else:
+                sys.exit('\n===================================== ERROR =====================================\n' +
+                         '\nInitial condition for R (Reynolds stress tensor) not recognised. Use either\n' +
+                         'BOUNDARY_CONDITIONED_BASED or ZERO_VELOCITY and restart the solver.\n' +
+                         '\n=================================== END ERROR ===================================\n')
 
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
@@ -622,5 +708,68 @@ class WriteBoundaryConditions:
         file_id.write('            // set boundary values to those computed values of "field"\n')
         file_id.write('            *this==(field);\n')
         file_id.write('        #};\n')
+
+    def __custom_initial_conditions(self, file_id, field_type):
+        file_id.write('internalField   #codeStream\n')
+        file_id.write('{\n')
+        file_id.write('    codeInclude\n')
+        file_id.write('    #{\n')
+        file_id.write('        #include "fvCFD.H"\n')
+        file_id.write('    #};\n')
+        file_id.write('\n')
+        file_id.write('    codeOptions\n')
+        file_id.write('    #{\n')
+        file_id.write('        -I$(LIB_SRC)/finiteVolume/lnInclude \\\n')
+        file_id.write('        -I$(LIB_SRC)/meshTools/lnInclude\n')
+        file_id.write('    #};\n')
+        file_id.write('\n')
+        file_id.write('    codeLibs\n')
+        file_id.write('    #{\n')
+        file_id.write('        -lmeshTools \\\n')
+        file_id.write('        -lfiniteVolume\n')
+        file_id.write('    #};\n')
+        file_id.write('\n')
+        file_id.write('    code\n')
+        file_id.write('    #{\n')
+        file_id.write('        // get the dictionary\n')
+        file_id.write('        const IOdictionary& d = static_cast<const IOdictionary&>(dict);\n')
+        file_id.write('\n')
+        file_id.write('        // get access to the mesh\n')
+        file_id.write('        const fvMesh& mesh = refCast<const fvMesh>(d.db());\n')
+        file_id.write('\n')
+        file_id.write('        // create a new field which will be used as the initial field\n')
+        file_id.write('        vectorField field(mesh.nCells());\n')
+        file_id.write('\n')
+        file_id.write('        // loop over entire mesh and set values for field\n')
+        file_id.write('        forAll(field, cellI)\n')
+        file_id.write('        {\n')
+        file_id.write('            // get access to coordinates\n')
+        file_id.write('            const auto x = mesh.C()[cellI].x();\n')
+        file_id.write('            const auto y = mesh.C()[cellI].y();\n')
+        file_id.write('            const auto z = mesh.C()[cellI].z();\n')
+        file_id.write('\n')
+        file_id.write('            // set field here, overwrite for your use case here\n')
+        if field_type == Parameters.SCALAR:
+            file_id.write('            field[cellI] = x * y * z;\n')
+        elif field_type == Parameters.VECTOR:
+            file_id.write('            field[cellI].x() =   Foam::sin(x) * Foam::cos(y) * Foam::cos(z);\n')
+            file_id.write('            field[cellI].y() = - Foam::cos(x) * Foam::sin(y) * Foam::cos(z);\n')
+            file_id.write('            field[cellI].z() =   0.0;\n')
+        elif field_type == Parameters.TENSOR:
+            file_id.write('            field[cellI].xx() = 1;\n')
+            file_id.write('            field[cellI].xy() = 0;\n')
+            file_id.write('            field[cellI].xz() = 0;\n')
+            file_id.write('            field[cellI].yx() = 0;\n')
+            file_id.write('            field[cellI].yy() = 1;\n')
+            file_id.write('            field[cellI].yz() = 0;\n')
+            file_id.write('            field[cellI].zx() = 0;\n')
+            file_id.write('            field[cellI].zy() = 0;\n')
+            file_id.write('            field[cellI].zz() = 1;\n')
+        file_id.write('        }\n')
+        file_id.write('        field.writeEntry("", os);\n')
+        file_id.write('    #};\n')
+        file_id.write('};\n')
+        file_id.write('\n')
+
 
 

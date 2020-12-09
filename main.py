@@ -81,8 +81,22 @@ def case_properties():
             # specify the inlet boundary condition (free stream velocity)
             'inlet_velocity': [30, 0, 0],
 
-            # set initial velocity field everywhere to inlet velocity?
-            'initial_velocity_field_is_inlet_velocity': False,
+            # specify how the initial field should be set
+            #   BOUNDARY_CONDITIONED_BASED: set the initial field based on inlet conditions (where applicable)
+            #   ZERO_VELOCITY:              set the initial field to a zero velocity field
+            #   CUSTOM:                     create a code snippet the user can modify to set custom initial conditions
+            'initial_conditions': Parameters.CUSTOM,
+
+            # if initial_conditions is set to CUSTOM, specify which variables should receive custom initial conditions
+            # and how to treat variables which are not set to custom, coded initial conditions. Only applicable to
+            # flow variables, not to turbulent quantities.
+            'custom_initial_conditions': {
+                # variables to create custom initial conditions for
+                'variables': ['U'],
+
+                # treatment for variables that are not initialised with custom code
+                'non_custom_initialised_variables_treatment': Parameters.ZERO_VELOCITY,
+            },
 
             # specify the laminar viscosity
             'nu': 1.47e-5,
@@ -108,14 +122,14 @@ def case_properties():
             'startTime': 0,
 
             # end time
-            'endTime': 20000,
+            'endTime': 10,
 
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
             #   FIRST_TIME:  Start from the first available (lowest time) directory
             #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a simulation from
             #                the last calculated solution
-            'startFrom': Parameters.LATEST_TIME,
+            'startFrom': Parameters.START_TIME,
 
             # flag indicating whether to dynamically calculate time step based on CFL criterion
             'CFLBasedTimeStepping': False,
@@ -131,7 +145,7 @@ def case_properties():
             'maxDeltaT': 1,
 
             # frequency at which to write output files. Behaviour controlled through write control entry below.
-            'write_frequency': 250,
+            'write_frequency': 1,
 
             # write control, specify when to output results, the options are listed below
             #   TIME_STEP:           write every 'write_frequency' time steps
@@ -146,16 +160,16 @@ def case_properties():
             'purge_write': 0,
 
             # under-relaxation factor for pressure
-            'under_relaxation_p': 0.1,
+            'under_relaxation_p': 0.3,
 
             # under-relaxation factor for velocity
-            'under_relaxation_U': 0.1,
+            'under_relaxation_U': 0.3,
 
             # under-relaxation factor for turbulent quantities
-            'under_relaxation_turbulence': 0.1,
+            'under_relaxation_turbulence': 0.3,
 
             # under-relaxation factor for Reynolds stresses
-            'under_relaxation_reynolds_stresses': 0.1,
+            'under_relaxation_reynolds_stresses': 0.3,
         },
 
         'numerical_discretisation': {
