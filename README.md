@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Generic badge](https://img.shields.io/badge/Version-v1.0.0-red.svg)](https://shields.io/)
+
 ## Introduction
 
 This collection of python files will generate a basic case set-up for openfoam, i.e. it will generate the **0/**, **constant/** and **system/** directory with all required files based on some user input.
@@ -55,7 +58,7 @@ Whenever there is a range of choices that can be specified through the *Paramete
 
 This piece of software is provided under the MIT license, see the accompanying license file.
 
-## Contributions, Issues,  
+## Contributions, Issues
 
 There will be, unavoidably, bugs that will come up with certain parameter combinations.
 While validation cases were run to ensure the correctness of most settings, it is impossible to test all possible combinations.
