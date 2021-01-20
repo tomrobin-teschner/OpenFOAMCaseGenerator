@@ -152,9 +152,13 @@ class WriteBoundaryConditions:
                 self.__neumann(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.INLET:
                 if self.properties['flow_properties']['custom_velocity_inlet_profile']:
-                    self.__custom_velocity_inlet_profile(file_id, initial_field)
+                    self.file_manager.write(file_id, '        type            fixedValue;\n')
+                    self.file_manager.write(file_id, '        value           ')
+                    self.__custom_inlet_profile(file_id, key, Parameters.VECTOR)
                 else:
                     self.__dirichlet(file_id, initial_field)
+            elif self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET:
+                self.__write_dfsem_inlet(file_id, key, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream_velocity(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
@@ -193,7 +197,8 @@ class WriteBoundaryConditions:
                 self.__advective(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
+            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
+                    self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__neumann(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream_pressure(file_id, initial_field)
@@ -243,7 +248,8 @@ class WriteBoundaryConditions:
                 self.__advective(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
+            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
+                    self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -293,7 +299,8 @@ class WriteBoundaryConditions:
                 self.__advective(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
+            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
+                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -328,7 +335,8 @@ class WriteBoundaryConditions:
                 self.__advective(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
+            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
+                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -378,7 +386,8 @@ class WriteBoundaryConditions:
                 self.__advective(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
+            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
+                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -416,7 +425,8 @@ class WriteBoundaryConditions:
                 self.__advective(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
+            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
+                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -466,7 +476,8 @@ class WriteBoundaryConditions:
                 self.__advective(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
+            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
+                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -509,7 +520,8 @@ class WriteBoundaryConditions:
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.INLET:
+            if (self.properties['boundary_properties'][key] == Parameters.INLET or
+                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -533,7 +545,8 @@ class WriteBoundaryConditions:
         self.file_manager.write(file_id, 'boundaryField\n{\n')
         for key in self.properties['boundary_properties']:
             self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.INLET:
+            if (self.properties['boundary_properties'][key] == Parameters.INLET or
+                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -589,7 +602,8 @@ class WriteBoundaryConditions:
                 self.__advective(file_id)
             elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
                 self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
+            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
+                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
                 self.__dirichlet(file_id, initial_field)
             elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
                 self.__freestream(file_id, initial_field)
@@ -667,47 +681,148 @@ class WriteBoundaryConditions:
         file_id.write('        type            freestream;\n')
         file_id.write('        freestreamValue ' + initial_field + ';\n')
 
-    def __custom_velocity_inlet_profile(self, file_id, initial_field):
-        file_id.write('        type            codedFixedValue;\n')
-        file_id.write('        value           ' + initial_field + ';\n')
+    def __write_dfsem_inlet(self, file_id, bc_name, initial_field):
+        length_scale = self.properties['flow_properties']['reference_length']
+        R = self.properties['flow_properties']['reynolds_stresses']
+        L = self.properties['flow_properties']['turbulent_length_scale']
+        nCellsPerEddy = self.properties['flow_properties']['number_of_cells_per_eddy']
+
+        init_reynolds_stresses = 'uniform (' + str(R[0]) + ' ' + str(R[1]) + ' ' + str(R[2]) + ' ' + str(R[3]) + ' '\
+                                 + str(R[4]) + ' ' + str(R[5]) + ')'
+        init_turbulent_length_scale = 'uniform ' + str(L)
+
+        file_id.write('        type            turbulentDFSEMInlet;\n')
+        file_id.write('        delta           ' + str(length_scale) + ';\n')
+
+        if self.properties['flow_properties']['custom_Reynolds_stresses']:
+            self.file_manager.write(file_id, '        R               ')
+            self.__custom_inlet_profile(file_id, bc_name, Parameters.TENSOR)
+        else:
+            file_id.write('        R               ' + init_reynolds_stresses + ';\n')
+
+        if self.properties['flow_properties']['custom_velocity_inlet_profile']:
+            self.file_manager.write(file_id, '        U               ')
+            self.__custom_inlet_profile(file_id, bc_name, Parameters.VECTOR)
+        else:
+            file_id.write('        U               ' + initial_field + ';\n')
+
+        if self.properties['flow_properties']['custom_turbulent_length_scale']:
+            self.file_manager.write(file_id, '        L               ')
+            self.__custom_inlet_profile(file_id, bc_name, Parameters.SCALAR)
+        else:
+            if self.properties['flow_properties']['set_turbulent_length_scale_at_inlet']:
+                file_id.write('        L               ' + init_turbulent_length_scale + ';\n')
+            else:
+                file_id.write('        L               uniform 0;\n')
+                file_id.write('        nCellsPerEddy   ' + str(nCellsPerEddy) + ';\n')
+
+        file_id.write('        value           uniform (0 0 0);\n')
+
+    def __custom_inlet_profile(self, file_id, bc_name, field_type):
+        file_id.write('#codeStream\n')
+        file_id.write('        {\n')
+        file_id.write('            codeInclude\n')
+        file_id.write('            #{\n')
+        file_id.write('                #include "fvCFD.H"\n')
+        file_id.write('            #};\n')
         file_id.write('\n')
-        file_id.write('        name            customInletVelocityProfile; // ensure name does not already exist as boundary patch\n')
-        file_id.write('        code\n')
-        file_id.write('        #{\n')
-        file_id.write('            // get access to the boundary patch\n')
-        file_id.write('            const fvPatch& boundaryPatch = patch();\n')
+        file_id.write('            codeOptions\n')
+        file_id.write('            #{\n')
+        file_id.write('                -I$(LIB_SRC)/finiteVolume/lnInclude \\\n')
+        file_id.write('                -I$(LIB_SRC)/meshTools/lnInclude\n')
+        file_id.write('            #};\n')
         file_id.write('\n')
-        file_id.write('            // get all boundary faces on the current boundary condition\n')
-        file_id.write('            const vectorField& boundaryFaces = boundaryPatch.Cf();\n')
+        file_id.write('            codeLibs\n')
+        file_id.write('            #{\n')
+        file_id.write('                -lmeshTools \\\n')
+        file_id.write('                -lfiniteVolume\n')
+        file_id.write('            #};\n')
         file_id.write('\n')
-        file_id.write('            // get access the current field on this boundary condition\n')
-        file_id.write('            vectorField field = *this;\n')
+        file_id.write('            code\n')
+        file_id.write('            #{\n')
+        file_id.write('                // get access to dictionary\n')
+        file_id.write('                const IOdictionary& d = static_cast<const IOdictionary&>\n')
+        file_id.write('                (\n')
+        file_id.write('                    dict.parent().parent()\n')
+        file_id.write('                );\n')
         file_id.write('\n')
-        file_id.write('            // current (total) time\n')
-        file_id.write('            const scalar currentTime = this->db().time().value();\n')
+        file_id.write('                // get access to computational mesh\n')
+        file_id.write('                const fvMesh& mesh = refCast<const fvMesh>(d.db());\n')
         file_id.write('\n')
-        file_id.write('            // loop over all boundary faces if requires\n')
-        file_id.write('            forAll(boundaryFaces, faceI)\n')
-        file_id.write('            {\n')
-        file_id.write('                // access to boundary face coordinates\n')
-        file_id.write('                const auto x = boundaryFaces[faceI].x();\n')
-        file_id.write('                const auto y = boundaryFaces[faceI].y();\n')
-        file_id.write('                const auto z = boundaryFaces[faceI].z();\n')
+        file_id.write('                // get boundary patch ID by boundary condition name\n')
+        file_id.write('                const label id = mesh.boundary().findPatchID("' + bc_name + '");\n')
         file_id.write('\n')
-        file_id.write('                // set field scalar / vector based on location in space as required\n')
-        file_id.write('                if (y > 0.5)\n')
+        file_id.write('                // get boundary patch based on ID obtained above\n')
+        file_id.write('                const fvPatch& patch = mesh.boundary()[id];\n')
+        file_id.write('\n')
+        file_id.write('                // current (total) time\n')
+        file_id.write('                const scalar currentTime = d.db().time().value();\n')
+        file_id.write('\n')
+        if field_type == Parameters.SCALAR:
+            file_id.write('                // create new scalar field which will be written on boundary patch\n')
+            file_id.write('                scalarField field = 0.0;\n')
+            file_id.write('\n')
+        elif field_type == Parameters.VECTOR:
+            file_id.write('                // create new vector field which will be written on boundary patch\n')
+            file_id.write('                vectorField field(patch.size(), vector(0, 0, 0));\n')
+            file_id.write('\n')
+        elif field_type == Parameters.TENSOR:
+            file_id.write('                // create new tensor field which will be written on boundary patch\n')
+            file_id.write('                tensorField field(patch.size(), tensor(0, 0, 0, 0, 0, 0, 0, 0, 0));\n')
+            file_id.write('\n')
+        file_id.write('                // loop over all boundary faces if requires\n')
+        file_id.write('                forAll(field, faceI)\n')
         file_id.write('                {\n')
-        file_id.write('                    field[faceI] = vector(0.01 * currentTime,0,0);\n')
-        file_id.write('                }\n')
-        file_id.write('                else\n')
-        file_id.write('                {\n')
-        file_id.write('                    field[faceI] = vector(0,0,0);\n')
-        file_id.write('                }\n')
-        file_id.write('            }\n')
+        file_id.write('                    // access to boundary face coordinates\n')
+        file_id.write('                    const auto x = patch.Cf()[faceI].x();\n')
+        file_id.write('                    const auto y = patch.Cf()[faceI].y();\n')
+        file_id.write('                    const auto z = patch.Cf()[faceI].z();\n')
         file_id.write('\n')
-        file_id.write('            // set boundary values to those computed values of "field"\n')
-        file_id.write('            *this==(field);\n')
-        file_id.write('        #};\n')
+        file_id.write('                    // set field based on location in space and time as required\n')
+        file_id.write('                    if (y > 0.5)\n')
+        file_id.write('                    {\n')
+        if field_type == Parameters.SCALAR:
+            file_id.write('                        field[faceI] = 0.01 * currentTime;\n')
+        elif field_type == Parameters.VECTOR:
+            file_id.write('                        field[faceI].x() =   Foam::sin(x) * Foam::cos(y) * Foam::cos(z);\n')
+            file_id.write('                        field[faceI].y() = - Foam::cos(x) * Foam::sin(y) * Foam::cos(z);\n')
+            file_id.write('                        field[faceI].z() =   0.0;\n')
+        elif field_type == Parameters.TENSOR:
+            file_id.write('                        field[faceI].xx() = 1;\n')
+            file_id.write('                        field[faceI].xy() = 0;\n')
+            file_id.write('                        field[faceI].xz() = 0;\n')
+            file_id.write('                        field[faceI].yx() = 0;\n')
+            file_id.write('                        field[faceI].yy() = 1;\n')
+            file_id.write('                        field[faceI].yz() = 0;\n')
+            file_id.write('                        field[faceI].zx() = 0;\n')
+            file_id.write('                        field[faceI].zy() = 0;\n')
+            file_id.write('                        field[faceI].zz() = 1;\n')
+        file_id.write('                    }\n')
+        file_id.write('                    else\n')
+        file_id.write('                    {\n')
+        if field_type == Parameters.SCALAR:
+            file_id.write('                        field[faceI] = 0;\n')
+        elif field_type == Parameters.VECTOR:
+            file_id.write('                        field[faceI].x() = 0;\n')
+            file_id.write('                        field[faceI].y() = 0;\n')
+            file_id.write('                        field[faceI].z() = 0;\n')
+        elif field_type == Parameters.TENSOR:
+            file_id.write('                        field[faceI].xx() = 0;\n')
+            file_id.write('                        field[faceI].xy() = 0;\n')
+            file_id.write('                        field[faceI].xz() = 0;\n')
+            file_id.write('                        field[faceI].yx() = 0;\n')
+            file_id.write('                        field[faceI].yy() = 0;\n')
+            file_id.write('                        field[faceI].yz() = 0;\n')
+            file_id.write('                        field[faceI].zx() = 0;\n')
+            file_id.write('                        field[faceI].zy() = 0;\n')
+            file_id.write('                        field[faceI].zz() = 0;\n')
+        file_id.write('                    }\n')
+        file_id.write('                }\n')
+        file_id.write('\n')
+        file_id.write('                // set boundary values to those computed values of "field"\n')
+        file_id.write('                field.writeEntry("", os);\n')
+        file_id.write('            #};\n')
+        file_id.write('        };\n')
 
     def __custom_initial_conditions(self, file_id, field_type):
         file_id.write('internalField   #codeStream\n')

@@ -29,11 +29,12 @@ def case_properties():
     properties = {
         'file_properties': {
             # name of the case to use (will be used for the folder name)
-            'case_name': '',
+            'case_name': 'testChannel',
 
             # path to where the currently generated case should be copied to (parent directory)
             # if left empty, the case will be written into the current directory
             'run_directory': '',
+            # 'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
 
             # version of openfoam to use (does not have an influence on the case setup, but will be used in headers)
             'version': 'v2006',
@@ -55,6 +56,8 @@ def case_properties():
         #
         #   The following types are supported
         #   INLET:            Standard inlet condition, dirichlet for velocity + turbulence, neumann for pressure
+        #   DFSEM_INLET:      Divergence Free Synthetic Eddy Method (DFSEM) Inlet, use for Large-Eddy Simulation to
+        #                     artificially create turbulent fluctuations at the inlet.
         #   FREESTREAM:       Specify freestream condition globally (can be inlet and outlet)
         #   OUTLET:           Standard outlet, fixed pressure and Neumann for velocity + turbulence (Reflective outlet)
         #   BACKFLOW_OUTLET:  Same as outlet, but allows for flow to re-enter the domain (backflow at outlet)
@@ -65,27 +68,60 @@ def case_properties():
         #                     (Neumann condition for all quantities)
         #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
         'boundary_properties': {
-            'inlet': Parameters.INLET,
+            # 'inlet': Parameters.INLET,
+            'inlet': Parameters.DFSEM_INLET,
             'outlet': Parameters.OUTLET,
-            'wall': Parameters.WALL,
-            'symmetry': Parameters.OUTLET,
-            'BaseAndTop': Parameters.EMPTY,
+            # 'step': Parameters.WALL,
+            # 'wall': Parameters.WALL,
+            # 'inletWall': Parameters.WALL,
+            # 'topWall': Parameters.WALL,
+            'symmetry': Parameters.SYMMETRY,
+            # 'BaseAndTop': Parameters.EMPTY,
+            # 'inlet': Parameters.DFSEM_INLET,
+            # 'lid': Parameters.INLET,
+            'walls': Parameters.WALL,
+            # 'frontAndBack': Parameters.EMPTY,
         },
 
         # physical properties of solver set-up
         'flow_properties': {
-            # use custom velocity inlet? Some template code will be written to the 0/U file which needs to be modified
+            # use custom velocity inlet? Some template code will be written to the 0/U file which needs to be modified.
             # make sure to keep a copy of the custom code as it may be overwritten by this script if it is run again!
             'custom_velocity_inlet_profile': False,
 
             # specify the inlet boundary condition (free stream velocity)
-            'inlet_velocity': [30, 0, 0],
+            'inlet_velocity': [1.0, 0, 0],
+
+            # Write custom profile for reynolds stresses at inlet? (DFSEM Inlet only)
+            'custom_Reynolds_stresses': False,
+
+            # specify the reynold stresses at the inlet (used only by DFSEM Inlet boundary condition), ignored if
+            # custom_Reynolds_stresses is set to True. The order is R_uu, R_uv, R_uw, R_vv, R_vw, R_ww
+            'reynolds_stresses': [1, 0, 0, 0, 0, 0],
+
+            # Write custom profile for turbulent length scale at inlet? (DFSEM Inlet only)
+            'custom_turbulent_length_scale': False,
+
+            # set turbulent length scale at inlet? If true, the turbulent length scale needs to be provided, if false,
+            # we need to specify how many cells we want to use to resolve turbulent eddies (dynamically adjust to the
+            # mesh size and controls the dissipation, use this option of no length scale information is available)
+            # If custom_turbulent_length_scale is set to true, this choice will have no effect
+            'set_turbulent_length_scale_at_inlet': False,
+
+            # turbulent length scale
+            'turbulent_length_scale': 0.004,
+
+            # number of cells to use to resolve turbulent eddies if no turbulent length scale is given. Typical values
+            # should be between 1 - 5, where values closer to 1 are more dissipative and values closer to 5 sustain
+            # eddies for longer. Only used if both custom_turbulent_length_scale and set_turbulent_length_scale_at_inlet
+            # are set to false.
+            'number_of_cells_per_eddy': 1,
 
             # specify how the initial field should be set
             #   BOUNDARY_CONDITIONED_BASED: set the initial field based on inlet conditions (where applicable)
             #   ZERO_VELOCITY:              set the initial field to a zero velocity field
             #   CUSTOM:                     create a code snippet the user can modify to set custom initial conditions
-            'initial_conditions': Parameters.CUSTOM,
+            'initial_conditions': Parameters.ZERO_VELOCITY,
 
             # if initial_conditions is set to CUSTOM, specify which variables should receive custom initial conditions
             # and how to treat variables which are not set to custom, coded initial conditions. Only applicable to
@@ -99,13 +135,13 @@ def case_properties():
             },
 
             # specify the laminar viscosity
-            'nu': 1.47e-5,
+            'nu': 1e-3,
 
             # freestream turbulent intensity (between 0 - 1)
-            'freestream_turbulent_intensity': 0.00051,
+            'freestream_turbulent_intensity': 0.05,
 
             # reference length in simulation
-            'reference_length': 1.5,
+            'reference_length': 1.0,
         },
 
         'solver_properties': {
@@ -116,13 +152,13 @@ def case_properties():
             #     pisoFoam:   unsteady, turbulent (RANS, LES) solver based on the PISO algorithm
             #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use
             #                 higher CFL numbers than pisoFoam while being more stable. Recommended in general
-            'solver': Parameters.simpleFoam,
+            'solver': Parameters.pimpleFoam,
 
             # start time
             'startTime': 0,
 
             # end time
-            'endTime': 10,
+            'endTime': 1,
 
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -139,7 +175,7 @@ def case_properties():
 
             # time step to be used (will be ignored if CFL-based time steppng is chosen)
             # WARNING: solver needs to support adjustable deltaT calculation
-            'deltaT': 1,
+            'deltaT': 1e-2,
 
             # largest allowable time step
             'maxDeltaT': 1,
@@ -163,10 +199,10 @@ def case_properties():
             'under_relaxation_p': 0.3,
 
             # under-relaxation factor for velocity
-            'under_relaxation_U': 0.3,
+            'under_relaxation_U': 0.7,
 
             # under-relaxation factor for turbulent quantities
-            'under_relaxation_turbulence': 0.3,
+            'under_relaxation_turbulence': 0.7,
 
             # under-relaxation factor for Reynolds stresses
             'under_relaxation_reynolds_stresses': 0.3,
@@ -176,7 +212,7 @@ def case_properties():
             # time integration scheme, options are listed below
             #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
             #   UNSTEADY:     Integrate in time and resolve  dU / dt
-            'time_integration': Parameters.STEADY_STATE,
+            'time_integration': Parameters.UNSTEADY,
 
             # Choose preset of numerical schemes based on accuracy and robustness requirements
             #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
@@ -187,13 +223,13 @@ def case_properties():
             #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
             #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate
             #               with less limiting compared to DEFAULT and TVD.
-            'numerical_schemes_correction': Parameters.ROBUSTNESS,
+            'numerical_schemes_correction': Parameters.ACCURACY,
 
             # choose the amount of limiter to use. A high value may limit more strongly but can slow down convergence
             #
 
             # flag to indicate if first order discretisation should be used for turbulent quantities
-            'use_first_order_for_turbulence': True,
+            'use_first_order_for_turbulence': False,
         },
 
         'turbulence_properties': {
@@ -201,7 +237,7 @@ def case_properties():
             #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
             #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
             #   RANS:    Use this for scale modelled / averaged simulations (RANS)
-            'turbulence_type': Parameters.RANS,
+            'turbulence_type': Parameters.LES,
 
             # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
             #   LOW_RE  : first cell-height near wall is of order y+ <= 1
@@ -279,7 +315,7 @@ def case_properties():
             #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the
             #                turbulent to laminar viscosity ratio entirely on the freestream turbulence intensity.
             #                Use this option if any of the above are not suitable
-            'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
+            'turbulent_quantities_at_inlet': Parameters.INTERNAL,
 
             # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
             'turbulent_to_laminar_ratio': 10,
@@ -287,7 +323,7 @@ def case_properties():
 
         'convergence_control': {
             # convergence criterion for residuals (used to judge if a simulation has converged)
-            'convergence_threshold': 1e-5,
+            'convergence_threshold': 1e-4,
 
             # absolute convergence criterion for implicit solvers (used to judge if the current iteration has converged)
             'absolute_convergence_criterion': 1e-8,
@@ -337,13 +373,13 @@ def case_properties():
             'wall_boundaries': ['wall', 'leadingEdge'],
 
             # write force coefficients flag
-            'write_force_coefficients': True,
+            'write_force_coefficients': False,
 
             # write pressure coefficient (cp)
             'write_pressure_coefficient': False,
 
             # write wall shear stresses (can be used to obtain skin friction coefficient)
-            'write_wall_shear_stresses': False,
+            'write_wall_shear_stresses': True,
         },
 
         # write out additional fields of interest
@@ -353,7 +389,7 @@ def case_properties():
             #   VORTICITY: Write out vorticity field
             #   LAMBDA_2:  Write out the Lambda-2 criterion, useful for vortex core detection
             #   ENSTROPHY: Write out enstrophy field (useful for turbulent studies)
-            'fields': [Parameters.Q],
+            'fields': [Parameters.Q, Parameters.VORTICITY],
 
             # flag indicating if additional fields should be active (written to file). Will be written with all other
             # variables to file at the same time.
@@ -490,6 +526,7 @@ def add_default_properties(properties):
 
 
 def main():
+
     # get case specific dictionaries to set up case and write input files
     properties = case_properties()
 
