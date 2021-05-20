@@ -1,9 +1,11 @@
 import os
 from math import sqrt, pow
+import json
 
 import src.FileDirectoryIO.FileManager as IO
 import src.FileDirectoryIO.WriteUtilityScripts as UtilityScripts
 from src.CheckCase import CheckCase as CheckCase
+from src.CheckCase import CheckCommandLineArguments as CheckCommandLineArguments
 import src.WriteSystemDirectoryFiles.WriteForceCoefficients as ForceCoefficients
 import src.WriteSystemDirectoryFiles.WritePressureCoefficient as PressureCoefficient
 import src.WriteSystemDirectoryFiles.WriteDecomposePar as DecomposeParDict
@@ -25,16 +27,19 @@ import src.WriteSystemDirectoryFiles.WritefvSchemesFile as fvSchemes
 import src.Write0DirectoryFiles.WriteBoundaryConditions as BoundaryConditions
 
 
-def case_properties():
+def case_properties(command_line_arguments):
     properties = {
         'file_properties': {
             # name of the case to use (will be used for the folder name)
-            'case_name': 'testChannel',
+            'case_name': 'NACA_0012_kw_SST_y+_1_Re_6e6',
+
+            # directory where mesh is located (the specified directory needs to contain a folder called polyMesh which
+            # in turn contains the boundary, cellZones, faces, faceZones, neighbour, owner and points files)
+            'mesh_directory': os.path.join('examples', 'mesh', 'airfoil'),
 
             # path to where the currently generated case should be copied to (parent directory)
             # if left empty, the case will be written into the current directory
             'run_directory': '',
-            # 'run_directory': 'D:\\z_dataSecurity\\ubuntu\\OpenFOAM\\run',
 
             # version of openfoam to use (does not have an influence on the case setup, but will be used in headers)
             'version': 'v2006',
@@ -68,19 +73,12 @@ def case_properties():
         #                     (Neumann condition for all quantities)
         #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
         'boundary_properties': {
-            # 'inlet': Parameters.INLET,
-            'inlet': Parameters.DFSEM_INLET,
+            'inlet': Parameters.INLET,
             'outlet': Parameters.OUTLET,
-            # 'step': Parameters.WALL,
-            # 'wall': Parameters.WALL,
-            # 'inletWall': Parameters.WALL,
-            # 'topWall': Parameters.WALL,
-            'symmetry': Parameters.SYMMETRY,
-            # 'BaseAndTop': Parameters.EMPTY,
-            # 'inlet': Parameters.DFSEM_INLET,
-            # 'lid': Parameters.INLET,
-            'walls': Parameters.WALL,
-            # 'frontAndBack': Parameters.EMPTY,
+            'upper': Parameters.WALL,
+            'lower': Parameters.WALL,
+            'trailingEdge': Parameters.WALL,
+            'BaseAndTop': Parameters.EMPTY,
         },
 
         # physical properties of solver set-up
@@ -90,7 +88,7 @@ def case_properties():
             'custom_velocity_inlet_profile': False,
 
             # specify the inlet boundary condition (free stream velocity)
-            'inlet_velocity': [1.0, 0, 0],
+            'inlet_velocity': [6.0, 0, 0],
 
             # Write custom profile for reynolds stresses at inlet? (DFSEM Inlet only)
             'custom_Reynolds_stresses': False,
@@ -105,23 +103,23 @@ def case_properties():
             # set turbulent length scale at inlet? If true, the turbulent length scale needs to be provided, if false,
             # we need to specify how many cells we want to use to resolve turbulent eddies (dynamically adjust to the
             # mesh size and controls the dissipation, use this option of no length scale information is available)
-            # If custom_turbulent_length_scale is set to true, this choice will have no effect
+            # If custom_turbulent_length_scale is set to true, this choice will have no effect (DFSEM Inlet only)
             'set_turbulent_length_scale_at_inlet': False,
 
-            # turbulent length scale
+            # turbulent length scale (DFSEM Inlet only)
             'turbulent_length_scale': 0.004,
 
             # number of cells to use to resolve turbulent eddies if no turbulent length scale is given. Typical values
             # should be between 1 - 5, where values closer to 1 are more dissipative and values closer to 5 sustain
             # eddies for longer. Only used if both custom_turbulent_length_scale and set_turbulent_length_scale_at_inlet
-            # are set to false.
+            # are set to false. (DFSEM Inlet only)
             'number_of_cells_per_eddy': 1,
 
             # specify how the initial field should be set
             #   BOUNDARY_CONDITIONED_BASED: set the initial field based on inlet conditions (where applicable)
             #   ZERO_VELOCITY:              set the initial field to a zero velocity field
             #   CUSTOM:                     create a code snippet the user can modify to set custom initial conditions
-            'initial_conditions': Parameters.ZERO_VELOCITY,
+            'initial_conditions': Parameters.BOUNDARY_CONDITIONED_BASED,
 
             # if initial_conditions is set to CUSTOM, specify which variables should receive custom initial conditions
             # and how to treat variables which are not set to custom, coded initial conditions. Only applicable to
@@ -135,7 +133,7 @@ def case_properties():
             },
 
             # specify the laminar viscosity
-            'nu': 1e-3,
+            'nu': 1e-6,
 
             # freestream turbulent intensity (between 0 - 1)
             'freestream_turbulent_intensity': 0.05,
@@ -152,13 +150,13 @@ def case_properties():
             #     pisoFoam:   unsteady, turbulent (RANS, LES) solver based on the PISO algorithm
             #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use
             #                 higher CFL numbers than pisoFoam while being more stable. Recommended in general
-            'solver': Parameters.pimpleFoam,
+            'solver': Parameters.simpleFoam,
 
             # start time
             'startTime': 0,
 
             # end time
-            'endTime': 1,
+            'endTime': 500,
 
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -173,15 +171,15 @@ def case_properties():
             # CFL number
             'CFL': 1.0,
 
-            # time step to be used (will be ignored if CFL-based time steppng is chosen)
+            # time step to be used (will be ignored if CFL-based time stepping is chosen)
             # WARNING: solver needs to support adjustable deltaT calculation
-            'deltaT': 1e-2,
+            'deltaT': 1,
 
             # largest allowable time step
             'maxDeltaT': 1,
 
             # frequency at which to write output files. Behaviour controlled through write control entry below.
-            'write_frequency': 1,
+            'write_frequency': 100,
 
             # write control, specify when to output results, the options are listed below
             #   TIME_STEP:           write every 'write_frequency' time steps
@@ -212,7 +210,7 @@ def case_properties():
             # time integration scheme, options are listed below
             #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
             #   UNSTEADY:     Integrate in time and resolve  dU / dt
-            'time_integration': Parameters.UNSTEADY,
+            'time_integration': Parameters.STEADY_STATE,
 
             # Choose preset of numerical schemes based on accuracy and robustness requirements
             #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
@@ -223,13 +221,10 @@ def case_properties():
             #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used after
             #               running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order accurate
             #               with less limiting compared to DEFAULT and TVD.
-            'numerical_schemes_correction': Parameters.ACCURACY,
-
-            # choose the amount of limiter to use. A high value may limit more strongly but can slow down convergence
-            #
+            'numerical_schemes_correction': Parameters.DEFAULT,
 
             # flag to indicate if first order discretisation should be used for turbulent quantities
-            'use_first_order_for_turbulence': False,
+            'use_first_order_for_turbulence': True,
         },
 
         'turbulence_properties': {
@@ -237,7 +232,7 @@ def case_properties():
             #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
             #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
             #   RANS:    Use this for scale modelled / averaged simulations (RANS)
-            'turbulence_type': Parameters.LES,
+            'turbulence_type': Parameters.RANS,
 
             # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
             #   LOW_RE  : first cell-height near wall is of order y+ <= 1
@@ -301,7 +296,7 @@ def case_properties():
             #   cubeRootVol:         Take the cube root of the volume as delta
             #   maxDeltaxyzCubeRoot:
             #   vanDriest:           Applies van Driest damping function close to the wall
-            #   IDDESDelta:
+            #   IDDESDelta:          Applies filter from IDDES calculation
             'delta_model': Parameters.cubeRootVol,
 
             # select how to calculate turbulent quantities at inlet
@@ -315,7 +310,7 @@ def case_properties():
             #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the
             #                turbulent to laminar viscosity ratio entirely on the freestream turbulence intensity.
             #                Use this option if any of the above are not suitable
-            'turbulent_quantities_at_inlet': Parameters.INTERNAL,
+            'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
 
             # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
             'turbulent_to_laminar_ratio': 10,
@@ -340,7 +335,7 @@ def case_properties():
             #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
             #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
             #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
-            'integral_convergence_criterion': Parameters.NONE,
+            'integral_convergence_criterion': Parameters.C_L,
 
             # if integral quantities are checked for convergence, specify for how many timesteps their average should be
             # calculated to check if, on average, the quantity has converged
@@ -355,7 +350,7 @@ def case_properties():
 
         'dimensionless_coefficients': {
             # reference area used to non-dimensionalise force coefficients
-            'reference_area': 3.78378e-3,
+            'reference_area': 1,
 
             # direction of lift vector (normalised to unity)
             'lift_direction': [0, 1, 0],
@@ -367,37 +362,41 @@ def case_properties():
             'pitch_axis_direction': [0, 0, 1],
 
             # center of rotation for momentum coefficient
-            'center_of_roation': [0, 0, 0],
+            'center_of_roation': [0.25, 0, 0],
 
             # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-            'wall_boundaries': ['wall', 'leadingEdge'],
+            'wall_boundaries': ['lower', 'upper', 'trailingEdge'],
 
-            # write force coefficients flag
-            'write_force_coefficients': False,
+            # write force coefficients to file
+            'write_force_coefficients': True,
 
-            # write pressure coefficient (cp)
+            # write pressure coefficient (cp) to file
             'write_pressure_coefficient': False,
 
-            # write wall shear stresses (can be used to obtain skin friction coefficient)
-            'write_wall_shear_stresses': True,
+            # write wall shear stresses (can be used to obtain skin friction coefficient) to file
+            'write_wall_shear_stresses': False,
         },
 
         # write out additional fields of interest
         'additional_fields': {
+            # flag indicating if additional fields should be active (written to file). Will be written with all other
+            # variables to file at the same time. If set to false, ignore the rest of this dictionary.
+            'write_additional_fields': False,
+
             # list of additional fields to write, can be more than 1
             #   Q:         Write out the Q-criterion, useful for isoSurfaces to visualise turbulence structures
             #   VORTICITY: Write out vorticity field
             #   LAMBDA_2:  Write out the Lambda-2 criterion, useful for vortex core detection
             #   ENSTROPHY: Write out enstrophy field (useful for turbulent studies)
             'fields': [Parameters.Q, Parameters.VORTICITY],
-
-            # flag indicating if additional fields should be active (written to file). Will be written with all other
-            # variables to file at the same time.
-            'write_additional_fields': False,
         },
 
         # specify 0-D point probes to which will output flow variables at each timestep at a given location x, y and z
         'point_probes': {
+            # flag indicating if point probes should be active (written to file). If set to false, ignore the rest of
+            # this dictionary.
+            'write_point_probes': False,
+
             # specify the location at which to output information, can be more than 1
             'location': [
                 [1, 0.01, 0],
@@ -407,9 +406,6 @@ def case_properties():
             # specify variables that should be monitored at the specified point
             'variables_to_monitor': ['U', 'p'],
 
-            # flag indicating if point probes should be active (written to file)
-            'write_point_probes': False,
-
             # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only be
             # written according to the settings in the controlDict (i.e. every time a new time directory is generated)
             'output_probe_at_every_timestep': True,
@@ -417,6 +413,10 @@ def case_properties():
 
         # specify 1-D line probes
         'line_probes': {
+            # flag indicating if point probes should be active (written to file). If set to false, ignore the rest of
+            # this dictionary.
+            'write_line_probes': False,
+
             # specify the start and end point where line should be placed, can be more than 1
             'location': [
                 {
@@ -437,9 +437,6 @@ def case_properties():
             # specify variables that should be monitored along line
             'variables_to_monitor': ['U', 'p'],
 
-            # flag indicating if point probes should be active (written to file)
-            'write_line_probes': False,
-
             # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only be
             # written according to the settings in the controlDict (i.e. every time a new time directory is generated)
             'output_probe_at_every_timestep': False,
@@ -447,6 +444,10 @@ def case_properties():
 
         # specify 2-D cutting planes
         'cutting_planes': {
+            # flag indicating if point probes should be active (written to file). If set to false, ignore the rest of
+            # this dictionary.
+            'write_cutting_planes': False,
+
             # specify the origin and normal vector of cutting plane, can be more than 1
             'location': [
                 {
@@ -464,9 +465,6 @@ def case_properties():
             # specify variables that should be monitored along line
             'variables_to_monitor': ['U', 'p'],
 
-            # flag indicating if point probes should be active (written to file)
-            'write_cutting_planes': False,
-
             # if flag is set to true, solution will be written at every time step. Otherwise, the cutting plane will
             # only be written according to the settings in the controlDict (i.e. every time a new time directory is
             # generated)
@@ -475,6 +473,10 @@ def case_properties():
 
         # write iso surfaces of variables during calculation
         'iso_surfaces': {
+            # flag indicating if iso-surfaces should be active (written to file). If set to false, ignore the rest of
+            # this dictionary.
+            'write_iso_surfaces': False,
+
             # variables of which to write iso surfaces
             'flow_variable': ['Q', 'Lambda2'],
 
@@ -485,15 +487,24 @@ def case_properties():
             # additional fields to write (can be more than 1, can be used to colour iso-surface in post-processing)
             'additional_field_to_write': ['p'],
 
-            # flag indicating if iso-surfaces should be active (written to file)
-            'write_iso_surfaces': False,
-
             # if flag is set to true, iso-surfaces will be written at every time step. Otherwise, the iso surfaces will
             # only be written according to the settings in the controlDict (i.e. every time a new time directory is
             # generated)
             'output_iso_surfaces_at_every_timestep': False,
         },
     }
+
+    # process properties dictionary (read and write if necessary)
+    if command_line_arguments.option_exists('input'):
+        with open(command_line_arguments['input'], 'r') as json_file:
+            properties = json.load(json_file)
+    elif command_line_arguments.option_exists('output'):
+        with open(command_line_arguments['output'], 'w') as json_file:
+            json.dump(properties, json_file, indent=4)
+    elif command_line_arguments.option_exists('write-json-only'):
+        with open(command_line_arguments['write-json-only'], 'w') as json_file:
+            json.dump(properties, json_file, indent=4)
+        exit(0)
 
     return properties
 
@@ -527,8 +538,11 @@ def add_default_properties(properties):
 
 def main():
 
+    # process command line arguments first
+    command_line_arguments = CheckCommandLineArguments.CheckCommandLineArguments()
+
     # get case specific dictionaries to set up case and write input files
-    properties = case_properties()
+    properties = case_properties(command_line_arguments)
 
     # check case (make sure that current set up will not produce any problem)
     check_case = CheckCase.CheckCase(properties)
@@ -542,6 +556,7 @@ def main():
     # create the initial data structure for the case set-up
     file_manager = IO.FileManager(properties)
     file_manager.create_directory_structure()
+    file_manager.copy_mesh_to_destination()
 
     # write out boundary conditions for all relevant flow properties
     boundary_conditions = BoundaryConditions.WriteBoundaryConditions(properties, file_manager)

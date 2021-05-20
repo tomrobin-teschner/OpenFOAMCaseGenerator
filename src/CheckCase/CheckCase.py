@@ -1,4 +1,5 @@
-import sys, warnings
+import sys
+import warnings
 from src import GlobalVariables as Parameters
 
 

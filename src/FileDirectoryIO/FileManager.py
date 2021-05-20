@@ -1,9 +1,20 @@
 import os
+from distutils.dir_util import copy_tree
 
 
 class FileManager:
     def __init__(self, properties):
         self.properties = properties
+
+    def copy_mesh_to_destination(self):
+        # if mesh directory is specified, copy data to current case
+        if len(self.properties['file_properties']['mesh_directory']) != 0:
+            mesh_source_dir = os.path.join(self.properties['file_properties']['mesh_directory'], 'polyMesh')
+            mesh_destination_dir = os.path.join(self.properties['file_properties']['path'], 'constant', 'polyMesh')
+            copy_tree(mesh_source_dir, mesh_destination_dir)
+        else:
+            pass
+
 
     def create_directory_structure(self):
         self.__create_directory(os.path.join(self.properties['file_properties']['path']))
