@@ -1,5 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Generic badge](https://img.shields.io/badge/Version-v1.2.0-red.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/Version-v1.2.1-red.svg)](https://shields.io/)
 
 ## Introduction
 
@@ -24,7 +24,7 @@ To get started, you can run the example case provided with this distribution. Th
 To run the example, simply specify which input script you want to use
 
 ```bash
-python3 OpenFOAMCaseGenerator.py --output=examples\settings\airfoil.json
+python3 OpenFOAMCaseGenerator.py --input=examples\settings\airfoil.json
 ```
 
 This will generate a case directory setup called ```NACA_0012_kw_SST_y+_1_Re_6e6``` within the root folder of this case generator. You can open this folder and run OpenFOAM within it.
