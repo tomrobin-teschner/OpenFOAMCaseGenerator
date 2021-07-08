@@ -362,7 +362,7 @@ def case_properties(command_line_arguments):
             'pitch_axis_direction': [0, 0, 1],
 
             # center of rotation for momentum coefficient
-            'center_of_roation': [0.25, 0, 0],
+            'center_of_rotation': [0.25, 0, 0],
 
             # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
             'wall_boundaries': ['lower', 'upper', 'trailingEdge'],

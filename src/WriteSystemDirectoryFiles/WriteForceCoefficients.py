@@ -13,9 +13,9 @@ class WriteForceCoefficients:
         pitch_dir = ('(' + str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][0]) + ' ' +
                      str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][1]) + ' ' +
                      str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][2]) + ')')
-        cofr = ('(' + str(self.properties['dimensionless_coefficients']['center_of_roation'][0]) + ' ' +
-                str(self.properties['dimensionless_coefficients']['center_of_roation'][1]) + ' ' +
-                str(self.properties['dimensionless_coefficients']['center_of_roation'][2]) + ')')
+        cofr = ('(' + str(self.properties['dimensionless_coefficients']['center_of_rotation'][0]) + ' ' +
+                str(self.properties['dimensionless_coefficients']['center_of_rotation'][1]) + ' ' +
+                str(self.properties['dimensionless_coefficients']['center_of_rotation'][2]) + ')')
 
         file_id = self.file_manager.create_file('system/include', 'forceCoefficients')
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'forceCoefficiens')
