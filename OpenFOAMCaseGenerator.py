@@ -64,7 +64,7 @@ def case_properties(command_line_arguments):
         'parallel_properties': {
             # flag indicating if simulation will be run in parallel. If true, additional information for domain
             # decomposition will be written (and Allrun script modified, accordingly)
-            'run_in_parallel': False,
+            'run_in_parallel': True,
 
             # number of processors that will be used to run case in parallel
             'number_of_processors': 4,
@@ -88,7 +88,7 @@ def case_properties(command_line_arguments):
         #                     (Neumann condition for all quantities)
         #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
         'boundary_properties': {
-            'inlet': Parameters.DFSEM_INLET,
+            'inlet': Parameters.INLET,
             'outlet': Parameters.OUTLET,
             'wall': Parameters.WALL,
             'symmetry': Parameters.SYMMETRY,
@@ -176,7 +176,7 @@ def case_properties(command_line_arguments):
             #                   for parallel computations and non-elliptic flow problems (e.g. compressible flows)
             #   KRYLOV:         Use OpenFOAM's Krylov subspace solver (Conjugate Gradient) with preconditioning.
             #                   Recommended to use for compressible and parallel computations
-            'pressure_solver':  Parameters.KRYLOV,
+            'pressure_solver':  Parameters.MULTI_GRID,
 
             # start time
             'startTime': 0,
@@ -192,20 +192,20 @@ def case_properties(command_line_arguments):
             'startFrom': Parameters.START_TIME,
 
             # flag indicating whether to dynamically calculate time step based on CFL criterion
-            'CFLBasedTimeStepping': False,
+            'CFLBasedTimeStepping': True,
 
             # CFL number
             'CFL': 1.0,
 
             # time step to be used (will be ignored if CFL-based time stepping is chosen)
             # WARNING: solver needs to support adjustable deltaT calculation
-            'deltaT': 1e-2,
+            'deltaT': 2e-3,
 
             # largest allowable time step
             'maxDeltaT': 1,
 
             # frequency at which to write output files. Behaviour controlled through write control entry below.
-            'write_frequency': 10,
+            'write_frequency': 0.1,
 
             # write control, specify when to output results, the options are listed below
             #   TIME_STEP:           write every 'write_frequency' time steps
@@ -214,7 +214,7 @@ def case_properties(command_line_arguments):
             #                        (use with 'CFLBasedTimeStepping' = True)
             #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
             #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
-            'write_control': Parameters.TIME_STEP,
+            'write_control': Parameters.ADJUSTABLE_RUN_TIME,
 
             # specify how many solutions to keep (specify 0 to keep all)
             'purge_write': 0,

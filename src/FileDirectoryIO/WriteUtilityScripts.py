@@ -37,6 +37,9 @@ class WriteUtilityScripts:
         elif self.properties['solver_properties']['solver'] == Parameters.pimpleFoam:
             self.file_manager.write(file_id, pre_solver_flag + 'pimpleFoam' + post_solver_flag + '\n')
 
+        if self.properties['parallel_properties']['run_in_parallel']:
+            self.file_manager.write(file_id, 'reconstructPar\n')
+
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
                                 '# ------------------------------------------------------------------------------\n')

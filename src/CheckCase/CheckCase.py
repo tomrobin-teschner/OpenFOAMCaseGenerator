@@ -7,6 +7,12 @@ class CheckCase:
     def __init__(self, properties):
         self.properties = properties
 
+    def run_all_checks(self):
+        self.check_correct_turbulence_model_setup()
+        self.check_correct_boundary_condition_setup()
+        self.check_appropriate_numerical_scheme_combination()
+        self.check_appropriate_pressure_solver()
+
     def check_correct_turbulence_model_setup(self):
         if (self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSSTLM or
                 self.properties['turbulence_properties']['RANS_model'] == Parameters.kkLOmega):
@@ -58,5 +64,17 @@ class CheckCase:
                 'current choice. You should start your simulation from an initial RANS simulation\n' +
                 'which should provide enough stability. If you experience divergence, you may wish\n' +
                 'to revisit your meshing approach and potential increase the mesh quality.\n' +
+                '\n================================== END WARNING ==================================\n',
+                UserWarning, '', 0)
+
+    def check_appropriate_pressure_solver(self):
+        if (self.properties['parallel_properties']['run_in_parallel'] == True and
+                self.properties['solver_properties']['pressure_solver'] == Parameters.MULTI_GRID):
+            warnings.showwarning(
+                '\n==================================== WARNING ====================================\n' +
+                '\nYou have selected to solve the pressure field with a multigrid solver and at the\n' +
+                'same time you have selected to run the case in parallel. Parallel efficiency may be \n' +
+                'reduced in this case and a (preconditioned) conjugate gradient method is recommened.\n' +
+                'You can set the pressure solver to KRYLOV to select a conjugate gradient approach.\n' +
                 '\n================================== END WARNING ==================================\n',
                 UserWarning, '', 0)
