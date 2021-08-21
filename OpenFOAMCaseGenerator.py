@@ -4,6 +4,7 @@ import json
 
 import src.FileDirectoryIO.FileManager as IO
 import src.FileDirectoryIO.WriteUtilityScripts as UtilityScripts
+import src.FileDirectoryIO.ScreenOutput as ScreenOutput
 from src.CheckCase import CheckCase as CheckCase
 from src.CheckCase import CheckCommandLineArguments as CheckCommandLineArguments
 import src.WriteSystemDirectoryFiles.WriteForceCoefficients as ForceCoefficients
@@ -64,7 +65,7 @@ def case_properties(command_line_arguments):
         'parallel_properties': {
             # flag indicating if simulation will be run in parallel. If true, additional information for domain
             # decomposition will be written (and Allrun script modified, accordingly)
-            'run_in_parallel': True,
+            'run_in_parallel': False,
 
             # number of processors that will be used to run case in parallel
             'number_of_processors': 4,
@@ -176,7 +177,7 @@ def case_properties(command_line_arguments):
             #                   for parallel computations and non-elliptic flow problems (e.g. compressible flows)
             #   KRYLOV:         Use OpenFOAM's Krylov subspace solver (Conjugate Gradient) with preconditioning.
             #                   Recommended to use for compressible and parallel computations
-            'pressure_solver':  Parameters.MULTI_GRID,
+            'pressure_solver':  Parameters.KRYLOV,
 
             # start time
             'startTime': 0,
@@ -258,7 +259,7 @@ def case_properties(command_line_arguments):
             #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
             #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
             #   RANS:    Use this for scale modelled / averaged simulations (RANS)
-            'turbulence_type': Parameters.LAMINAR,
+            'turbulence_type': Parameters.RANS,
 
             # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
             #   LOW_RE  : first cell-height near wall is of order y+ <= 1
@@ -673,11 +674,8 @@ def main():
     utility_scripts.write_all_clean_file()
 
     # output diagnostics
-    print('Generated case : ' + properties['file_properties']['path'])
-    print('Reynolds number: ' + str(properties['flow_properties']['reynolds_number']))
-    if properties['file_properties']['mesh_treatment'] == Parameters.NO_MESH:
-        print('\nNo mesh was specified during the generation of case directory.'
-              '\nEnsure you copy a mesh manually before running your case')
+    screen_output = ScreenOutput.ScreenOutput(properties)
+    screen_output.print_summary()
 
 
 if __name__ == '__main__':
