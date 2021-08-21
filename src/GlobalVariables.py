@@ -24,11 +24,15 @@ INLET_OUTLET = 2
 # turbulence constant
 C_MU = 0.09
 
-# solver to be used
+# solver to be used for solving the navier-stokes equation
 simpleFoam = 0
 icoFoam = 1
 pisoFoam = 2
 pimpleFoam = 3
+
+# solver to be used for solving the implicit system of equations for the pressure
+MULTI_GRID = 0
+KRYLOV = 1
 
 # integral quantities used for convergence checking
 NONE = -1

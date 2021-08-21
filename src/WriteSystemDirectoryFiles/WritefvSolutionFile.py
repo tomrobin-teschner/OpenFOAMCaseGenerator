@@ -1,3 +1,6 @@
+from src import GlobalVariables as Parameters
+
+
 class fvSolutionFile:
     def __init__(self, properties, file_manager):
         self.properties = properties
@@ -10,8 +13,12 @@ class fvSolutionFile:
         self.file_manager.write(file_id, 'solvers\n{\n')
         self.file_manager.write(file_id, '    p\n')
         self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        solver           GAMG;\n')
-        self.file_manager.write(file_id, '        smoother         FDIC;\n')
+        if self.properties['solver_properties']['pressure_solver'] == Parameters.MULTI_GRID:
+            self.file_manager.write(file_id, '        solver           GAMG;\n')
+            self.file_manager.write(file_id, '        smoother         FDIC;\n')
+        elif self.properties['solver_properties']['pressure_solver'] == Parameters.KRYLOV:
+            self.file_manager.write(file_id, '        solver           PCG;\n')
+            self.file_manager.write(file_id, '        preconditioner   FDIC;\n')
         self.file_manager.write(file_id, '        tolerance        ' + str(
             self.properties['convergence_control']['absolute_convergence_criterion']) + ';\n')
         self.file_manager.write(file_id, '        relTol           ' + str(
@@ -34,7 +41,7 @@ class fvSolutionFile:
             self.properties['convergence_control']['relative_convergence_criterion']) + ';\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    "(UFinal|kFinal|omegaFinal|epsilonFinal|nuTildaFinal|qFinal|ReThetatFinal|gammaIntFinal|klFinal|ktFinal|RFinal)"\n')
+        self.file_manager.write(file_id, '    "(U|k|omega|epsilon|nuTilda|q|zeta|ReThetat|gammaInt|kl|kt|R)Final"\n')
         self.file_manager.write(file_id, '    {\n')
         self.file_manager.write(file_id, '        $U;\n')
         self.file_manager.write(file_id, '        relTol           0;\n')

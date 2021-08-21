@@ -88,7 +88,7 @@ def case_properties(command_line_arguments):
         #                     (Neumann condition for all quantities)
         #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
         'boundary_properties': {
-            'inlet': Parameters.INLET,
+            'inlet': Parameters.DFSEM_INLET,
             'outlet': Parameters.OUTLET,
             'wall': Parameters.WALL,
             'symmetry': Parameters.SYMMETRY,
@@ -103,31 +103,6 @@ def case_properties(command_line_arguments):
 
             # specify the inlet boundary condition (free stream velocity)
             'inlet_velocity': [4.0, 0, 0],
-
-            # Write custom profile for reynolds stresses at inlet? (DFSEM Inlet only)
-            'custom_Reynolds_stresses': False,
-
-            # specify the reynold stresses at the inlet (used only by DFSEM Inlet boundary condition), ignored if
-            # custom_Reynolds_stresses is set to True. The order is R_uu, R_uv, R_uw, R_vv, R_vw, R_ww
-            'reynolds_stresses': [1, 0, 0, 0, 0, 0],
-
-            # Write custom profile for turbulent length scale at inlet? (DFSEM Inlet only)
-            'custom_turbulent_length_scale': False,
-
-            # set turbulent length scale at inlet? If true, the turbulent length scale needs to be provided, if false,
-            # we need to specify how many cells we want to use to resolve turbulent eddies (dynamically adjust to the
-            # mesh size and controls the dissipation, use this option of no length scale information is available)
-            # If custom_turbulent_length_scale is set to true, this choice will have no effect (DFSEM Inlet only)
-            'set_turbulent_length_scale_at_inlet': False,
-
-            # turbulent length scale (DFSEM Inlet only)
-            'turbulent_length_scale': 0.004,
-
-            # number of cells to use to resolve turbulent eddies if no turbulent length scale is given. Typical values
-            # should be between 1 - 5, where values closer to 1 are more dissipative and values closer to 5 sustain
-            # eddies for longer. Only used if both custom_turbulent_length_scale and set_turbulent_length_scale_at_inlet
-            # are set to false. (DFSEM Inlet only)
-            'number_of_cells_per_eddy': 1,
 
             # specify how the initial field should be set
             #   BOUNDARY_CONDITIONED_BASED: set the initial field based on inlet conditions (where applicable)
@@ -154,10 +129,40 @@ def case_properties(command_line_arguments):
 
             # reference length in simulation
             'reference_length': 1.0,
+
+            # start DFSEM Inlet only section ---------------------------------------------------------------------------
+            # the below options are for the special DFSEM Inlet only. Use with caution. Before using, see remarks at
+            # https://www.cfd-online.com/Forums/openfoam-solving/177711-turbulentdfseminlet.html
+
+            # Write custom profile for reynolds stresses at inlet? (DFSEM Inlet only)
+            'custom_Reynolds_stresses': False,
+
+            # specify the reynold stresses at the inlet (used only by DFSEM Inlet boundary condition), ignored if
+            # custom_Reynolds_stresses is set to True. The order is R_uu, R_uv, R_uw, R_vv, R_vw, R_ww
+            'reynolds_stresses': [1, 0, 0, 0, 0, 0],
+
+            # Write custom profile for turbulent length scale at inlet? (DFSEM Inlet only)
+            'custom_turbulent_length_scale': False,
+
+            # set turbulent length scale at inlet? If true, the turbulent length scale needs to be provided, if false,
+            # we need to specify how many cells we want to use to resolve turbulent eddies (dynamically adjust to the
+            # mesh size and controls the dissipation, use this option of no length scale information is available)
+            # If custom_turbulent_length_scale is set to true, this choice will have no effect (DFSEM Inlet only)
+            'set_turbulent_length_scale_at_inlet': False,
+
+            # turbulent length scale (DFSEM Inlet only)
+            'turbulent_length_scale': 0.004,
+
+            # number of cells to use to resolve turbulent eddies if no turbulent length scale is given. Typical values
+            # should be between 1 - 5, where values closer to 1 are more dissipative and values closer to 5 sustain
+            # eddies for longer. Only used if both custom_turbulent_length_scale and set_turbulent_length_scale_at_inlet
+            # are set to false. (DFSEM Inlet only)
+            'number_of_cells_per_eddy': 1,
+            # end DFSEM Inlet only section -----------------------------------------------------------------------------
         },
 
         'solver_properties': {
-            # name of solver to use for simulation
+            # name of solver to use for solving the Navier-Stokes equations
             #   incompressible:
             #     simpleFoam: steady state, turbulent (RANS) solver based on the SIMPLE algorithm
             #     icoFoam:    unsteady, non-turbulent (only laminar) solver based on the PISO algorithm
@@ -165,6 +170,13 @@ def case_properties(command_line_arguments):
             #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use
             #                 higher CFL numbers than pisoFoam while being more stable. Recommended in general
             'solver': Parameters.pimpleFoam,
+
+            # name of the solver to use to solve the implicit system of equations for the pressure
+            #   MULTI_GRID:     Use OpenFOAM's geometric agglomerated algebraic multigrid (GAMG). May be less efficient
+            #                   for parallel computations and non-elliptic flow problems (e.g. compressible flows)
+            #   KRYLOV:         Use OpenFOAM's Krylov subspace solver (Conjugate Gradient) with preconditioning.
+            #                   Recommended to use for compressible and parallel computations
+            'pressure_solver':  Parameters.KRYLOV,
 
             # start time
             'startTime': 0,
@@ -253,6 +265,22 @@ def case_properties(command_line_arguments):
             #   HIGH_RE : first cell-height near wall is of order y+ >  30
             'wall_modelling': Parameters.LOW_RE,
 
+            # select how to calculate turbulent quantities at inlet
+            #   INTERNAL:    Internal flow assumes the turbulent length scale to be limited by the channel / wind tunnel
+            #                height or diameter, expressed through the reference_length parameter. It is calculated as
+            #                0.07 * reference length
+            #   EXTERNAL:    External flow assumes the turbulent length scale to be limited by the scales within the
+            #                fully turbulent boundary layer and approximately equal to 40% of the boundary layer
+            #                thickness
+            #   RATIO:       Alternatively, the turbulent to laminar viscosity ratio may be prescribed
+            #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the
+            #                turbulent to laminar viscosity ratio entirely on the freestream turbulence intensity.
+            #                Use this option if any of the above are not suitable
+            'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
+
+            # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
+            'turbulent_to_laminar_ratio': 10,
+
             # RANS turbulence model (will be ignored if turbulence_type != RANS)
             #   Based on linear eddy viscosity:
             #     kEpsilon:        standard k-epsilon model
@@ -326,22 +354,6 @@ def case_properties(command_line_arguments):
             #                           The min and max delta are calculated using the face to face distance of
             #                           the cell
             'delta_model': Parameters.cubeRootVol,
-
-            # select how to calculate turbulent quantities at inlet
-            #   INTERNAL:    Internal flow assumes the turbulent length scale to be limited by the channel / wind tunnel
-            #                height or diameter, expressed through the reference_length parameter. It is calculated as
-            #                0.07 * reference length
-            #   EXTERNAL:    External flow assumes the turbulent length scale to be limited by the scales within the
-            #                fully turbulent boundary layer and approximately equal to 40% of the boundary layer
-            #                thickness
-            #   RATIO:       Alternatively, the turbulent to laminar viscosity ratio may be prescribed
-            #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the
-            #                turbulent to laminar viscosity ratio entirely on the freestream turbulence intensity.
-            #                Use this option if any of the above are not suitable
-            'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
-
-            # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
-            'turbulent_to_laminar_ratio': 10,
         },
 
         'convergence_control': {
@@ -370,7 +382,7 @@ def case_properties(command_line_arguments):
             'averaging_time_steps': 20,
 
             # specify the convergence threshold for the integral quantities
-            'integral_quantities_convergence_threshold': 1e-4,
+            'integral_quantities_convergence_threshold': 1e-3,
 
             # specify how many iterations to wait before checking convergence criterion
             'time_steps_to_wait_before_checking_convergence': 100,
@@ -574,9 +586,7 @@ def main():
 
     # check case (make sure that current set up will not produce any problem)
     check_case = CheckCase.CheckCase(properties)
-    check_case.check_correct_turbulence_model_setup()
-    check_case.check_correct_boundary_condition_setup()
-    check_case.check_appropriate_numerical_scheme_combination()
+    check_case.run_all_checks()
 
     # add additional entries to dictionaries
     add_default_properties(properties)
