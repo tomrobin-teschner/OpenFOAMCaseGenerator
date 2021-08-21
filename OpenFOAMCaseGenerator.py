@@ -287,12 +287,18 @@ def case_properties(command_line_arguments):
 
             # LES / DES model
             #   LES:
-            #     Smagorinsky:         Large Eddy Simulation based on classical Smagorinsky approach (fixed C_s)
-            #     kEqn:                solve transport equation for sub-grid scale kinetic energy k_sgs
-            #     dynamicKEqn:
-            #     dynamicLagrangian:
-            #     DeardorffDiffStress:
-            #     WALE:                Wall adapting local eddy (WALE)
+            #     Smagorinsky:          Large Eddy Simulation based on classical Smagorinsky approach (fixed C_s)
+            #     kEqn:                 One equation eddy-viscosity model
+            #                           Eddy viscosity SGS model using a modeled balance equation to simulate the
+            #                           behaviour of k.
+            #     dynamicKEqn:          Dynamic one equation eddy-viscosity model
+            #                           Eddy viscosity SGS model using a modeled balance equation to simulate
+            #                           the behaviour of k in which a dynamic procedure is applied to evaluate the
+            #                           coefficients
+            #     dynamicLagrangian:    Dynamic SGS model with Lagrangian averaging
+            #     DeardorffDiffStress:  Differential SGS Stress Equation Model for incompressible and
+            #                           compressible flows
+            #     WALE:                 The Wall-adapting local eddy-viscosity (WALE) SGS model
             #
             #   DES:
             #     SpalartAllmarasDES:   Detached Eddy Simulation based on the Spalart-Allmaras model
@@ -304,13 +310,21 @@ def case_properties(command_line_arguments):
             'LES_model': Parameters.Smagorinsky,
 
             # model to calculate delta coefficient in LES / DES model
-            #   smooth:
-            #   Prandtl:
-            #   maxDeltaxyz:
-            #   cubeRootVol:         Take the cube root of the volume as delta
-            #   maxDeltaxyzCubeRoot:
-            #   vanDriest:           Applies van Driest damping function close to the wall
-            #   IDDESDelta:          Applies filter from IDDES calculation
+            #   smooth:                 Smoothed delta which takes a given simple geometric delta and applies
+            #                           smoothing to it such that the ratio of deltas between two cells is no
+            #                           larger than a specified amount, typically 1.15
+            #   Prandtl:                Apply Prandtl mixing-length based damping function to the specified
+            #                           geometric delta to improve near-wall behavior or LES models
+            #   maxDeltaxyz:            Delta calculated by taking the maximum distance between the cell centre
+            #                           and any face centre.  For a regular hex cell, the computed delta will
+            #                           equate to half of the cell width; accordingly, the deltaCoeff model
+            #                           coefficient should be set to 2 for this case
+            #   cubeRootVol:            Simple cube-root of cell volume delta used in LES models
+            #   maxDeltaxyzCubeRoot:    Maximum delta between maxDeltaxyz and cubeRootVolDelta
+            #   vanDriest:              Simple cube-root of cell volume delta used in incompressible LES models
+            #   IDDESDelta:             IDDESDelta used by the IDDES (improved low Re Spalart-Allmaras DES model)
+            #                           The min and max delta are calculated using the face to face distance of
+            #                           the cell
             'delta_model': Parameters.cubeRootVol,
 
             # select how to calculate turbulent quantities at inlet
