@@ -31,11 +31,26 @@ def case_properties(command_line_arguments):
     properties = {
         'file_properties': {
             # name of the case to use (will be used for the folder name)
-            'case_name': 'NACA_0012_kw_SST_y+_1_Re_6e6',
+            'case_name': 'square_cylinder_Re=40',
 
-            # directory where mesh is located (the specified directory needs to contain a folder called polyMesh which
-            # in turn contains the boundary, cellZones, faces, faceZones, neighbour, owner and points files)
-            'mesh_directory': os.path.join('examples', 'mesh', 'airfoil'),
+            # specify how the mesh should be incorporated into the case directory
+            #   The following types are supported
+            #   NO_MESH:                                Don't do anything, leave mesh treatment up to user
+            #   BLOCK_MESH_DICT:                        Copy blockMeshDict file into case, requires the path to the file
+            #   BLOCK_MESH_AND_SNAPPY_HEX_MESH_DICT:    Copy both blockMeshDict and snappyHexMeshDict to directory,
+            #                                           requires the path to both files
+            #   POLY_MESH:                              Specify a polyMesh directory and copy it into the case setup
+            'mesh_treatment': Parameters.POLY_MESH,
+
+            # directory where the blockMeshDict file is located (needs to be named blockMeshDict)
+            'blockmeshdict_directory': os.path.join(''),
+
+            # directory where the snappyHexMeshDict file is located (needs to be named snappyHexMeshDict)
+            'snappyhexmeshdict_directory': os.path.join(''),
+
+            # directory where the polyMesh is located (the specified directory needs to contain a folder called polyMesh
+            # which in turn contains the boundary, cellZones, faces, faceZones, neighbour, owner and points files)
+            'polymesh_directory': os.path.join('examples', 'mesh', 'square_cylinder'),
 
             # path to where the currently generated case should be copied to (parent directory)
             # if left empty, the case will be written into the current directory
@@ -75,9 +90,8 @@ def case_properties(command_line_arguments):
         'boundary_properties': {
             'inlet': Parameters.INLET,
             'outlet': Parameters.OUTLET,
-            'upper': Parameters.WALL,
-            'lower': Parameters.WALL,
-            'trailingEdge': Parameters.WALL,
+            'wall': Parameters.WALL,
+            'symmetry': Parameters.SYMMETRY,
             'BaseAndTop': Parameters.EMPTY,
         },
 
@@ -88,7 +102,7 @@ def case_properties(command_line_arguments):
             'custom_velocity_inlet_profile': False,
 
             # specify the inlet boundary condition (free stream velocity)
-            'inlet_velocity': [6.0, 0, 0],
+            'inlet_velocity': [4.0, 0, 0],
 
             # Write custom profile for reynolds stresses at inlet? (DFSEM Inlet only)
             'custom_Reynolds_stresses': False,
@@ -133,7 +147,7 @@ def case_properties(command_line_arguments):
             },
 
             # specify the laminar viscosity
-            'nu': 1e-6,
+            'nu': 1e-1,
 
             # freestream turbulent intensity (between 0 - 1)
             'freestream_turbulent_intensity': 0.05,
@@ -150,13 +164,13 @@ def case_properties(command_line_arguments):
             #     pisoFoam:   unsteady, turbulent (RANS, LES) solver based on the PISO algorithm
             #     pimpleFoam: unsteady, turbulent (RANS, LES) solver based on the SIMPLE + PISO algorithm. May use
             #                 higher CFL numbers than pisoFoam while being more stable. Recommended in general
-            'solver': Parameters.simpleFoam,
+            'solver': Parameters.pimpleFoam,
 
             # start time
             'startTime': 0,
 
             # end time
-            'endTime': 500,
+            'endTime': 1,
 
             # specify from which time directory to start from
             #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -173,13 +187,13 @@ def case_properties(command_line_arguments):
 
             # time step to be used (will be ignored if CFL-based time stepping is chosen)
             # WARNING: solver needs to support adjustable deltaT calculation
-            'deltaT': 1,
+            'deltaT': 1e-2,
 
             # largest allowable time step
             'maxDeltaT': 1,
 
             # frequency at which to write output files. Behaviour controlled through write control entry below.
-            'write_frequency': 100,
+            'write_frequency': 10,
 
             # write control, specify when to output results, the options are listed below
             #   TIME_STEP:           write every 'write_frequency' time steps
@@ -194,7 +208,7 @@ def case_properties(command_line_arguments):
             'purge_write': 0,
 
             # under-relaxation factor for pressure
-            'under_relaxation_p': 0.3,
+            'under_relaxation_p': 0.7,
 
             # under-relaxation factor for velocity
             'under_relaxation_U': 0.7,
@@ -210,7 +224,7 @@ def case_properties(command_line_arguments):
             # time integration scheme, options are listed below
             #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
             #   UNSTEADY:     Integrate in time and resolve  dU / dt
-            'time_integration': Parameters.STEADY_STATE,
+            'time_integration': Parameters.UNSTEADY,
 
             # Choose preset of numerical schemes based on accuracy and robustness requirements
             #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
@@ -232,7 +246,7 @@ def case_properties(command_line_arguments):
             #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
             #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
             #   RANS:    Use this for scale modelled / averaged simulations (RANS)
-            'turbulence_type': Parameters.RANS,
+            'turbulence_type': Parameters.LAMINAR,
 
             # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
             #   LOW_RE  : first cell-height near wall is of order y+ <= 1
@@ -365,7 +379,7 @@ def case_properties(command_line_arguments):
             'center_of_rotation': [0.25, 0, 0],
 
             # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-            'wall_boundaries': ['lower', 'upper', 'trailingEdge'],
+            'wall_boundaries': ['wall'],
 
             # write force coefficients to file
             'write_force_coefficients': True,
@@ -637,6 +651,9 @@ def main():
     # output diagnostics
     print('Generated case : ' + properties['file_properties']['path'])
     print('Reynolds number: ' + str(properties['flow_properties']['reynolds_number']))
+    if properties['file_properties']['mesh_treatment'] == Parameters.NO_MESH:
+        print('\nNo mesh was specified during the generation of case directory.'
+              '\nEnsure you copy a mesh manually before running your case')
 
 
 if __name__ == '__main__':

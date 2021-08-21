@@ -14,26 +14,29 @@ class WriteUtilityScripts:
         self.file_manager.write(file_id,
                                 '# ------------------------------------------------------------------------------\n')
         self.file_manager.write(file_id, '\n')
+
+        if self.properties['file_properties']['mesh_treatment'] == Parameters.BLOCK_MESH_DICT:
+            self.file_manager.write(file_id, 'blockMesh\n')
+        elif self.properties['file_properties']['mesh_treatment'] == Parameters.BLOCK_MESH_AND_SNAPPY_HEX_MESH_DICT:
+            self.file_manager.write(file_id, 'blockMesh\n')
+            self.file_manager.write(file_id, 'snappyHexMesh\n')
+
+        pre_solver_flag = ''
+        post_solver_flag = ''
         if self.properties['parallel_properties']['run_in_parallel']:
             self.file_manager.write(file_id, 'decomposePar\n')
-            if self.properties['solver_properties']['solver'] == Parameters.simpleFoam:
-                self.file_manager.write(file_id, 'foamJob -parallel simpleFoam\n')
-            elif self.properties['solver_properties']['solver'] == Parameters.icoFoam:
-                self.file_manager.write(file_id, 'foamJob -parallel icoFoam\n')
-            elif self.properties['solver_properties']['solver'] == Parameters.pisoFoam:
-                self.file_manager.write(file_id, 'foamJob -parallel pisoFoam\n')
-            elif self.properties['solver_properties']['solver'] == Parameters.pimpleFoam:
-                self.file_manager.write(file_id, 'foamJob -parallel pimpleFoam\n')
-        else:
-            if self.properties['solver_properties']['solver'] == Parameters.simpleFoam:
-                self.file_manager.write(file_id, 'foamJob simpleFoam\n')
-            elif self.properties['solver_properties']['solver'] == Parameters.icoFoam:
-                self.file_manager.write(file_id, 'foamJob icoFoam\n')
-            elif self.properties['solver_properties']['solver'] == Parameters.pisoFoam:
-                self.file_manager.write(file_id, 'foamJob pisoFoam\n')
-            elif self.properties['solver_properties']['solver'] == Parameters.pimpleFoam:
-                self.file_manager.write(file_id, 'foamJob pimpleFoam\n')
-        self.file_manager.write(file_id, 'foamLog log\n')
+            pre_solver_flag = 'mpirun -np ' + str(self.properties['parallel_properties']['number_of_processors']) + ' '
+            post_solver_flag = ' -parallel'
+
+        if self.properties['solver_properties']['solver'] == Parameters.simpleFoam:
+            self.file_manager.write(file_id, pre_solver_flag + 'simpleFoam' + post_solver_flag + '\n')
+        elif self.properties['solver_properties']['solver'] == Parameters.icoFoam:
+            self.file_manager.write(file_id, pre_solver_flag + 'icoFoam' + post_solver_flag + '\n')
+        elif self.properties['solver_properties']['solver'] == Parameters.pisoFoam:
+            self.file_manager.write(file_id, pre_solver_flag + 'pisoFoam' + post_solver_flag + '\n')
+        elif self.properties['solver_properties']['solver'] == Parameters.pimpleFoam:
+            self.file_manager.write(file_id, pre_solver_flag + 'pimpleFoam' + post_solver_flag + '\n')
+
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
                                 '# ------------------------------------------------------------------------------\n')

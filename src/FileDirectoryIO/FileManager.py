@@ -1,5 +1,8 @@
 import os
-from distutils.dir_util import copy_tree
+import distutils.dir_util
+import distutils.file_util
+import shutil
+from src import GlobalVariables as Parameters
 
 
 class FileManager:
@@ -7,14 +10,15 @@ class FileManager:
         self.properties = properties
 
     def copy_mesh_to_destination(self):
-        # if mesh directory is specified, copy data to current case
-        if len(self.properties['file_properties']['mesh_directory']) != 0:
-            mesh_source_dir = os.path.join(self.properties['file_properties']['mesh_directory'], 'polyMesh')
-            mesh_destination_dir = os.path.join(self.properties['file_properties']['path'], 'constant', 'polyMesh')
-            copy_tree(mesh_source_dir, mesh_destination_dir)
-        else:
-            pass
+        if self.properties['file_properties']['mesh_treatment'] == Parameters.BLOCK_MESH_DICT:
+            self.__copy_block_mesh_dict()
 
+        elif self.properties['file_properties']['mesh_treatment'] == Parameters.BLOCK_MESH_AND_SNAPPY_HEX_MESH_DICT:
+            self.__copy_block_mesh_dict()
+            self.__copy_snappy_hex_mesh_dict()
+
+        elif self.properties['file_properties']['mesh_treatment'] == Parameters.POLY_MESH:
+            self.__copy_poly_mesh_dict()
 
     def create_directory_structure(self):
         self.__create_directory(os.path.join(self.properties['file_properties']['path']))
@@ -23,15 +27,6 @@ class FileManager:
         self.__create_directory(os.path.join(self.properties['file_properties']['path'], 'system'))
         self.__create_directory(os.path.join(self.properties['file_properties']['path'], 'system/include'))
         self.__create_case_file()
-
-    def __create_directory(self, directory):
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-    def __create_case_file(self):
-        file_id = open(os.path.join(self.properties['file_properties']['path'],
-                                    self.properties['file_properties']['case_name'] + '.foam'), 'w')
-        file_id.close()
 
     def create_file(self, folder, file_name):
         file_id = open(os.path.join(self.properties['file_properties']['path'], folder, file_name), 'w')
@@ -63,3 +58,33 @@ class FileManager:
 
     def get_version(self):
         return self.properties['file_properties']['version']
+
+    def __copy_block_mesh_dict(self):
+        src = os.path.join(self.properties['file_properties']['blockmeshdict_directory'], 'blockMeshDict')
+        dst = os.path.join(self.properties['file_properties']['path'], 'system', 'blockMeshDict')
+        self.__copy_file(src, dst)
+
+    def __copy_snappy_hex_mesh_dict(self):
+        src = os.path.join(self.properties['file_properties']['snappyhexmeshdict_directory'], 'snappyHexMeshDict')
+        dst = os.path.join(self.properties['file_properties']['path'], 'system', 'snappyHexMeshDict')
+        self.__copy_file(src, dst)
+
+    def __copy_poly_mesh_dict(self):
+        src = os.path.join(self.properties['file_properties']['polymesh_directory'], 'polyMesh')
+        dst = os.path.join(self.properties['file_properties']['path'], 'constant', 'polyMesh')
+        self.__copy_directory(src, dst)
+
+    def __copy_directory(self, src, dst):
+        distutils.dir_util.copy_tree(src, dst)
+
+    def __copy_file(self, src, dst):
+        distutils.file_util.copy_file(src, dst)
+
+    def __create_directory(self, directory):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    def __create_case_file(self):
+        file_id = open(os.path.join(self.properties['file_properties']['path'],
+                                    self.properties['file_properties']['case_name'] + '.foam'), 'w')
+        file_id.close()
