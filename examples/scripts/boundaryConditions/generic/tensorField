@@ -1,0 +1,59 @@
+// get access to dictionary
+const IOdictionary& d = static_cast<const IOdictionary&>
+(
+    dict.parent().parent()
+);
+
+// get access to computational mesh
+const fvMesh& mesh = refCast<const fvMesh>(d.db());
+
+// get boundary patch ID by boundary condition name
+const label id = mesh.boundary().findPatchID("inlet");
+
+// get boundary patch based on ID obtained above
+const fvPatch& patch = mesh.boundary()[id];
+
+// current (total) time
+const scalar currentTime = d.db().time().value();
+
+// create new tensor field which will be written on boundary patch
+tensorField field(patch.size(), tensor(0, 0, 0, 0, 0, 0, 0, 0, 0));
+
+// loop over all boundary faces if requires
+forAll(field, faceI)
+{
+    // example usage shown below
+    // access to boundary face coordinates
+    const auto x = patch.Cf()[faceI].x();
+    const auto y = patch.Cf()[faceI].y();
+    const auto z = patch.Cf()[faceI].z();
+
+    // set field based on location in space and time as required
+    if (y > 0.5)
+    {
+        field[faceI].xx() = 1;
+        field[faceI].xy() = 0;
+        field[faceI].xz() = 0;
+        field[faceI].yx() = 0;
+        field[faceI].yy() = 1;
+        field[faceI].yz() = 0;
+        field[faceI].zx() = 0;
+        field[faceI].zy() = 0;
+        field[faceI].zz() = 1;
+    }
+    else
+    {
+        field[faceI].xx() = 0;
+        field[faceI].xy() = 0;
+        field[faceI].xz() = 0;
+        field[faceI].yx() = 0;
+        field[faceI].yy() = 0;
+        field[faceI].yz() = 0;
+        field[faceI].zx() = 0;
+        field[faceI].zy() = 0;
+        field[faceI].zz() = 0;
+    }
+}
+
+// set boundary values to those computed values of "field"
+field.writeEntry("", os);

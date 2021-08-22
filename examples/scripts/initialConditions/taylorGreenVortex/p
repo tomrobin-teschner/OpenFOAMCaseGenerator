@@ -1,0 +1,12 @@
+const IOdictionary& d = static_cast<const IOdictionary&>(dict);
+const fvMesh& mesh = refCast<const fvMesh>(d.db());
+scalarField p(mesh.nCells(), 0.0);
+forAll(p, cellI)
+{
+    auto x = mesh.C()[cellI].x();
+    auto y = mesh.C()[cellI].y();
+    auto z = mesh.C()[cellI].z();
+
+    p[cellI] = - 1.0/16.0 * (Foam::cos(2.0 * x) + Foam::cos(2.0 * y)) * ( Foam::cos(2.0 * z) + 2.0 );
+}
+p.writeEntry("", os);

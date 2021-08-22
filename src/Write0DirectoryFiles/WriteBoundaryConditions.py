@@ -1,7 +1,7 @@
 from src import GlobalVariables as Parameters
 
 import sys
-from math import pow
+from math import pow, sqrt
 
 
 class WriteBoundaryConditions:
@@ -10,9 +10,43 @@ class WriteBoundaryConditions:
         self.properties = properties
         self.file_manager = file_manager
 
+        # list of all variables managed by this class. Each variable is mapped to a list of properties that contains
+        # the following information
+        #
+        #   first index:    type of boundary field (either of scalar, vector or tensor type)
+        #   second index:   dimension of of boundary field
+        self.variables = {
+            'U':        ['volVectorField',      '[0 1 -1 0 0 0 0]'],
+            'p':        ['volScalarField',      '[0 2 -2 0 0 0 0]'],
+            'k':        ['volScalarField',      '[0 2 -2 0 0 0 0]'],
+            'omega':    ['volScalarField',      '[0 0 -1 0 0 0 0]'],
+            'epsilon':  ['volScalarField',      '[0 2 -3 0 0 0 0]'],
+            'nuTilda':  ['volScalarField',      '[0 2 -1 0 0 0 0]'],
+            'nut':      ['volScalarField',      '[0 2 -1 0 0 0 0]'],
+            'kt':       ['volScalarField',      '[0 2 -2 0 0 0 0]'],
+            'kl':       ['volScalarField',      '[0 2 -2 0 0 0 0]'],
+            'ReThetat': ['volScalarField',      '[0 0 0 0 0 0 0]'],
+            'gammaInt': ['volScalarField',      '[0 0 0 0 0 0 0]'],
+            'R':        ['volSymmTensorField',  '[0 2 -2 0 0 0 0]'],
+        }
+
+        # list of all wall function types used for RANS turbulence modelling. Not all wall modelling approaches have
+        # wall functions applied and appropriate dirichlet or neumann boundary conditions are set here instead. These
+        # are left blank in the list below.
+        self.RANS_wall_functions = {
+            'k':        ['kLowReWallFunction', 'kqRWallFunction'],
+            'kl':       ['', 'kqRWallFunction'],
+            'kt':       ['', 'kqRWallFunction'],
+            'omega':    ['omegaWallFunction', 'omegaWallFunction'],
+            'epsilon':  ['', 'epsilonWallFunction'],
+            'nut':      ['nutLowReWallFunction', 'nutkWallFunction'],
+            'R':        ['kLowReWallFunction', 'kqRWallFunction'],
+        }
+
         # calculate freestream conditions
         # see https://www.cfd-online.com/Wiki/Turbulence_free-stream_boundary_conditions as a reference
         self.velocity_magnitude = self.properties['flow_properties']['velocity_magnitude']
+        self.turbulence_intensity = self.properties['flow_properties']['freestream_turbulent_intensity']
         self.freestream_k = self.__calculate_freestream_k()
         self.freestream_omega = self.__calculate_freestream_omega()
         self.freestream_epsilon = self.__calculate_freestream_epsilon()
@@ -29,592 +63,332 @@ class WriteBoundaryConditions:
         return 0.4 * delta
 
     def __calculate_turbulent_to_laminar_viscosity_ratio(self):
-        if self.properties['flow_properties']['freestream_turbulent_intensity'] < 0.01:
+        TI = self.turbulence_intensity
+        if TI < 0.01:
             return 1
-        elif 0.01 <= self.properties['flow_properties']['freestream_turbulent_intensity'] < 0.05:
-            return 1 + 9 * (self.properties['flow_properties']['freestream_turbulent_intensity'] - 0.01) / 0.04
-        elif 0.05 <= self.properties['flow_properties']['freestream_turbulent_intensity'] < 0.1:
-            return 10 + 90 * (self.properties['flow_properties']['freestream_turbulent_intensity'] - 0.05) / 0.05
-        elif self.properties['flow_properties']['freestream_turbulent_intensity'] >= 0.1:
+        elif 0.01 <= TI < 0.05:
+            return 1 + 9 * (TI - 0.01) / 0.04
+        elif 0.05 <= TI < 0.1:
+            return 10 + 90 * (TI - 0.05) / 0.05
+        elif TI >= 0.1:
             return 100
 
     def __calculate_freestream_k(self):
-        return (1.5 * pow(self.velocity_magnitude *
-                          self.properties['flow_properties']['freestream_turbulent_intensity'], 2))
+        TI = self.turbulence_intensity
+        UMag = self.velocity_magnitude
+        return 1.5 * pow(UMag * TI, 2)
 
     def __calculate_freestream_omega(self):
-        if self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
-            tls = self.__calculate_turbulent_length_scale_for_internal_flows()
-            return pow(Parameters.C_MU, -0.25) * pow(self.freestream_k, 0.5) / tls
-        elif self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
-            tls = self.__calculate_turbulent_length_scale_for_external_flows()
-            return pow(Parameters.C_MU, -0.25) * pow(self.freestream_k, 0.5) / tls
-        elif self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.RATIO:
-            return ((self.freestream_k / self.properties['flow_properties']['nu']) /
-                    self.properties['turbulence_properties']['turbulent_to_laminar_ratio'])
-        elif self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.RATIO_AUTO:
-            ttlr = self.__calculate_turbulent_to_laminar_viscosity_ratio()
-            return (self.freestream_k / self.properties['flow_properties']['nu']) / ttlr
+        turbulence_at_inlet = self.properties['turbulence_properties']['turbulent_quantities_at_inlet']
+        turbulent_length_scale = self.__calculate_turbulent_length_scale_for_internal_flows()
+        turbulent_to_laminar_viscosity_ratio = self.properties['turbulence_properties']['turbulent_to_laminar_ratio']
+        turbulent_to_laminar_viscosity_ratio_calculated = self.__calculate_turbulent_to_laminar_viscosity_ratio()
+        nu = self.properties['flow_properties']['nu']
+        k = self.freestream_k
+
+        if turbulence_at_inlet == Parameters.INTERNAL:
+            return pow(Parameters.C_MU, -0.25) * pow(k, 0.5) / turbulent_length_scale
+        elif turbulence_at_inlet == Parameters.EXTERNAL:
+            return pow(Parameters.C_MU, -0.25) * pow(k, 0.5) / turbulent_length_scale
+        elif turbulence_at_inlet == Parameters.RATIO:
+            return (k / nu) / turbulent_to_laminar_viscosity_ratio
+        elif turbulence_at_inlet == Parameters.RATIO_AUTO:
+            return (k / nu) / turbulent_to_laminar_viscosity_ratio_calculated
 
     def __calculate_freestream_epsilon(self):
-        if self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
-            tls = self.__calculate_turbulent_length_scale_for_internal_flows()
-            return pow(Parameters.C_MU, 0.75) * pow(self.freestream_k, 1.5) / tls
-        elif self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
-            tls = self.__calculate_turbulent_length_scale_for_external_flows()
-            return pow(Parameters.C_MU, 0.75) * pow(self.freestream_k, 1.5) / tls
-        elif self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.RATIO:
-            return ((Parameters.C_MU * pow(self.freestream_k, 2) / self.properties['flow_properties']['nu']) /
-                    self.properties['turbulence_properties']['turbulent_to_laminar_ratio'])
-        elif self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.RATIO_AUTO:
-            ttlr = self.__calculate_turbulent_to_laminar_viscosity_ratio()
-            return (Parameters.C_MU * pow(self.freestream_k, 2) / self.properties['flow_properties']['nu']) / ttlr
+        turbulence_at_inlet = self.properties['turbulence_properties']['turbulent_quantities_at_inlet']
+        turbulent_length_scale = self.__calculate_turbulent_length_scale_for_internal_flows()
+        turbulent_to_laminar_viscosity_ratio = self.properties['turbulence_properties']['turbulent_to_laminar_ratio']
+        turbulent_to_laminar_viscosity_ratio_calculated = self.__calculate_turbulent_to_laminar_viscosity_ratio()
+        nu = self.properties['flow_properties']['nu']
+        k = self.freestream_k
+
+        if turbulence_at_inlet == Parameters.INTERNAL:
+            return pow(Parameters.C_MU, 0.75) * pow(k, 1.5) / turbulent_length_scale
+        elif turbulence_at_inlet == Parameters.EXTERNAL:
+            return pow(Parameters.C_MU, 0.75) * pow(k, 1.5) / turbulent_length_scale
+        elif turbulence_at_inlet == Parameters.RATIO:
+            return (Parameters.C_MU * pow(k, 2) / nu) / turbulent_to_laminar_viscosity_ratio
+        elif turbulence_at_inlet == Parameters.RATIO_AUTO:
+            return (Parameters.C_MU * pow(k, 2) / nu) / turbulent_to_laminar_viscosity_ratio_calculated
 
     def __calculate_freestream_nuTilda(self):
-        if self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.INTERNAL:
-            tls = self.__calculate_turbulent_length_scale_for_internal_flows()
-            return (1.5 * self.velocity_magnitude *
-                    self.properties['flow_properties']['freestream_turbulent_intensity'] * tls)
-        elif self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] == Parameters.EXTERNAL:
-            tls = self.__calculate_turbulent_length_scale_for_external_flows()
-            return (1.5 * self.velocity_magnitude *
-                    self.properties['flow_properties']['freestream_turbulent_intensity'] * tls)
+        turbulence_at_inlet = self.properties['turbulence_properties']['turbulent_quantities_at_inlet']
+        nu = self.properties['flow_properties']['nu']
+        turbulent_length_scale = self.__calculate_turbulent_length_scale_for_internal_flows()
+        k = self.freestream_k
+        TI = self.turbulence_intensity
+        UMag = self.velocity_magnitude
+
+        if turbulence_at_inlet == Parameters.INTERNAL or turbulence_at_inlet == Parameters.EXTERNAL:
+            return (sqrt(1.5) * UMag * TI * turbulent_length_scale)
         else:
-            return 5 * self.properties['flow_properties']['nu']
+            return 5 * nu
 
     def __calculate_ReThetaT(self):
-        if self.properties['flow_properties']['freestream_turbulent_intensity'] <= 0.013:
-            return (1173.51 - 589.428 * self.properties['flow_properties']['freestream_turbulent_intensity'] * 100 +
-                    0.2196 / pow(self.properties['flow_properties']['freestream_turbulent_intensity'] * 100, 2))
-        elif self.properties['flow_properties']['freestream_turbulent_intensity'] > 0.013:
-            return (331.5 / pow((self.properties['flow_properties']['freestream_turbulent_intensity'] * 100 - 0.5658),
-                                0.671))
+        TI = self.turbulence_intensity
+        if TI <= 0.013:
+            return 1173.51 - 589.428 * TI * 100 + 0.2196 / pow(TI * 100, 2)
+        elif TI > 0.013:
+            return 331.5 / pow((TI * 100 - 0.5658), 0.671)
 
-    def __write_header(self, file_id, field_type, folder, variable_name, dimensions, internal_field):
-        # create new boundary file
-        self.file_manager.write_header(file_id, field_type, folder, variable_name)
+    def write_all_boundary_conditions(self):
+        # open files
+        file_id = self.__open_boundary_condition_files()
 
-        # write dimensions and internal-field
-        self.file_manager.write(file_id, '\ndimensions      ' + dimensions + ';\n\n')
-        self.file_manager.write(file_id, 'internalField   ' + internal_field + ';\n\n')
+        # write headers
+        self.__write_headers_to_file(file_id)
 
-    def write_all_appropriate_boundary_conditions(self):
-        self.write_U()
-        self.write_p()
-        self.write_k()
-        self.write_kt()
-        self.write_kl()
-        self.write_nut()
-        self.write_omega()
-        self.write_epsilon()
-        self.write_nuTilda()
-        self.write_ReThetat()
-        self.write_gammaInt()
-        self.write_R()
+        # write dimensions
+        self.__write_dimensions(file_id)
 
-    def write_U(self):
-        file_id = self.file_manager.create_file('0', 'U')
+        # construct initial conditions
+        bc_freestream_conditions, bc_zero_initial_conditions = self.__construct_initial_conditions()
 
-        initial_field = ('uniform (' + str(self.properties['flow_properties']['inlet_velocity'][0]) + ' ' +
-                         str(self.properties['flow_properties']['inlet_velocity'][1]) + ' ' +
-                         str(self.properties['flow_properties']['inlet_velocity'][2]) + ')')
+        # write initial field
+        self.__write_initial_conditions_to_file(file_id, bc_freestream_conditions, bc_zero_initial_conditions)
 
-        self.file_manager.write_header(file_id, 'volVectorField', '0', 'U')
-        self.file_manager.write(file_id, '\ndimensions      [0 1 -1 0 0 0 0];\n\n')
+        # write boundary conditions here
+        self.__write_boundary_condition_entries_to_file(file_id, bc_freestream_conditions)
 
-        if self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
-            if 'U' in self.properties['flow_properties']['custom_initial_conditions']['variables']:
-                self.__custom_initial_conditions(file_id, Parameters.VECTOR)
+        # close all boundary condition files
+        self.__close_boundary_condition_files(file_id)
+
+    def __open_boundary_condition_files(self):
+        file_id = {}
+        for var in self.variables:
+            file_id[var] = self.file_manager.create_file('0', var)
+        return file_id
+
+    def __close_boundary_condition_files(self, file_id):
+        for var in self.variables:
+            self.file_manager.close_file(file_id[var])
+
+    def __write_headers_to_file(self, file_id):
+        for var, bc_props in self.variables.items():
+            self.file_manager.write_header(file_id[var], bc_props[Parameters.BC_TYPE], '0', var)
+
+    def __write_dimensions(self, file_id):
+        for var, bc_props in self.variables.items():
+            self.file_manager.write(file_id[var], '\ndimensions      ' + bc_props[Parameters.BC_DIMENSIONS] + ';\n\n')
+
+    def __write_initial_conditions_to_file(self, file_id, bc_freestream_conditions, bc_zero_initial_conditions):
+        initial_conditions_type = self.properties['flow_properties']['initial_conditions']
+        custom_initial_conditions_flag = self.properties['flow_properties']['custom_initial_conditions']
+        custom_initial_conditions_setup = self.properties['flow_properties']['custom_initial_conditions_setup']
+        for var in self.variables:
+            if custom_initial_conditions_flag:
+                if var in custom_initial_conditions_setup:
+                    path_to_script = custom_initial_conditions_setup[var]
+                    self.__write_custom_initial_conditions(file_id[var], path_to_script)
+            if (custom_initial_conditions_flag is False) or (var not in custom_initial_conditions_setup):
+                if initial_conditions_type == Parameters.BOUNDARY_CONDITIONED_BASED:
+                    self.file_manager.write(file_id[var], 'internalField   ' + bc_freestream_conditions[var] + ';\n\n')
+                elif initial_conditions_type == Parameters.ZERO_VELOCITY:
+                    self.file_manager.write(file_id[var],
+                                            'internalField   ' + bc_zero_initial_conditions[var] + ';\n\n')
+
+    def __construct_initial_conditions(self):
+        U = self.properties['flow_properties']['inlet_velocity']
+        uiui = (2.0 / 3.0) * self.freestream_k
+        bc_freestream_conditions = {
+            'U': 'uniform (' + str(U[0]) + ' ' + str(U[1]) + ' ' + str(U[2]) + ')',
+            'p': 'uniform 0',
+            'k': 'uniform ' + str(self.freestream_k),
+            'kt': 'uniform ' + str(self.freestream_k),
+            'kl': 'uniform 0',
+            'nut': 'uniform 0',
+            'epsilon': 'uniform ' + str(self.freestream_epsilon),
+            'omega': 'uniform ' + str(self.freestream_omega),
+            'nuTilda': 'uniform ' + str(self.freestream_nuTilda),
+            'ReThetat': 'uniform ' + str(self.freestream_ReThetat),
+            'gammaInt': 'uniform 1',
+            'R': 'uniform (' + str(uiui) + ' 0 0 ' + str(uiui) + ' 0 ' + str(uiui) + ')'
+        }
+
+        bc_zero_initial_conditions = bc_freestream_conditions
+        bc_zero_initial_conditions['U'] = 'uniform (0 0 0)'
+        bc_zero_initial_conditions['nuTilda'] = 'uniform 0'
+        bc_zero_initial_conditions['R'] = 'uniform (0 0 0 0 0 0)'
+
+        return bc_freestream_conditions, bc_zero_initial_conditions
+
+    def __write_boundary_condition_entries_to_file(self, file_id, bc_freestream_conditions):
+        for var in self.variables:
+            self.file_manager.write(file_id[var], 'boundaryField\n{\n')
+
+        for name, bc_type in self.properties['boundary_properties'].items():
+            for var in self.variables:
+                # write boundary condition's name
+                self.file_manager.write(file_id[var], '    ' + name + '\n    {\n')
+
+                # write inlet boundary conditions
+                if bc_type == Parameters.INLET or bc_type == Parameters.DFSEM_INLET:
+                    self.__inlet_boundary_condition(file_id, var, name, bc_type, bc_freestream_conditions)
+
+                # write standard outlet boundary conditions
+                if bc_type == Parameters.OUTLET:
+                    self.__outlet_boundary_condition(bc_freestream_conditions, file_id, var)
+
+                # write backflow outlet boundary conditions
+                if bc_type == Parameters.BACKFLOW_OUTLET:
+                    self.__backflow_boundary_condition(bc_freestream_conditions, file_id, var)
+
+                # write advective outlet boundary conditions
+                if bc_type == Parameters.ADVECTIVE_OUTLET:
+                    self.__advective_boundary_condition(file_id, var)
+
+                # wall boundary condition
+                if bc_type == Parameters.WALL:
+                    self._wall_boundary_condition(file_id, var, bc_freestream_conditions)
+
+                # freestream boundary condition
+                if bc_type == Parameters.FREESTREAM:
+                    self._freestream_boundary_condition(file_id, var, bc_freestream_conditions)
+
+                # symmetry boundary condition
+                if bc_type == Parameters.SYMMETRY:
+                    self.__symmetry_boundary_condition(file_id, var)
+
+                # cyclic boundary conditions
+                if bc_type == Parameters.CYCLIC:
+                    self.__cyclic_boundary_condition(file_id, var)
+
+                # empty boundary conditions
+                if bc_type == Parameters.EMPTY:
+                    self.__empty_boundary_condition(file_id, var)
+
+                # close boundary condition writing
+                self.file_manager.write(file_id[var], '    }\n')
+
+        for var in self.variables:
+            self.file_manager.write(file_id[var], '}')
+
+    def __inlet_boundary_condition(self, file_id, var, name, bc_type, bc_freestream_conditions):
+        custom_inlet = self.properties['flow_properties']['custom_inlet_boundary_conditions']
+        custom_inlet_setup = self.properties['flow_properties']['custom_inlet_boundary_conditions_setup']
+        if custom_inlet:
+            if var in custom_inlet_setup:
+                path_to_script = custom_inlet_setup[var]
+                self.__write_custom_inlet_profile(file_id[var], 8, path_to_script)
+        if (custom_inlet is False) or (var not in custom_inlet_setup):
+            if var == 'U':
+                if bc_type == Parameters.INLET:
+                    self.__dirichlet(file_id[var], bc_freestream_conditions[var])
+                elif bc_type == Parameters.DFSEM_INLET:
+                    self.__write_dfsem_inlet(file_id[var], name, bc_freestream_conditions[var])
+            elif var == 'p':
+                self.__neumann(file_id[var])
+            elif var == 'nut':
+                self.__zero_calculated(file_id[var])
             else:
-                if (self.properties['flow_properties']['custom_initial_conditions']
-                        ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
-                    self.file_manager.write(file_id, 'internalField   ' + initial_field + ';\n\n')
-                elif (self.properties['flow_properties']['custom_initial_conditions']
-                        ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
-                    self.file_manager.write(file_id, 'internalField   uniform (0 0 0);\n\n')
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
-            self.file_manager.write(file_id, 'internalField   ' + initial_field + ';\n\n')
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
-            self.file_manager.write(file_id, 'internalField   uniform (0 0 0);\n\n')
+                self.__dirichlet(file_id[var], bc_freestream_conditions[var])
 
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                self.__no_slip_wall(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__inlet_outlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.INLET:
-                if self.properties['flow_properties']['custom_velocity_inlet_profile']:
-                    self.file_manager.write(file_id, '        type            fixedValue;\n')
-                    self.file_manager.write(file_id, '        value           ')
-                    self.__custom_inlet_profile(file_id, key, Parameters.VECTOR)
-                else:
-                    self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET:
-                self.__write_dfsem_inlet(file_id, key, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream_velocity(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
-
-    def write_p(self):
-        file_id = self.file_manager.create_file('0', 'p')
-        initial_field = 'uniform ' + str(0)
-
-        self.file_manager.write_header(file_id, 'volScalarField', '0', 'p')
-        self.file_manager.write(file_id, '\ndimensions      [0 2 -2 0 0 0 0];\n\n')
-
-        if self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
-            if 'p' in self.properties['flow_properties']['custom_initial_conditions']['variables']:
-                self.__custom_initial_conditions(file_id, Parameters.SCALAR)
-            else:
-                self.file_manager.write(file_id, 'internalField   ' + initial_field + ';\n\n')
+    def __outlet_boundary_condition(self, bc_freestream_conditions, file_id, var):
+        if var == 'p':
+            self.__dirichlet(file_id[var], bc_freestream_conditions[var])
+        elif var == 'nut':
+            self.__zero_calculated(file_id[var])
         else:
-            self.file_manager.write(file_id, 'internalField   ' + initial_field + ';\n\n')
+            self.__neumann(file_id[var])
 
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
-                    self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream_pressure(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
+    def __backflow_boundary_condition(self, bc_freestream_conditions, file_id, var):
+        if var == 'p':
+            self.__dirichlet(file_id[var], bc_freestream_conditions[var])
+        elif var == 'nut':
+            self.__zero_calculated(file_id[var])
+        else:
+            self.__inlet_outlet(file_id[var], bc_freestream_conditions)
 
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
+    def __advective_boundary_condition(self, file_id, var):
+        self.__advective(file_id[var])
 
-    def write_k(self):
-        file_id = self.file_manager.create_file('0', 'k')
-        initial_field = 'uniform ' + str(self.freestream_k)
+    def _wall_boundary_condition(self, file_id, var, bc_freestream_conditions):
+        wall_modelling = self.properties['turbulence_properties']['wall_modelling']
+        rans_model = self.properties['turbulence_properties']['RANS_model']
+        write_wall_function_high_re = lambda v: self.__wall_function(file_id[v], bc_freestream_conditions[v],
+                                                                     self.RANS_wall_functions[v][Parameters.HIGH_RE])
+        write_wall_function_low_re = lambda v: self.__wall_function(file_id[v], bc_freestream_conditions[v],
+                                                                    self.RANS_wall_functions[v][Parameters.LOW_RE])
+        if var == 'U':
+            self.__no_slip_wall(file_id[var])
 
-        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
-            self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', initial_field)
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
-            self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', 'uniform 0')
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
-            if (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
-                self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', initial_field)
-            elif (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
-                self.__write_header(file_id, 'volScalarField', '0', 'k', '[0 2 -2 0 0 0 0]', 'uniform 0')
-            else:
-                sys.exit('\n===================================== ERROR =====================================\n' +
-                         '\nInitial condition for k not recognised. Use either BOUNDARY_CONDITIONED_BASED\n' +
-                         'or ZERO_VELOCITY and restart the solver.\n' +
-                         '\n=================================== END ERROR ===================================\n')
+        elif var == 'k':
+            if wall_modelling == Parameters.HIGH_RE:
+                write_wall_function_high_re(var)
+            elif wall_modelling == Parameters.LOW_RE:
+                write_wall_function_low_re(var)
 
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                if self.properties['turbulence_properties']['wall_modelling'] == Parameters.LOW_RE:
-                    self.__kLowReWallFunction(file_id, initial_field)
-                elif self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__kqRWallFunction(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__inlet_outlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
-                    self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
+        elif var == 'omega':
+            if wall_modelling == Parameters.HIGH_RE:
+                write_wall_function_high_re(var)
+            elif wall_modelling == Parameters.LOW_RE:
+                if rans_model == Parameters.kkLOmega:
+                    self.__neumann(file_id[var])
+                else:
+                    write_wall_function_low_re(var)
 
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
+        elif var == 'epsilon':
+            if wall_modelling == Parameters.HIGH_RE:
+                write_wall_function_high_re(var)
+            elif wall_modelling == Parameters.LOW_RE:
+                self.__neumann(file_id[var])
 
-    def write_kt(self):
-        file_id = self.file_manager.create_file('0', 'kt')
-        initial_field = 'uniform ' + str(self.freestream_k)
+        elif var == 'nuTilda':
+            if wall_modelling == Parameters.HIGH_RE:
+                self.__neumann(file_id[var])
+            elif wall_modelling == Parameters.LOW_RE:
+                nuTilda = self.properties['flow_properties']['nu'] / 2
+                self.__dirichlet(file_id[var], 'uniform ' + str(nuTilda))
 
-        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
-            self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', initial_field)
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
-            self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', 'uniform 0')
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
-            if (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
-                self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', initial_field)
-            elif (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
-                self.__write_header(file_id, 'volScalarField', '0', 'kt', '[0 2 -2 0 0 0 0]', 'uniform 0')
-            else:
-                sys.exit('\n===================================== ERROR =====================================\n' +
-                         '\nInitial condition for kt not recognised. Use either BOUNDARY_CONDITIONED_BASED\n' +
-                         'or ZERO_VELOCITY and restart the solver.\n' +
-                         '\n=================================== END ERROR ===================================\n')
+        elif var == 'nut':
+            if wall_modelling == Parameters.HIGH_RE:
+                write_wall_function_high_re(var)
+            elif wall_modelling == Parameters.LOW_RE:
+                write_wall_function_low_re(var)
 
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                if self.properties['turbulence_properties']['wall_modelling'] == Parameters.LOW_RE:
-                    self.__dirichlet(file_id, initial_field)
-                elif self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__kqRWallFunction(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__inlet_outlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
-                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
+        elif var == 'kt':
+            if wall_modelling == Parameters.HIGH_RE:
+                write_wall_function_high_re(var)
+            elif wall_modelling == Parameters.LOW_RE:
+                self.__dirichlet(file_id[var], bc_freestream_conditions[var])
 
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
+        elif var == 'kl':
+            if wall_modelling == Parameters.HIGH_RE:
+                write_wall_function_high_re(var)
+            elif wall_modelling == Parameters.LOW_RE:
+                self.__dirichlet(file_id[var], bc_freestream_conditions[var])
 
-    def write_kl(self):
-        file_id = self.file_manager.create_file('0', 'kl')
-        initial_field = 'uniform 0'
+        elif var == 'R':
+            if wall_modelling == Parameters.HIGH_RE:
+                write_wall_function_high_re(var)
+            elif wall_modelling == Parameters.LOW_RE:
+                self.__dirichlet(file_id[var], 'uniform (0 0 0 0 0 0)')
 
-        self.__write_header(file_id, 'volScalarField', '0', 'kl', '[0 2 -2 0 0 0 0]', initial_field)
+        else:
+            self.__neumann(file_id[var])
 
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                if self.properties['turbulence_properties']['wall_modelling'] == Parameters.LOW_RE:
-                    self.__dirichlet(file_id, initial_field)
-                elif self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__kqRWallFunction(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__inlet_outlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
-                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
+    def _freestream_boundary_condition(self, file_id, var, bc_freestream_conditions):
+        if var == 'U':
+            self.__freestream_velocity(file_id[var], bc_freestream_conditions[var])
+        elif var == 'p':
+            self.__freestream_pressure(file_id[var], bc_freestream_conditions[var])
+        elif var == 'nut':
+            self.__zero_calculated(file_id[var])
+        else:
+            self.__freestream(file_id[var], bc_freestream_conditions[var])
 
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
+    def __symmetry_boundary_condition(self, file_id, var):
+        if var == 'nut':
+            self.__zero_calculated(file_id[var])
+        else:
+            self.__neumann(file_id[var])
 
-    def write_epsilon(self):
-        file_id = self.file_manager.create_file('0', 'epsilon')
-        initial_field = 'uniform ' + str(self.freestream_epsilon)
+    def __cyclic_boundary_condition(self, file_id, var):
+        self.__periodic(file_id[var])
 
-        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
-            self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', initial_field)
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
-            self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', 'uniform 0')
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
-            if (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
-                self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', initial_field)
-            elif (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
-                self.__write_header(file_id, 'volScalarField', '0', 'epsilon', '[0 2 -3 0 0 0 0]', 'uniform 0')
-            else:
-                sys.exit('\n===================================== ERROR =====================================\n' +
-                         '\nInitial condition for epsilon not recognised. Use either\n' +
-                         'BOUNDARY_CONDITIONED_BASED or ZERO_VELOCITY and restart the solver.\n' +
-                         '\n=================================== END ERROR ===================================\n')
-
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                if self.properties['turbulence_properties']['wall_modelling'] == Parameters.LOW_RE:
-                    self.__neumann(file_id)
-                elif self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__epsilonWallFunction(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__inlet_outlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
-                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
-
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
-
-    def write_omega(self):
-        file_id = self.file_manager.create_file('0', 'omega')
-        initial_field = 'uniform ' + str(self.freestream_omega)
-
-        self.__write_header(file_id, 'volScalarField', '0', 'omega', '[0 0 -1 0 0 0 0]', initial_field)
-
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                if self.properties['turbulence_properties']['wall_modelling'] == Parameters.LOW_RE:
-                    if self.properties['turbulence_properties']['RANS_model'] == Parameters.kkLOmega:
-                        self.__neumann(file_id)
-                    else:
-                        self.__omegaWallFunction(file_id, initial_field)
-                elif self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__omegaWallFunction(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__inlet_outlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
-                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
-
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
-
-    def write_nuTilda(self):
-        file_id = self.file_manager.create_file('0', 'nuTilda')
-        initial_field = 'uniform ' + str(self.freestream_nuTilda)
-
-        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
-            self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', initial_field)
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
-            self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', 'uniform 0')
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
-            if (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
-                self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', initial_field)
-            elif (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
-                self.__write_header(file_id, 'volScalarField', '0', 'nuTilda', '[0 2 -1 0 0 0 0]', 'uniform 0')
-            else:
-                sys.exit('\n===================================== ERROR =====================================\n' +
-                         '\nInitial condition for nuTilda not recognised. Use either\n' +
-                         'BOUNDARY_CONDITIONED_BASED or ZERO_VELOCITY and restart the solver.\n' +
-                         '\n=================================== END ERROR ===================================\n')
-
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                if self.properties['turbulence_properties']['wall_modelling'] == Parameters.LOW_RE:
-                    self.__dirichlet(file_id, 'uniform ' + str(self.properties['flow_properties']['nu'] / 2))
-                elif self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__inlet_outlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
-                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
-
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
-
-    def write_nut(self):
-        file_id = self.file_manager.create_file('0', 'nut')
-        initial_field = 'uniform ' + str(0)
-        self.__write_header(file_id, 'volScalarField', '0', 'nut', '[0 2 -1 0 0 0 0]', initial_field)
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                if self.properties['turbulence_properties']['wall_modelling'] == Parameters.LOW_RE:
-                    self.__nutLowReWallFunction(file_id, initial_field)
-                elif self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__nutkWallFunction(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            else:
-                self.__zeroCalculated(file_id)
-            self.file_manager.write(file_id, '    }\n')
-
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
-
-    def write_ReThetat(self):
-        file_id = self.file_manager.create_file('0', 'ReThetat')
-        initial_field = 'uniform ' + str(self.freestream_ReThetat)
-        self.__write_header(file_id, 'volScalarField', '0', 'ReThetat', '[0 0 0 0 0 0 0]', initial_field)
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if (self.properties['boundary_properties'][key] == Parameters.INLET or
-                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            else:
-                self.__neumann(file_id)
-            self.file_manager.write(file_id, '    }\n')
-
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
-
-    def write_gammaInt(self):
-        file_id = self.file_manager.create_file('0', 'gammaInt')
-        initial_field = 'uniform ' + str(1)
-        self.__write_header(file_id, 'volScalarField', '0', 'gammaInt', '[0 0 0 0 0 0 0]', initial_field)
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if (self.properties['boundary_properties'][key] == Parameters.INLET or
-                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            else:
-                self.__neumann(file_id)
-            self.file_manager.write(file_id, '    }\n')
-
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
-
-    def write_R(self):
-        file_id = self.file_manager.create_file('0', 'R')
-        uiui = (2.0/3.0)*self.freestream_k
-        initial_field = 'uniform (' + str(uiui) + ' 0 0 ' + str(uiui) + ' 0 ' + str(uiui) + ')'
-
-        if self.properties['flow_properties']['initial_conditions'] == Parameters.BOUNDARY_CONDITIONED_BASED:
-            self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', initial_field)
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.ZERO_VELOCITY:
-            self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', 'uniform (0 0 0 0 0 0)')
-        elif self.properties['flow_properties']['initial_conditions'] == Parameters.CUSTOM:
-            if (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.BOUNDARY_CONDITIONED_BASED):
-                self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]', initial_field)
-            elif (self.properties['flow_properties']['custom_initial_conditions']
-                    ['non_custom_initialised_variables_treatment'] == Parameters.ZERO_VELOCITY):
-                self.__write_header(file_id, 'volSymmTensorField', '0', 'R', '[0 2 -2 0 0 0 0]',
-                                    'uniform (0 0 0 0 0 0)')
-            else:
-                sys.exit('\n===================================== ERROR =====================================\n' +
-                         '\nInitial condition for R (Reynolds stress tensor) not recognised. Use either\n' +
-                         'BOUNDARY_CONDITIONED_BASED or ZERO_VELOCITY and restart the solver.\n' +
-                         '\n=================================== END ERROR ===================================\n')
-
-        self.file_manager.write(file_id, 'boundaryField\n{\n')
-        for key in self.properties['boundary_properties']:
-            self.file_manager.write(file_id, '    ' + key + '\n    {\n')
-            if self.properties['boundary_properties'][key] == Parameters.WALL:
-                if self.properties['turbulence_properties']['wall_modelling'] == Parameters.LOW_RE:
-                    self.__dirichlet(file_id, 'uniform (0 0 0 0 0 0)')
-                elif self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
-                    self.__kqRWallFunction(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.OUTLET:
-                self.__neumann(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.BACKFLOW_OUTLET:
-                self.__inlet_outlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.ADVECTIVE_OUTLET:
-                self.__advective(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.SYMMETRY:
-                self.__neumann(file_id)
-            elif (self.properties['boundary_properties'][key] == Parameters.INLET or
-                  self.properties['boundary_properties'][key] == Parameters.DFSEM_INLET):
-                self.__dirichlet(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.FREESTREAM:
-                self.__freestream(file_id, initial_field)
-            elif self.properties['boundary_properties'][key] == Parameters.CYCLIC:
-                self.__periodic(file_id)
-            elif self.properties['boundary_properties'][key] == Parameters.EMPTY:
-                self.__empty(file_id)
-            self.file_manager.write(file_id, '    }\n')
-
-        self.file_manager.write(file_id, '}')
-        self.file_manager.close_file(file_id)
+    def __empty_boundary_condition(self, file_id, var):
+        self.__empty(file_id[var])
 
     def __dirichlet(self, file_id, initial_field):
         file_id.write('        type            fixedValue;\n')
@@ -640,32 +414,11 @@ class WriteBoundaryConditions:
     def __empty(self, file_id):
         file_id.write('        type            empty;\n')
 
-    def __kqRWallFunction(self, file_id, initial_field):
-        file_id.write('        type            kqRWallFunction;\n')
+    def __wall_function(self, file_id, initial_field, wall_function_type):
+        file_id.write('        type            ' + wall_function_type + ';\n')
         file_id.write('        value           ' + initial_field + ';\n')
 
-    def __epsilonWallFunction(self, file_id, initial_field):
-        file_id.write('        type            epsilonWallFunction;\n')
-        file_id.write('        value           ' + initial_field + ';\n')
-
-    def __omegaWallFunction(self, file_id, initial_field):
-        file_id.write('        type            omegaWallFunction;\n')
-        file_id.write('        value           ' + initial_field + ';\n')
-
-    def __nutkWallFunction(self, file_id, initial_field):
-        file_id.write('        type            nutkWallFunction;\n')
-        file_id.write('        value           ' + initial_field + ';\n')
-
-    def __kLowReWallFunction(self, file_id, initial_field):
-        file_id.write('        type            kLowReWallFunction;\n')
-        file_id.write('        value           ' + initial_field + ';\n')
-
-
-    def __nutLowReWallFunction(self, file_id, initial_field):
-        file_id.write('        type            nutLowReWallFunction;\n')
-        file_id.write('        value           ' + initial_field + ';\n')
-
-    def __zeroCalculated(self, file_id):
+    def __zero_calculated(self, file_id):
         file_id.write('        type            calculated;\n')
         file_id.write('        value           uniform 0;\n')
 
@@ -682,6 +435,8 @@ class WriteBoundaryConditions:
         file_id.write('        freestreamValue ' + initial_field + ';\n')
 
     def __write_dfsem_inlet(self, file_id, bc_name, initial_field):
+        custom_DFSEM_conditions = self.properties['flow_properties']['custom_DFSEM_conditions']
+        custom_DFSEM_conditions_setup = self.properties['flow_properties']['custom_DFSEM_conditions_setup']
         length_scale = self.properties['flow_properties']['reference_length']
         R = self.properties['flow_properties']['reynolds_stresses']
         L = self.properties['flow_properties']['turbulent_length_scale']
@@ -694,22 +449,30 @@ class WriteBoundaryConditions:
         file_id.write('        type            turbulentDFSEMInlet;\n')
         file_id.write('        delta           ' + str(length_scale) + ';\n')
 
-        if self.properties['flow_properties']['custom_Reynolds_stresses']:
-            self.file_manager.write(file_id, '        R               ')
-            self.__custom_inlet_profile(file_id, bc_name, Parameters.TENSOR)
-        else:
+        if custom_DFSEM_conditions:
+            if 'R' in custom_DFSEM_conditions_setup:
+                file_id.write('        R\n        {\n')
+                path_to_script = custom_DFSEM_conditions_setup['R']
+                self.__write_custom_inlet_profile(file_id, 12, path_to_script)
+                file_id.write('        }\n')
+            if 'U' in custom_DFSEM_conditions_setup:
+                file_id.write('        U\n        {\n')
+                path_to_script = custom_DFSEM_conditions_setup['U']
+                self.__write_custom_inlet_profile(file_id, 12, path_to_script)
+                file_id.write('        }\n')
+            if 'L' in custom_DFSEM_conditions_setup:
+                file_id.write('        L\n        {\n')
+                path_to_script = custom_DFSEM_conditions_setup['L']
+                self.__write_custom_inlet_profile(file_id, 12, path_to_script)
+                file_id.write('        }\n')
+
+        if (custom_DFSEM_conditions is False) or ('R' not in custom_DFSEM_conditions_setup):
             file_id.write('        R               ' + init_reynolds_stresses + ';\n')
 
-        if self.properties['flow_properties']['custom_velocity_inlet_profile']:
-            self.file_manager.write(file_id, '        U               ')
-            self.__custom_inlet_profile(file_id, bc_name, Parameters.VECTOR)
-        else:
+        if (custom_DFSEM_conditions is False) or ('U' not in custom_DFSEM_conditions_setup):
             file_id.write('        U               ' + initial_field + ';\n')
 
-        if self.properties['flow_properties']['custom_turbulent_length_scale']:
-            self.file_manager.write(file_id, '        L               ')
-            self.__custom_inlet_profile(file_id, bc_name, Parameters.SCALAR)
-        else:
+        if (custom_DFSEM_conditions is False) or ('L' not in custom_DFSEM_conditions_setup):
             if self.properties['flow_properties']['set_turbulent_length_scale_at_inlet']:
                 file_id.write('        L               ' + init_turbulent_length_scale + ';\n')
             else:
@@ -718,113 +481,7 @@ class WriteBoundaryConditions:
 
         file_id.write('        value           uniform (0 0 0);\n')
 
-    def __custom_inlet_profile(self, file_id, bc_name, field_type):
-        file_id.write('#codeStream\n')
-        file_id.write('        {\n')
-        file_id.write('            codeInclude\n')
-        file_id.write('            #{\n')
-        file_id.write('                #include "fvCFD.H"\n')
-        file_id.write('            #};\n')
-        file_id.write('\n')
-        file_id.write('            codeOptions\n')
-        file_id.write('            #{\n')
-        file_id.write('                -I$(LIB_SRC)/finiteVolume/lnInclude \\\n')
-        file_id.write('                -I$(LIB_SRC)/meshTools/lnInclude\n')
-        file_id.write('            #};\n')
-        file_id.write('\n')
-        file_id.write('            codeLibs\n')
-        file_id.write('            #{\n')
-        file_id.write('                -lmeshTools \\\n')
-        file_id.write('                -lfiniteVolume\n')
-        file_id.write('            #};\n')
-        file_id.write('\n')
-        file_id.write('            code\n')
-        file_id.write('            #{\n')
-        file_id.write('                // get access to dictionary\n')
-        file_id.write('                const IOdictionary& d = static_cast<const IOdictionary&>\n')
-        file_id.write('                (\n')
-        file_id.write('                    dict.parent().parent()\n')
-        file_id.write('                );\n')
-        file_id.write('\n')
-        file_id.write('                // get access to computational mesh\n')
-        file_id.write('                const fvMesh& mesh = refCast<const fvMesh>(d.db());\n')
-        file_id.write('\n')
-        file_id.write('                // get boundary patch ID by boundary condition name\n')
-        file_id.write('                const label id = mesh.boundary().findPatchID("' + bc_name + '");\n')
-        file_id.write('\n')
-        file_id.write('                // get boundary patch based on ID obtained above\n')
-        file_id.write('                const fvPatch& patch = mesh.boundary()[id];\n')
-        file_id.write('\n')
-        file_id.write('                // current (total) time\n')
-        file_id.write('                const scalar currentTime = d.db().time().value();\n')
-        file_id.write('\n')
-        if field_type == Parameters.SCALAR:
-            file_id.write('                // create new scalar field which will be written on boundary patch\n')
-            file_id.write('                scalarField field = 0.0;\n')
-            file_id.write('\n')
-        elif field_type == Parameters.VECTOR:
-            file_id.write('                // create new vector field which will be written on boundary patch\n')
-            file_id.write('                vectorField field(patch.size(), vector(0, 0, 0));\n')
-            file_id.write('\n')
-        elif field_type == Parameters.TENSOR:
-            file_id.write('                // create new tensor field which will be written on boundary patch\n')
-            file_id.write('                tensorField field(patch.size(), tensor(0, 0, 0, 0, 0, 0, 0, 0, 0));\n')
-            file_id.write('\n')
-        file_id.write('                // loop over all boundary faces if requires\n')
-        file_id.write('                forAll(field, faceI)\n')
-        file_id.write('                {\n')
-        file_id.write('                    // access to boundary face coordinates\n')
-        file_id.write('                    const auto x = patch.Cf()[faceI].x();\n')
-        file_id.write('                    const auto y = patch.Cf()[faceI].y();\n')
-        file_id.write('                    const auto z = patch.Cf()[faceI].z();\n')
-        file_id.write('\n')
-        file_id.write('                    // set field based on location in space and time as required\n')
-        file_id.write('                    if (y > 0.5)\n')
-        file_id.write('                    {\n')
-        if field_type == Parameters.SCALAR:
-            file_id.write('                        field[faceI] = 0.01 * currentTime;\n')
-        elif field_type == Parameters.VECTOR:
-            file_id.write('                        field[faceI].x() =   Foam::sin(x) * Foam::cos(y) * Foam::cos(z);\n')
-            file_id.write('                        field[faceI].y() = - Foam::cos(x) * Foam::sin(y) * Foam::cos(z);\n')
-            file_id.write('                        field[faceI].z() =   0.0;\n')
-        elif field_type == Parameters.TENSOR:
-            file_id.write('                        field[faceI].xx() = 1;\n')
-            file_id.write('                        field[faceI].xy() = 0;\n')
-            file_id.write('                        field[faceI].xz() = 0;\n')
-            file_id.write('                        field[faceI].yx() = 0;\n')
-            file_id.write('                        field[faceI].yy() = 1;\n')
-            file_id.write('                        field[faceI].yz() = 0;\n')
-            file_id.write('                        field[faceI].zx() = 0;\n')
-            file_id.write('                        field[faceI].zy() = 0;\n')
-            file_id.write('                        field[faceI].zz() = 1;\n')
-        file_id.write('                    }\n')
-        file_id.write('                    else\n')
-        file_id.write('                    {\n')
-        if field_type == Parameters.SCALAR:
-            file_id.write('                        field[faceI] = 0;\n')
-        elif field_type == Parameters.VECTOR:
-            file_id.write('                        field[faceI].x() = 0;\n')
-            file_id.write('                        field[faceI].y() = 0;\n')
-            file_id.write('                        field[faceI].z() = 0;\n')
-        elif field_type == Parameters.TENSOR:
-            file_id.write('                        field[faceI].xx() = 0;\n')
-            file_id.write('                        field[faceI].xy() = 0;\n')
-            file_id.write('                        field[faceI].xz() = 0;\n')
-            file_id.write('                        field[faceI].yx() = 0;\n')
-            file_id.write('                        field[faceI].yy() = 0;\n')
-            file_id.write('                        field[faceI].yz() = 0;\n')
-            file_id.write('                        field[faceI].zx() = 0;\n')
-            file_id.write('                        field[faceI].zy() = 0;\n')
-            file_id.write('                        field[faceI].zz() = 0;\n')
-        file_id.write('                    }\n')
-        file_id.write('                }\n')
-        file_id.write('\n')
-        file_id.write('                // set boundary values to those computed values of "field"\n')
-        file_id.write('                field.writeEntry("", os);\n')
-        file_id.write('            #};\n')
-        file_id.write('        };\n')
-
-    def __custom_initial_conditions(self, file_id, field_type):
+    def __write_custom_initial_conditions(self, file_id, path_to_script):
         file_id.write('internalField   #codeStream\n')
         file_id.write('{\n')
         file_id.write('    codeInclude\n')
@@ -846,45 +503,48 @@ class WriteBoundaryConditions:
         file_id.write('\n')
         file_id.write('    code\n')
         file_id.write('    #{\n')
-        file_id.write('        // get the dictionary\n')
-        file_id.write('        const IOdictionary& d = static_cast<const IOdictionary&>(dict);\n')
+
+        custom_initial_condition_script = open(path_to_script, 'r')
+        all_lines = custom_initial_condition_script.readlines()
+        spaces = '        '
+        for line in all_lines:
+            file_id.write(spaces + line)
+
         file_id.write('\n')
-        file_id.write('        // get access to the mesh\n')
-        file_id.write('        const fvMesh& mesh = refCast<const fvMesh>(d.db());\n')
-        file_id.write('\n')
-        file_id.write('        // create a new field which will be used as the initial field\n')
-        file_id.write('        vectorField field(mesh.nCells());\n')
-        file_id.write('\n')
-        file_id.write('        // loop over entire mesh and set values for field\n')
-        file_id.write('        forAll(field, cellI)\n')
-        file_id.write('        {\n')
-        file_id.write('            // get access to coordinates\n')
-        file_id.write('            const auto x = mesh.C()[cellI].x();\n')
-        file_id.write('            const auto y = mesh.C()[cellI].y();\n')
-        file_id.write('            const auto z = mesh.C()[cellI].z();\n')
-        file_id.write('\n')
-        file_id.write('            // set field here, overwrite for your use case here\n')
-        if field_type == Parameters.SCALAR:
-            file_id.write('            field[cellI] = x * y * z;\n')
-        elif field_type == Parameters.VECTOR:
-            file_id.write('            field[cellI].x() =   Foam::sin(x) * Foam::cos(y) * Foam::cos(z);\n')
-            file_id.write('            field[cellI].y() = - Foam::cos(x) * Foam::sin(y) * Foam::cos(z);\n')
-            file_id.write('            field[cellI].z() =   0.0;\n')
-        elif field_type == Parameters.TENSOR:
-            file_id.write('            field[cellI].xx() = 1;\n')
-            file_id.write('            field[cellI].xy() = 0;\n')
-            file_id.write('            field[cellI].xz() = 0;\n')
-            file_id.write('            field[cellI].yx() = 0;\n')
-            file_id.write('            field[cellI].yy() = 1;\n')
-            file_id.write('            field[cellI].yz() = 0;\n')
-            file_id.write('            field[cellI].zx() = 0;\n')
-            file_id.write('            field[cellI].zy() = 0;\n')
-            file_id.write('            field[cellI].zz() = 1;\n')
-        file_id.write('        }\n')
-        file_id.write('        field.writeEntry("", os);\n')
         file_id.write('    #};\n')
         file_id.write('};\n')
         file_id.write('\n')
 
+    def __write_custom_inlet_profile(self, file_id, leading_spaces, path_to_script):
+        spaces = ' ' * leading_spaces
+        file_id.write(spaces + '#codeStream\n')
+        file_id.write(spaces + '{\n')
+        file_id.write(spaces + '    codeInclude\n')
+        file_id.write(spaces + '    #{\n')
+        file_id.write(spaces + '        #include "fvCFD.H"\n')
+        file_id.write(spaces + '    #};\n')
+        file_id.write('\n')
+        file_id.write(spaces + '    codeOptions\n')
+        file_id.write(spaces + '    #{\n')
+        file_id.write(spaces + '        -I$(LIB_SRC)/finiteVolume/lnInclude \\\n')
+        file_id.write(spaces + '        -I$(LIB_SRC)/meshTools/lnInclude\n')
+        file_id.write(spaces + '    #};\n')
+        file_id.write('\n')
+        file_id.write(spaces + '    codeLibs\n')
+        file_id.write(spaces + '    #{\n')
+        file_id.write(spaces + '        -lmeshTools \\\n')
+        file_id.write(spaces + '        -lfiniteVolume\n')
+        file_id.write(spaces + '    #};\n')
+        file_id.write('\n')
+        file_id.write(spaces + '    code\n')
+        file_id.write(spaces + '    #{\n')
 
+        custom_inlet_script = open(path_to_script, 'r')
+        all_lines = custom_inlet_script.readlines()
+        code_spaces = ' ' * 8
+        for line in all_lines:
+            file_id.write(spaces + code_spaces + line)
 
+        file_id.write('\n')
+        file_id.write(spaces + '    #};\n')
+        file_id.write(spaces + '};\n')

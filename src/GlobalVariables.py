@@ -16,6 +16,10 @@ EMPTY = 7
 SYMMETRY = 8
 CYCLIC = 9
 
+# boundary properties stored in boundary condition class
+BC_TYPE = 0
+BC_DIMENSIONS = 1
+
 # outlet boundary condition ID
 NEUMANN = 0
 ADVECTIVE = 1

@@ -98,29 +98,38 @@ def case_properties(command_line_arguments):
 
         # physical properties of solver set-up
         'flow_properties': {
-            # use custom velocity inlet? Some template code will be written to the 0/U file which needs to be modified.
-            # make sure to keep a copy of the custom code as it may be overwritten by this script if it is run again!
-            'custom_velocity_inlet_profile': False,
+            # specify if custom initial conditions should be used for this case setup. If set to true, this will require
+            # the dictionary entry for custom_initial_conditions_setup
+            'custom_initial_conditions': False,
 
-            # specify the inlet boundary condition (free stream velocity)
+            # if custom initial conditions should be used, this dictionary provides a mapping where the key is used to
+            # identify for which variable custom initial conditions should be written. The value is a path to the c++
+            # script which should be used as the custom initial condition
+            'custom_initial_conditions_setup': {
+                'p': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'p'),
+                'U': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'U'),
+            },
+
+            # specify if custom inlet boundary conditions should be used for this case setup. If set to true, this will
+            # require the dictionary entry for custom_inlet_boundary_conditions_setup
+            'custom_inlet_boundary_conditions': False,
+
+            # if custom inlet boundary conditions should be used, this dictionary provides a mapping where the key is
+            # used to identify for which variable custom inlet boundary conditions should be written. The value is a
+            # path to the c++ script which should be used as the custom inlet boundary condition
+            'custom_inlet_boundary_conditions_setup': {
+                'p': os.path.join('examples', 'scripts', 'boundaryConditions', 'generic', 'scalarField'),
+                'U': os.path.join('examples', 'scripts', 'boundaryConditions', 'generic', 'vectorField'),
+            },
+
+            # specify the inlet boundary condition (free stream velocity). This is only used if no custom inlet
+            # boundary conditions are used for the velocity.
             'inlet_velocity': [4.0, 0, 0],
 
-            # specify how the initial field should be set
+            # specify how the initial field should be set for non-custom initial conditions
             #   BOUNDARY_CONDITIONED_BASED: set the initial field based on inlet conditions (where applicable)
             #   ZERO_VELOCITY:              set the initial field to a zero velocity field
-            #   CUSTOM:                     create a code snippet the user can modify to set custom initial conditions
             'initial_conditions': Parameters.BOUNDARY_CONDITIONED_BASED,
-
-            # if initial_conditions is set to CUSTOM, specify which variables should receive custom initial conditions
-            # and how to treat variables which are not set to custom, coded initial conditions. Only applicable to
-            # flow variables, not to turbulent quantities.
-            'custom_initial_conditions': {
-                # variables to create custom initial conditions for
-                'variables': ['U'],
-
-                # treatment for variables that are not initialised with custom code
-                'non_custom_initialised_variables_treatment': Parameters.ZERO_VELOCITY,
-            },
 
             # specify the laminar viscosity
             'nu': 1e-1,
@@ -135,29 +144,34 @@ def case_properties(command_line_arguments):
             # the below options are for the special DFSEM Inlet only. Use with caution. Before using, see remarks at
             # https://www.cfd-online.com/Forums/openfoam-solving/177711-turbulentdfseminlet.html
 
-            # Write custom profile for reynolds stresses at inlet? (DFSEM Inlet only)
-            'custom_Reynolds_stresses': False,
+            # specify whether custom inlet or freestream conditions should be set
+            'custom_DFSEM_conditions': False,
 
-            # specify the reynold stresses at the inlet (used only by DFSEM Inlet boundary condition), ignored if
-            # custom_Reynolds_stresses is set to True. The order is R_uu, R_uv, R_uw, R_vv, R_vw, R_ww
+            # if custom DFSEM conditions should be set, specify the path which the custom conditions are stored
+            'custom_DFSEM_conditions_setup': {
+                'R': os.path.join('examples', 'scripts', 'boundaryConditions', 'generic', 'tensorField'),
+                'U': os.path.join('examples', 'scripts', 'boundaryConditions', 'generic', 'vectorField'),
+                'L': os.path.join('examples', 'scripts', 'boundaryConditions', 'generic', 'scalarField'),
+            },
+
+            # specify the reynold stresses at the inlet, ignored if custom_DFSEM_conditions is set to True and R is
+            # specified in custom_DFSEM_conditions_setup. The order is R_uu, R_uv, R_uw, R_vv, R_vw, R_ww
             'reynolds_stresses': [1, 0, 0, 0, 0, 0],
-
-            # Write custom profile for turbulent length scale at inlet? (DFSEM Inlet only)
-            'custom_turbulent_length_scale': False,
 
             # set turbulent length scale at inlet? If true, the turbulent length scale needs to be provided, if false,
             # we need to specify how many cells we want to use to resolve turbulent eddies (dynamically adjust to the
             # mesh size and controls the dissipation, use this option of no length scale information is available)
-            # If custom_turbulent_length_scale is set to true, this choice will have no effect (DFSEM Inlet only)
+            # If custom_DFSEM_conditions is set to true and L is specified in custom_DFSEM_conditions_setup, then this
+            # choice will have no effect
             'set_turbulent_length_scale_at_inlet': False,
 
-            # turbulent length scale (DFSEM Inlet only)
+            # turbulent length scale
             'turbulent_length_scale': 0.004,
 
             # number of cells to use to resolve turbulent eddies if no turbulent length scale is given. Typical values
             # should be between 1 - 5, where values closer to 1 are more dissipative and values closer to 5 sustain
-            # eddies for longer. Only used if both custom_turbulent_length_scale and set_turbulent_length_scale_at_inlet
-            # are set to false. (DFSEM Inlet only)
+            # eddies for longer. Only used if both custom_DFSEM_conditions and set_turbulent_length_scale_at_inlet
+            # are set to false.
             'number_of_cells_per_eddy': 1,
             # end DFSEM Inlet only section -----------------------------------------------------------------------------
         },
@@ -599,7 +613,7 @@ def main():
 
     # write out boundary conditions for all relevant flow properties
     boundary_conditions = BoundaryConditions.WriteBoundaryConditions(properties, file_manager)
-    boundary_conditions.write_all_appropriate_boundary_conditions()
+    boundary_conditions.write_all_boundary_conditions()
 
     # write transport properties to file
     transport_dict = Transport.TransportPropertiesFile(properties, file_manager)
