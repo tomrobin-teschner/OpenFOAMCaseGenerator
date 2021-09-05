@@ -1,7 +1,6 @@
 import os
 import distutils.dir_util
 import distutils.file_util
-import shutil
 from src import GlobalVariables as Parameters
 
 

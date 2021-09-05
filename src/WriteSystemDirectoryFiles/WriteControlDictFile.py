@@ -65,7 +65,7 @@ class ControlDictFile:
             self.file_manager.write(file_id, '    #include "include/fields"\n')
         if self.properties['dimensionless_coefficients']['write_force_coefficients']:
             self.file_manager.write(file_id, '    #include "include/forceCoefficients"\n')
-        if self.properties['convergence_control']['integral_convergence_criterion'] != Parameters.NONE:
+        if Parameters.NONE not in self.properties['convergence_control']['integral_convergence_criterion']:
             self.file_manager.write(file_id, '    #include "include/forceCoefficientTrigger"\n')
         if self.properties['dimensionless_coefficients']['write_pressure_coefficient']:
             self.file_manager.write(file_id, '    #include "include/pressureCoefficient"\n')
@@ -77,6 +77,8 @@ class ControlDictFile:
             self.file_manager.write(file_id, '    #include "include/cuttingPlanes"\n')
         self.file_manager.write(file_id, '    #include "include/yPlus"\n')
         self.file_manager.write(file_id, '    #include "include/residuals"\n')
+        if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
+            self.file_manager.write(file_id, '    #include "include/MachNo"\n')
         if self.properties['dimensionless_coefficients']['write_wall_shear_stresses']:
             self.file_manager.write(file_id, '    #includeFunc "wallShearStress"\n')
         self.file_manager.write(file_id, '}\n')

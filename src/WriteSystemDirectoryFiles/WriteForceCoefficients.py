@@ -1,21 +1,40 @@
+from src import GlobalVariables as Parameters
+from math import sin, cos, pi
+
+
 class WriteForceCoefficients:
     def __init__(self, properties, file_manager):
         self.file_manager = file_manager
         self.properties = properties
 
     def write_force_coefficients(self):
-        lift_dir = ('(' + str(self.properties['dimensionless_coefficients']['lift_direction'][0]) + ' ' +
-                    str(self.properties['dimensionless_coefficients']['lift_direction'][1]) + ' ' +
-                    str(self.properties['dimensionless_coefficients']['lift_direction'][2]) + ')')
-        drag_dir = ('(' + str(self.properties['dimensionless_coefficients']['drag_direction'][0]) + ' ' +
-                    str(self.properties['dimensionless_coefficients']['drag_direction'][1]) + ' ' +
-                    str(self.properties['dimensionless_coefficients']['drag_direction'][2]) + ')')
-        pitch_dir = ('(' + str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][0]) + ' ' +
-                     str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][1]) + ' ' +
-                     str(self.properties['dimensionless_coefficients']['pitch_axis_direction'][2]) + ')')
-        cofr = ('(' + str(self.properties['dimensionless_coefficients']['center_of_rotation'][0]) + ' ' +
-                str(self.properties['dimensionless_coefficients']['center_of_rotation'][1]) + ' ' +
-                str(self.properties['dimensionless_coefficients']['center_of_rotation'][2]) + ')')
+        RAD_TO_DEG = pi / 180
+        tangential = self.properties['flow_properties']['axis_aligned_flow_direction']['tangential']
+        normal = self.properties['flow_properties']['axis_aligned_flow_direction']['normal']
+        aoa = self.properties['flow_properties']['axis_aligned_flow_direction']['angle_of_attack']
+        cofr = self.properties['dimensionless_coefficients']['center_of_rotation']
+        lift_dir = [0, 0, 0]
+        drag_dir = [0, 0, 0]
+        pitch_dir = [0, 0, 0]
+
+        axes_indices = [0, 1, 2]
+        lift_drag_axis = [tangential, normal]
+        pitch_axis = list(set(axes_indices).difference(lift_drag_axis))
+        assert len(pitch_axis) == 1, ('Tangential and normal direction can not be the same axis.' +
+                                      'Check the axis_aligned_flow_direction input')
+        pitch_dir[pitch_axis[0]] = 1
+
+        lift_dir[tangential] = -sin(aoa * RAD_TO_DEG)
+        lift_dir[normal] = cos(aoa * RAD_TO_DEG)
+
+        drag_dir[tangential] = cos(aoa * RAD_TO_DEG)
+        drag_dir[normal] = sin(aoa * RAD_TO_DEG)
+
+        vector_to_string = lambda s: '(' + str(s[0]) + ' ' + str(s[1]) + ' ' + str(s[2]) + ')'
+        lift_dir_str = vector_to_string(lift_dir)
+        drag_dir_str = vector_to_string(drag_dir)
+        pitch_dir_str = vector_to_string(pitch_dir)
+        cofr_str = vector_to_string(cofr)
 
         file_id = self.file_manager.create_file('system/include', 'forceCoefficients')
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'forceCoefficiens')
@@ -41,15 +60,20 @@ class WriteForceCoefficients:
                 temp_str += boundary + ' '
             self.file_manager.write(file_id, temp_str[:-1] + ');\n')
         self.file_manager.write(file_id, '    rho             rhoInf;\n')
-        self.file_manager.write(file_id, '    rhoInf          1;\n')
-        self.file_manager.write(file_id, '    liftDir         ' + lift_dir + ';\n')
-        self.file_manager.write(file_id, '    dragDir         ' + drag_dir + ';\n')
-        self.file_manager.write(file_id, '    CofR            ' + cofr + ';\n')
-        self.file_manager.write(file_id, '    pitchAxis       ' + pitch_dir + ';\n')
+        if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
+            self.file_manager.write(file_id, '    rhoInf          1;\n')
+        if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
+            rho = str(self.properties['flow_properties']['dimensional_properties']['rho'])
+            self.file_manager.write(file_id, '    rhoInf          ' + rho + ';\n')
+        self.file_manager.write(file_id, '    liftDir         ' + lift_dir_str + ';\n')
+        self.file_manager.write(file_id, '    dragDir         ' + drag_dir_str + ';\n')
+        self.file_manager.write(file_id, '    CofR            ' + cofr_str + ';\n')
+        self.file_manager.write(file_id, '    pitchAxis       ' + pitch_dir_str + ';\n')
         self.file_manager.write(file_id, '    magUInf         ' +
-                                str(self.properties['flow_properties']['velocity_magnitude']) + ';\n')
+                                str(self.properties['flow_properties']['dimensional_properties']['velocity_magnitude'])
+                                + ';\n')
         self.file_manager.write(file_id, '    lRef            ' +
-                                str(self.properties['flow_properties']['reference_length']) + ';\n')
+                                str(self.properties['dimensionless_coefficients']['reference_length']) + ';\n')
         self.file_manager.write(file_id, '    Aref            ' +
                                 str(self.properties['dimensionless_coefficients']['reference_area']) + ';\n')
         self.file_manager.write(file_id, '}\n')

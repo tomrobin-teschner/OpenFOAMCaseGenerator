@@ -1,3 +1,5 @@
+import os
+import distutils.file_util
 from src import GlobalVariables as Parameters
 
 
@@ -36,9 +38,25 @@ class WriteUtilityScripts:
             self.file_manager.write(file_id, pre_solver_flag + 'pisoFoam' + post_solver_flag + '\n')
         elif self.properties['solver_properties']['solver'] == Parameters.pimpleFoam:
             self.file_manager.write(file_id, pre_solver_flag + 'pimpleFoam' + post_solver_flag + '\n')
+        elif self.properties['solver_properties']['solver'] == Parameters.rhoCentralFoam:
+            self.file_manager.write(file_id, pre_solver_flag + 'rhoCentralFoam' + post_solver_flag + '\n')
+        elif self.properties['solver_properties']['solver'] == Parameters.rhoSimpleFoam:
+            self.file_manager.write(file_id, pre_solver_flag + 'rhoSimpleFoam' + post_solver_flag + '\n')
+        elif self.properties['solver_properties']['solver'] == Parameters.rhoPimpleFoam:
+            self.file_manager.write(file_id, pre_solver_flag + 'rhoPimpleFoam' + post_solver_flag + '\n')
+        elif self.properties['solver_properties']['solver'] == Parameters.sonicFoam:
+            self.file_manager.write(file_id, pre_solver_flag + 'sonicFoam' + post_solver_flag + '\n')
 
         if self.properties['parallel_properties']['run_in_parallel']:
             self.file_manager.write(file_id, 'reconstructPar\n')
+
+        self.file_manager.write(file_id, 'python3 plotResiduals.py\n')
+        if self.properties['cutting_planes']['write_cutting_planes'] is True:
+            self.copy_PVD_loader_script()
+            self.file_manager.write(file_id, 'python3 addVTPLoader.py ')
+            for plane in self.properties['cutting_planes']['location']:
+                self.file_manager.write(file_id, plane['name'] + ' ')
+            self.file_manager.write(file_id, '\n')
 
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
@@ -57,3 +75,13 @@ class WriteUtilityScripts:
         self.file_manager.write(file_id,
                                 '# ------------------------------------------------------------------------------\n')
         self.file_manager.close_file(file_id)
+
+    def copy_residual_plotting_script(self):
+        src = os.path.join('utilityScripts', 'plotResiduals.py')
+        dst = self.properties['file_properties']['path']
+        distutils.file_util.copy_file(src, dst)
+
+    def copy_PVD_loader_script(self):
+        src = os.path.join('utilityScripts', 'addVTPLoader.py')
+        dst = self.properties['file_properties']['path']
+        distutils.file_util.copy_file(src, dst)

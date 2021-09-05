@@ -1,3 +1,8 @@
+# coordinate directions
+X = 0
+Y = 1
+Z = 2
+
 # mesh treatment
 NO_MESH = 0
 BLOCK_MESH_DICT = 1
@@ -28,11 +33,23 @@ INLET_OUTLET = 2
 # turbulence constant
 C_MU = 0.09
 
+# flow type
+incompressible = 0
+compressible = 1
+
+# input parameter specification mode
+DIMENSIONAL = 0
+NON_DIMENSIONAL = 1
+
 # solver to be used for solving the navier-stokes equation
 simpleFoam = 0
 icoFoam = 1
 pisoFoam = 2
 pimpleFoam = 3
+rhoCentralFoam = 4
+rhoSimpleFoam = 5
+rhoPimpleFoam = 6
+sonicFoam = 7
 
 # solver to be used for solving the implicit system of equations for the pressure
 MULTI_GRID = 0
@@ -118,6 +135,11 @@ SpalartAllmarasIDDES = 8
 kOmegaSSTDES = 9
 kOmegaSSTDDES = 10
 kOmegaSSTIDDES = 11
+
+# LES filters
+SIMPLE_FILTER = 0
+ANISOTROPIC_FILTER = 1
+LAPLACE_FILTER = 2
 
 # delta models
 smooth = 0

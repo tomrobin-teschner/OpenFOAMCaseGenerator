@@ -7,42 +7,24 @@ FoamFile
     object      boundary;
 }
 
-6         
+3         
 (
-    inlet
+    airfoil
+    {
+        type wall;
+        nFaces 422;
+        startFace 108287;
+    }
+    farfield
     {
         type patch;
-        nFaces 152;
-        startFace 48622;
-    }
-    lower
-    {
-        type wall;
-        nFaces 149;
-        startFace 48774;
-    }
-    outlet
-    {
-        type patch;
-        nFaces 170;
-        startFace 48923;
-    }
-    trailingEdge
-    {
-        type wall;
-        nFaces 24;
-        startFace 49093;
-    }
-    upper
-    {
-        type wall;
-        nFaces 149;
-        startFace 49117;
+        nFaces 25;
+        startFace 108709;
     }
     BaseAndTop
     {
         type empty;
-        nFaces 48944;
-        startFace 49266;
+        nFaces 130614;
+        startFace 108734;
     }
 )

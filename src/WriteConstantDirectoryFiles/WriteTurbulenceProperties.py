@@ -71,40 +71,57 @@ class TurbulencePropertiesFile:
         self.file_manager.write(file_id, '}\n\n')
 
     def __write_LES(self, file_id):
+        les_model = self.properties['turbulence_properties']['LES_model']
         self.file_manager.write(file_id, 'LES\n{\n')
-        if self.properties['turbulence_properties']['LES_model'] == Parameters.Smagorinsky:
+        if les_model == Parameters.Smagorinsky:
             self.file_manager.write(file_id, '    LESModel        Smagorinsky;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.kEqn:
+        elif les_model == Parameters.kEqn:
             self.file_manager.write(file_id, '    LESModel        kEqn;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.dynamicKEqn:
+        elif les_model == Parameters.dynamicKEqn:
             self.file_manager.write(file_id, '    LESModel        dynamicKEqn;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.dynamicLagrangian:
+        elif les_model == Parameters.dynamicLagrangian:
             self.file_manager.write(file_id, '    LESModel        dynamicLagrangian;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.DeardorffDiffStress:
+        elif les_model == Parameters.DeardorffDiffStress:
             self.file_manager.write(file_id, '    LESModel        DeardorffDiffStress;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.WALE:
+        elif les_model == Parameters.WALE:
             self.file_manager.write(file_id, '    LESModel        WALE;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.SpalartAllmarasDES:
+        elif les_model == Parameters.SpalartAllmarasDES:
             self.file_manager.write(file_id, '    LESModel        SpalartAllmarasDES;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.SpalartAllmarasDDES:
+        elif les_model == Parameters.SpalartAllmarasDDES:
             self.file_manager.write(file_id, '    LESModel        SpalartAllmarasDDES;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.SpalartAllmarasIDDES:
+        elif les_model == Parameters.SpalartAllmarasIDDES:
             self.file_manager.write(file_id, '    LESModel        SpalartAllmarasIDDES;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.kOmegaSSTDES:
+        elif les_model == Parameters.kOmegaSSTDES:
             self.file_manager.write(file_id, '    LESModel        kOmegaSSTDES;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.kOmegaSSTDDES:
+        elif les_model == Parameters.kOmegaSSTDDES:
             self.file_manager.write(file_id, '    LESModel        kOmegaSSTDDES;\n')
-        elif self.properties['turbulence_properties']['LES_model'] == Parameters.kOmegaSSTIDDES:
+        elif les_model == Parameters.kOmegaSSTIDDES:
             self.file_manager.write(file_id, '    LESModel        kOmegaSSTIDDES;\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    turbulence      on;\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    printCoeffs     on;\n')
         self.file_manager.write(file_id, '\n')
+        if les_model is Parameters.dynamicKEqn or les_model is Parameters.dynamicLagrangian:
+            self.__write_filter_model(file_id)
         self.__write_delta_model(file_id)
         self.file_manager.write(file_id, '}\n\n')
 
+    def __write_filter_model(self, file_id):
+        if self.properties['turbulence_properties']['LES_filter'] is Parameters.SIMPLE_FILTER:
+            self.file_manager.write(file_id, '    filter          simple;\n')
+        elif self.properties['turbulence_properties']['LES_filter'] is Parameters.ANISOTROPIC_FILTER:
+            self.file_manager.write(file_id, '    filter          anisotropic;\n')
+        elif self.properties['turbulence_properties']['LES_filter'] is Parameters.LAPLACE_FILTER:
+            self.file_manager.write(file_id, '    filter          laplace;\n')
+        self.file_manager.write(file_id, '\n')
+
     def __write_delta_model(self, file_id):
+        # if IDDES is used, delta model must be IDDES, silently overwrite it here in case wrong model is set
+        les_model = self.properties['turbulence_properties']['LES_model']
+        if les_model == Parameters.SpalartAllmarasIDDES or les_model is Parameters.kOmegaSSTIDDES:
+            self.properties['turbulence_properties']['delta_model'] = Parameters.IDDESDelta
+
         if self.properties['turbulence_properties']['delta_model'] == Parameters.smooth:
             self.file_manager.write(file_id, '    delta           smooth;\n')
         elif self.properties['turbulence_properties']['delta_model'] == Parameters.Prandtl:
