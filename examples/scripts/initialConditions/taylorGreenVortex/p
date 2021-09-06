@@ -7,6 +7,14 @@ forAll(p, cellI)
     auto y = mesh.C()[cellI].y();
     auto z = mesh.C()[cellI].z();
 
-    p[cellI] = - 1.0/16.0 * (Foam::cos(2.0 * x) + Foam::cos(2.0 * y)) * ( Foam::cos(2.0 * z) + 2.0 );
+    auto p_0 = 0.0;
+    auto U_0 = 1.6;
+    auto r_0 = 1.0;
+
+    auto cos2x = Foam::cos(2.0 * x);
+    auto cos2y = Foam::cos(2.0 * y);
+    auto cos2z = Foam::cos(2.0 * z);
+
+    p[cellI] = p_0 + ((r_0 * Foam::pow(U_0, 2)) / 16.0) * (cos2x + cos2y) * (cos2z + 2.0);
 }
 p.writeEntry("", os);

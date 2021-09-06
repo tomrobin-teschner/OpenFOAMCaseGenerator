@@ -11,7 +11,7 @@
     },
     "parallel_properties": {
         "run_in_parallel": true,
-        "number_of_processors": 4
+        "number_of_processors": 2
     },
     "boundary_properties": {
         "boundary_conditions": {
@@ -82,7 +82,7 @@
         "solver": 3,
         "pressure_solver": 1,
         "startTime": 0,
-        "endTime": 1,
+        "endTime": 10,
         "startFrom": 0,
         "CFLBasedTimeStepping": true,
         "CFL": 1.0,
@@ -107,7 +107,7 @@
         "turbulent_to_laminar_ratio": 10,
         "freestream_turbulent_intensity": 0.05,
         "RANS_model": 7,
-        "LES_model": 2,
+        "LES_model": 1,
         "LES_filter": 0,
         "delta_model": 3,
         "use_phi_instead_of_grad_U": [
@@ -255,14 +255,12 @@
         "output_cutting_plane_at_every_timestep": false
     },
     "iso_surfaces": {
-        "write_iso_surfaces": false,
+        "write_iso_surfaces": true,
         "flow_variable": [
-            "Q",
-            "Lambda2"
+            "Q"
         ],
         "iso_value": [
-            1e-05,
-            0
+            0.1
         ],
         "additional_field_to_write": [
             "p"

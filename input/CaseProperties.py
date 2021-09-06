@@ -1,4 +1,4 @@
-from src import GlobalVariables as Parameters
+from input import GlobalVariables as Parameters
 
 from math import sqrt, pow, log10, floor, sin, cos, pi
 import os
@@ -48,7 +48,7 @@ class CaseProperties:
                 'run_in_parallel': True,
 
                 # number of processors that will be used to run case in parallel
-                'number_of_processors': 4,
+                'number_of_processors': 2,
             },
 
             # properties imposed at boundaries / freestream
@@ -151,8 +151,8 @@ class CaseProperties:
 
                 # type of the flow to solve
                 #   The following types are supported:
-                #     incompressible
-                #     compressible
+                #     incompressible:   Solve the flow using a constant density approach
+                #     compressible:     Solve the flow using a variable density approach
                 'flow_type': Parameters.incompressible,
 
                 # flag indicating whether viscosity should be constant or variable (only applicable to compressible
@@ -241,7 +241,7 @@ class CaseProperties:
                 'startTime': 0,
 
                 # end time
-                'endTime': 1,
+                'endTime': 10,
 
                 # specify from which time directory to start from
                 #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -400,7 +400,7 @@ class CaseProperties:
                 #     kOmegaSSTDES:         Detached Eddy Simulation based on the k-omega SST model
                 #     kOmegaSSTDDES:        Delayed Detached Eddy Simulation based on the k-omega SST model
                 #     kOmegaSSTIDDES:       Improved Delayed Detached Eddy Simulation based on the k-omega SST model
-                'LES_model': Parameters.dynamicKEqn,
+                'LES_model': Parameters.kEqn,
 
                 # filter for spatial LES filtering, used for dynamic subgrid-scale models
                 #   SIMPLE_FILTER:      Simple top-hat filter used in dynamic LES models
@@ -428,7 +428,7 @@ class CaseProperties:
             },
 
             'convergence_control': {
-                # convergence criterion for residuals (used to judge if a simulation has converged)
+                # convergence criterion for residuals (used to judge if a simulation has converged to a steady state)
                 'convergence_threshold': 1e-4,
 
                 # absolute convergence criterion for implicit solvers (used to judge if the current iteration has
@@ -591,14 +591,14 @@ class CaseProperties:
             'iso_surfaces': {
                 # flag indicating if iso-surfaces should be active (written to file). If set to false, ignore the
                 # rest of this dictionary.
-                'write_iso_surfaces': False,
+                'write_iso_surfaces': True,
 
                 # variables of which to write iso surfaces
-                'flow_variable': ['Q', 'Lambda2'],
+                'flow_variable': ['Q'],
 
                 # iso value at which point the surface should be written. List entry correspond to order specified in
                 # flow_variable list
-                'iso_value': [1e-5, 0],
+                'iso_value': [0.1],
 
                 # additional fields to write (can be more than 1, can be used to colour iso-surface in post-processing)
                 'additional_field_to_write': ['p'],

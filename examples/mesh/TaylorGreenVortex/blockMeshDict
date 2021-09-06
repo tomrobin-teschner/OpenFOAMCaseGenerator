@@ -28,9 +28,9 @@ block
 // spacing entries, results in a 32^3 block.
 mesh
 {
-    spacingX        16;
-    spacingY        16;
-    spacingZ        16;
+    spacingX        32;
+    spacingY        32;
+    spacingZ        32;
 
     gradingX        1.0;
     gradingY        1.0;

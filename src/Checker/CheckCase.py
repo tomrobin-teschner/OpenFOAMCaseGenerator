@@ -1,6 +1,6 @@
 import sys
 import warnings
-from src import GlobalVariables as Parameters
+from input import GlobalVariables as Parameters
 
 
 class CheckCase:

@@ -1,6 +1,6 @@
 import os
 import distutils.file_util
-from src import GlobalVariables as Parameters
+from input import GlobalVariables as Parameters
 
 
 class WriteUtilityScripts:
@@ -51,11 +51,21 @@ class WriteUtilityScripts:
             self.file_manager.write(file_id, 'reconstructPar\n')
 
         self.file_manager.write(file_id, 'python3 plotResiduals.py\n')
-        if self.properties['cutting_planes']['write_cutting_planes'] is True:
+
+        if ((self.properties['cutting_planes']['write_cutting_planes'] is True) or
+                (self.properties['iso_surfaces']['write_iso_surfaces'] is True)):
             self.copy_PVD_loader_script()
+
+        if self.properties['cutting_planes']['write_cutting_planes'] is True:
             self.file_manager.write(file_id, 'python3 addVTPLoader.py ')
             for plane in self.properties['cutting_planes']['location']:
                 self.file_manager.write(file_id, plane['name'] + ' ')
+            self.file_manager.write(file_id, '\n')
+
+        if self.properties['iso_surfaces']['write_iso_surfaces'] is True:
+            self.file_manager.write(file_id, 'python3 addVTPLoader.py ')
+            for field in self.properties['iso_surfaces']['flow_variable']:
+                self.file_manager.write(file_id, 'isoSurface_' + field + ' ')
             self.file_manager.write(file_id, '\n')
 
         self.file_manager.write(file_id, '\n')

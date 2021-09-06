@@ -7,8 +7,10 @@ forAll(U, cellI)
     auto y = mesh.C()[cellI].y();
     auto z = mesh.C()[cellI].z();
 
-    U[cellI].x() =   Foam::sin(x) * Foam::cos(y) * Foam::cos(z);
-    U[cellI].y() = - Foam::cos(x) * Foam::sin(y) * Foam::cos(z);
+    auto U_0 = 1.6;
+
+    U[cellI].x() =   U_0 * Foam::sin(x) * Foam::cos(y) * Foam::cos(z);
+    U[cellI].y() = - U_0 * Foam::cos(x) * Foam::sin(y) * Foam::cos(z);
     U[cellI].z() =   0.0;
 }
 U.writeEntry("", os);

@@ -35,7 +35,7 @@ class WriteIsoSurfaces:
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    surfaces\n')
         self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        ' + field + '\n')
+        self.file_manager.write(file_id, '        isoSurface_' + field + '\n')
         self.file_manager.write(file_id, '        {\n')
         self.file_manager.write(file_id, '            type          isoSurface;\n')
         self.file_manager.write(file_id, '            isoField      ' + field + ';\n')

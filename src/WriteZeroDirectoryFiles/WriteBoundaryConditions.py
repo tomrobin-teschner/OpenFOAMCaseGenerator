@@ -1,4 +1,4 @@
-from src import GlobalVariables as Parameters
+from input import GlobalVariables as Parameters
 from math import pow, sqrt
 import copy
 

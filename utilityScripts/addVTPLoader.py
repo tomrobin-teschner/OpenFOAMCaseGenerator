@@ -2,7 +2,7 @@ import sys, os
 
 
 def main():
-    print('>>> Writing VTP loader')
+    print('>>> Writing VTP loader for', str(sys.argv[1:]))
     # get plane names from command line arguments
     assert len(sys.argv) > 1, 'Need at least one plane to process'
     for i in range(1, len(sys.argv)):
