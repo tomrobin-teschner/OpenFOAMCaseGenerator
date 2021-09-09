@@ -58,26 +58,26 @@ class FileManager:
     def get_version(self):
         return self.properties['file_properties']['version']
 
+    def copy_directory(self, src, dst):
+        distutils.dir_util.copy_tree(src, dst)
+
+    def copy_file(self, src, dst):
+        distutils.file_util.copy_file(src, dst)
+
     def __copy_block_mesh_dict(self):
         src = os.path.join(self.properties['file_properties']['blockmeshdict_directory'], 'blockMeshDict')
         dst = os.path.join(self.properties['file_properties']['path'], 'system', 'blockMeshDict')
-        self.__copy_file(src, dst)
+        self.copy_file(src, dst)
 
     def __copy_snappy_hex_mesh_dict(self):
         src = os.path.join(self.properties['file_properties']['snappyhexmeshdict_directory'], 'snappyHexMeshDict')
         dst = os.path.join(self.properties['file_properties']['path'], 'system', 'snappyHexMeshDict')
-        self.__copy_file(src, dst)
+        self.copy_file(src, dst)
 
     def __copy_poly_mesh_dict(self):
         src = os.path.join(self.properties['file_properties']['polymesh_directory'], 'polyMesh')
         dst = os.path.join(self.properties['file_properties']['path'], 'constant', 'polyMesh')
-        self.__copy_directory(src, dst)
-
-    def __copy_directory(self, src, dst):
-        distutils.dir_util.copy_tree(src, dst)
-
-    def __copy_file(self, src, dst):
-        distutils.file_util.copy_file(src, dst)
+        self.copy_directory(src, dst)
 
     def __create_directory(self, directory):
         if not os.path.exists(directory):

@@ -1,5 +1,5 @@
 import input.CaseProperties as CaseProperties
-from input import GlobalVariables as Parameters
+import input.GlobalVariables as Parameters
 
 import src.FileDirectoryIO as FileIO
 import src.Checker as Checker

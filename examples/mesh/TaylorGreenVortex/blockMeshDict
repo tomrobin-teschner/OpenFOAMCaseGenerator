@@ -24,8 +24,8 @@ block
 
 // meshing parameters per sub-block. There are two sub-blocks in each direction,
 // thus, the total number of points in the x, y or z direction is twice the
-// number specified for spacingX, Y or Z. For example, using 16 points for all
-// spacing entries, results in a 32^3 block.
+// number specified for spacingX, Y or Z. For example, using 32 points for all
+// spacing entries, results in a 64^3 block.
 mesh
 {
     spacingX        32;

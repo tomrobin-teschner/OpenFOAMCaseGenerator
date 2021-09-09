@@ -50,23 +50,34 @@ class WriteUtilityScripts:
         if self.properties['parallel_properties']['run_in_parallel']:
             self.file_manager.write(file_id, 'reconstructPar\n')
 
-        self.file_manager.write(file_id, 'python3 plotResiduals.py\n')
+        self.file_manager.write(file_id, 'python3 postProcessing/plotResiduals.py\n')
 
         if ((self.properties['cutting_planes']['write_cutting_planes'] is True) or
                 (self.properties['iso_surfaces']['write_iso_surfaces'] is True)):
             self.copy_PVD_loader_script()
 
         if self.properties['cutting_planes']['write_cutting_planes'] is True:
-            self.file_manager.write(file_id, 'python3 addVTPLoader.py ')
+            self.file_manager.write(file_id, 'python3 postProcessing/addVTPLoader.py ')
             for plane in self.properties['cutting_planes']['location']:
                 self.file_manager.write(file_id, plane['name'] + ' ')
             self.file_manager.write(file_id, '\n')
 
         if self.properties['iso_surfaces']['write_iso_surfaces'] is True:
-            self.file_manager.write(file_id, 'python3 addVTPLoader.py ')
+            self.file_manager.write(file_id, 'python3 postProcessing/addVTPLoader.py ')
             for field in self.properties['iso_surfaces']['flow_variable']:
                 self.file_manager.write(file_id, 'isoSurface_' + field + ' ')
             self.file_manager.write(file_id, '\n')
+
+        if self.properties['post_processing']['execute_python_scrip']:
+            for item in self.properties['post_processing']['python_script']:
+                src = item['script']
+                dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
+                distutils.file_util.copy_file(src, dst)
+                self.file_manager.write(file_id, 'python3 postProcessing/' + os.path.basename(src) + '\n')
+                for requires in item['requires']:
+                    src = requires
+                    distutils.file_util.copy_file(src, dst)
+
 
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
@@ -80,18 +91,26 @@ class WriteUtilityScripts:
         self.file_manager.write(file_id,
                                 '# ------------------------------------------------------------------------------\n')
         self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'rm -rf 0.[0-9]* [1-9]* log logs postProcessing processor*\n')
+        self.file_manager.write(file_id, 'rm -rf 0.[0-9]* [1-9]* log logs processor*\n')
+        self.file_manager.write(file_id, 'cd postProcessing/\n')
+        self.file_manager.write(file_id, 'find . -type f ! -name \'*.py\' -delete\n')
+        self.file_manager.write(file_id, 'find . -type d -delete\n')
+        self.file_manager.write(file_id, 'cd ../\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
                                 '# ------------------------------------------------------------------------------\n')
         self.file_manager.close_file(file_id)
 
     def copy_residual_plotting_script(self):
-        src = os.path.join('utilityScripts', 'plotResiduals.py')
-        dst = self.properties['file_properties']['path']
+        if not os.path.exists(os.path.join(self.properties['file_properties']['path'], 'postProcessing')):
+            os.makedirs(os.path.join(self.properties['file_properties']['path'], 'postProcessing'))
+        src = os.path.join('examples', 'scripts', 'userDefined', 'postProcessing', 'plotResiduals.py')
+        dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
         distutils.file_util.copy_file(src, dst)
 
     def copy_PVD_loader_script(self):
-        src = os.path.join('utilityScripts', 'addVTPLoader.py')
-        dst = self.properties['file_properties']['path']
+        if not os.path.exists(os.path.join(self.properties['file_properties']['path'], 'postProcessing')):
+            os.makedirs(os.path.join(self.properties['file_properties']['path'], 'postProcessing'))
+        src = os.path.join('examples', 'scripts', 'userDefined', 'postProcessing', 'addVTPLoader.py')
+        dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
         distutils.file_util.copy_file(src, dst)

@@ -10,7 +10,7 @@ class CaseProperties:
         self.properties = {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
-                'case_name': 'taylor_green_vortex',
+                'case_name': 'taylor_green_vortex20',
 
                 # specify how the mesh should be incorporated into the case directory
                 #   The following types are supported
@@ -48,7 +48,7 @@ class CaseProperties:
                 'run_in_parallel': True,
 
                 # number of processors that will be used to run case in parallel
-                'number_of_processors': 2,
+                'number_of_processors': 4,
             },
 
             # properties imposed at boundaries / freestream
@@ -140,8 +140,10 @@ class CaseProperties:
                 # used to identify for which variable custom initial conditions should be written. The value is a
                 # path to the c++ script which should be used as the custom initial condition
                 'custom_initial_conditions_setup': {
-                    'p': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'p'),
-                    'U': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'U'),
+                    'p': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'incompressible',
+                                      'p'),
+                    'U': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'incompressible',
+                                      'U'),
                 },
 
                 # specify how the initial field should be set for non-custom initial conditions
@@ -179,21 +181,21 @@ class CaseProperties:
                 'dimensional_properties': {
                     # specify the inlet velocity magnitude. The vector components will be constructed using the
                     # axis_aligned_flow_direction properties.
-                    'velocity_magnitude': 1.6,
+                    'velocity_magnitude': 1.0,
 
                     # specify density at inlet / freestream (only used for compressible calculations)
                     'rho': 1.0,
 
                     # specify the laminar viscosity (used for incompressible flows or compressible, if viscosity is set
                     # to const)
-                    'nu': 1e-3,
+                    'nu': 6.25e-4,
 
                     # specify total pressure at inlet / freestream (ignored for incompressible flows, here,
                     # static pressure will be used and will be set to 0 by default)
                     'p': 0,
 
                     # specify temperature at inlet / freestream
-                    'T': 298,
+                    'T': 300,
                 },
 
                 # specify the direction of the inflow velocity vector. Will be used to construct a 3D vector based on
@@ -241,7 +243,7 @@ class CaseProperties:
                 'startTime': 0,
 
                 # end time
-                'endTime': 10,
+                'endTime': 20,
 
                 # specify from which time directory to start from
                 #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -251,7 +253,7 @@ class CaseProperties:
                 'startFrom': Parameters.START_TIME,
 
                 # flag indicating whether to dynamically calculate time step based on CFL criterion
-                'CFLBasedTimeStepping': True,
+                'CFLBasedTimeStepping': False,
 
                 # CFL number
                 'CFL': 1.0,
@@ -264,7 +266,7 @@ class CaseProperties:
                 'maxDeltaT': 1,
 
                 # frequency at which to write output files. Behaviour controlled through write control entry below.
-                'write_frequency': 0.1,
+                'write_frequency': 100,
 
                 # write control, specify when to output results, the options are listed below
                 #   TIME_STEP:           write every 'write_frequency' time steps
@@ -273,7 +275,7 @@ class CaseProperties:
                 #                        (use with 'CFLBasedTimeStepping' = True)
                 #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
                 #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
-                'write_control': Parameters.ADJUSTABLE_RUN_TIME,
+                'write_control': Parameters.TIME_STEP,
 
                 # specify how many solutions to keep (specify 0 to keep all)
                 'purge_write': 0,
@@ -429,7 +431,7 @@ class CaseProperties:
 
             'convergence_control': {
                 # convergence criterion for residuals (used to judge if a simulation has converged to a steady state)
-                'convergence_threshold': 1e-4,
+                'convergence_threshold': 0,
 
                 # absolute convergence criterion for implicit solvers (used to judge if the current iteration has
                 # converged)
@@ -607,6 +609,37 @@ class CaseProperties:
                 # the iso surfaces will only be written according to the settings in the controlDict (i.e. every time
                 # a new time directory is generated)
                 'output_iso_surfaces_at_every_timestep': False,
+            },
+
+            # user-defined function objects that will get executed after all other function objects have run
+            'post_processing': {
+                # execute user-defined function object?
+                'execute_function_object': True,
+
+                # path to user-defined function object as a key value pair (dictionary). The key is used as the name of
+                # the file and the value is the path to the function object that should be executed
+                'function_objects': {
+                    'integratedKineticEnergy': os.path.join('examples', 'scripts', 'userDefined', 'functionObjects',
+                                                            'taylorGreenVortex')
+                },
+
+                # execute user-defined post processing routines?
+                'execute_python_scrip': True,
+
+                # list of user defined python scripts to copy and execute after the simulation is done
+                # each list entry contains a dictionary with 2 key-value pairs. The first key is named "script" and
+                # needs to point to the location of the python script. The second is the "requires" key which is a list
+                # of files requires by the script, for example, reference solution data that is read by the script
+                'python_script': [
+                    {
+                        'script': os.path.join('examples', 'scripts', 'userDefined', 'postProcessing',
+                                               'taylorGreenVortex', 'plotTaylorGreenVortex.py'),
+                        'requires': [
+                            os.path.join('examples', 'scripts', 'userDefined', 'postProcessing',
+                                         'taylorGreenVortex', 'taylor_green_vortex_512_ref.dat'),
+                        ],
+                    },
+                ],
             },
         }
 

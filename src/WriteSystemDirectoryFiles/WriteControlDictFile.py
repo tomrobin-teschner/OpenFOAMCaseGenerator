@@ -81,6 +81,17 @@ class ControlDictFile:
             self.file_manager.write(file_id, '    #include "include/MachNo"\n')
         if self.properties['dimensionless_coefficients']['write_wall_shear_stresses']:
             self.file_manager.write(file_id, '    #includeFunc "wallShearStress"\n')
+        if self.properties['post_processing']['execute_function_object']:
+            fo_dict = self.properties['post_processing']['function_objects']
+            for key, value in fo_dict.items():
+                self.file_manager.write(file_id, '    #include "include/' + key + '"\n')
+                fo_id = self.file_manager.create_file('system/include', key)
+                self.file_manager.write_header(fo_id, 'dictionary', 'system', key)
+                self.file_manager.write(fo_id, '\n')
+                with open(value, 'r') as fo_to_copy:
+                    for line in fo_to_copy:
+                        self.file_manager.write(fo_id, line)
+
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,

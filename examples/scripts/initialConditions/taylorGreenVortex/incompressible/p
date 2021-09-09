@@ -1,15 +1,16 @@
 const IOdictionary& d = static_cast<const IOdictionary&>(dict);
 const fvMesh& mesh = refCast<const fvMesh>(d.db());
 scalarField p(mesh.nCells(), 0.0);
+
+auto p_0 = 0.0;
+auto U_0 = 1.0;
+auto r_0 = 1.0;
+
 forAll(p, cellI)
 {
     auto x = mesh.C()[cellI].x();
     auto y = mesh.C()[cellI].y();
     auto z = mesh.C()[cellI].z();
-
-    auto p_0 = 0.0;
-    auto U_0 = 1.6;
-    auto r_0 = 1.0;
 
     auto cos2x = Foam::cos(2.0 * x);
     auto cos2y = Foam::cos(2.0 * y);
