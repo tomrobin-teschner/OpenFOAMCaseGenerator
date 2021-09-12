@@ -15,6 +15,8 @@ class CheckCase:
         self.check_appropriate_pressure_solver()
         self.check_correct_incompressible_solver_setup()
         self.check_correct_compressible_solver_setup()
+        self.check_sensible_convergence_criterion()
+        self.check_force_coefficients()
 
     def check_correct_turbulence_model_setup(self):
         if (self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSSTLM or
@@ -132,3 +134,58 @@ class CheckCase:
                 'know what you are doing and are sure your setup is correct.\n' +
                 '\n================================== END WARNING ==================================\n',
                 UserWarning, '', 0)
+
+    def check_sensible_convergence_criterion(self):
+        unsteady = self.properties['numerical_discretisation']['time_integration']
+        abs_tol = self.properties['convergence_control']['absolute_convergence_criterion']
+        rel_tol = self.properties['convergence_control']['relative_convergence_criterion']
+        if unsteady:
+            if abs_tol > 1e-4:
+                warnings.showwarning(
+                    '\n==================================== WARNING ====================================\n' +
+                    '\nYou are running an unsteady case but your absolute convergence criterion for the\n' +
+                    'implicit system of equations is too high and is likely to cause diffusion in time\n' +
+                    'and thus inaccurate results. Consider lowering your absolute convergence criterion.\n' +
+                    '\nCurrent absolute convergence criterion    : ' + str(abs_tol) + '\n' +
+                    'Recommended absolute convergence criterion: 1e-4 (or lower)\n' +
+                    '\n================================== END WARNING ==================================\n',
+                    UserWarning, '', 0)
+            if rel_tol > 1e-4:
+                warnings.showwarning(
+                    '\n==================================== WARNING ====================================\n' +
+                    '\nYou are running an unsteady case but your relative convergence criterion for the\n' +
+                    'implicit system of equations is too high and is likely to cause diffusion in time\n' +
+                    'and thus inaccurate results. Consider lowering your relative convergence criterion.\n' +
+                    '\nCurrent relative convergence criterion    : ' + str(rel_tol) + '\n' +
+                    'Recommended relative convergence criterion: 1e-4 (or lower)\n' +
+                    '\n================================== END WARNING ==================================\n',
+                    UserWarning, '', 0)
+
+    def check_force_coefficients(self):
+        force_coefficient_writing_active = self.properties['dimensionless_coefficients']['write_force_coefficients']
+        boundary_conditions = self.properties['boundary_properties']['boundary_conditions']
+        wall_patches = self.properties['dimensionless_coefficients']['wall_boundaries']
+
+        if force_coefficient_writing_active:
+            if len(wall_patches) == 0:
+                sys.exit('\n===================================== ERROR =====================================\n' +
+                         '\nForce coefficient calculation is requested, but no boundary patches are specified,\n' +
+                         'within the properties[\'dimensionless_coefficients\'][\'wall_boundaries\'] dictionary.\n' +
+                         'Ensure you specify the wall patches at which forces should be calculated.\n' +
+                         '\n=================================== END ERROR ===================================\n')
+
+            for patch in wall_patches:
+                if patch not in boundary_conditions:
+                    sys.exit('\n===================================== ERROR =====================================\n' +
+                             '\nThe boundary condition \'' + patch + '\' was not found in the\n' +
+                             'boundary conditions and thus may lead to unwanted force calculations. OpenFOAM may\n' +
+                             'fail silently here, check your boundary conditions and wall patches at which to\n' +
+                             'calculate the force coefficients again.\n' +
+                             '\n=================================== END ERROR ===================================\n')
+
+                if boundary_conditions[patch] is not Parameters.WALL:
+                    sys.exit('\n===================================== ERROR =====================================\n' +
+                             '\nThe boundary condition \'' + patch + '\' was found in the\n' +
+                             'boundary conditions but is not of wall type. Check your boundary conditions and \n' +
+                             'wall patches at which to calculate the force coefficients again.\n' +
+                             '\n=================================== END ERROR ===================================\n')
