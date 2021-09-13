@@ -1,7 +1,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Generic badge](https://img.shields.io/badge/Version-v2.0.0-red.svg)](https://shields.io/)
 
-> :warning: This is a pre-release, version 2.0.0-alpha.5
+> :warning: This is a pre-release, version 2.0.0-alpha.6
 
 ## Motivation
 
@@ -39,11 +39,35 @@ python3 OpenFOAMCaseGenerator.py --help
 
 ### Running examples
 
-To get started, a couple of examples come by default with the case generator. These are located in the ```examples/settings``` directory. To run any of them, we can use the ```--input=path/to/example/case``` command line argument. To run, for example, a compressible flow simulation around the NACA 0012 airfoil, we can use the following command:
+To get started, a couple of examples come by default with the case generator. These are located in the ```examples/settings``` directory. To run any of them, we can use the ```--input=path/to/example/case``` command line argument.
+
+To run a compressible flow simulation around the NACA 0012 airfoil at a Reynolds number of Re=6 000 000 and Mach number of Ma=0.15, we can use the following command:
 
 ```python
-python3 OpenFOAMCaseGenerator.py --input=examples/settings/airfoil_compressible.json
+python3 OpenFOAMCaseGenerator.py --input=examples/settings/compressible/airfoil.json
 ```
+
+To run the same case using an incompressible set up (same Reynolds number), use
+
+```python
+python3 OpenFOAMCaseGenerator.py --input=examples/settings/incompressible/airfoil.json
+```
+
+To run an unsteady simulations using large Eddy simulations (LES), there is a case prepared for the Taylor-Green Vortex problem which uses custom initial conditions and the c++ source code along with its boiler plate code setup is written to the appropriate files.
+
+To run the case using a compressible solver, use
+
+```python
+python3 OpenFOAMCaseGenerator.py --input=examples/settings/compressible/taylorGreenVortex.json
+```
+
+For the incompressible version, use
+
+```python
+python3 OpenFOAMCaseGenerator.py --input=examples/settings/compressible/taylorGreenVortex.json
+```
+
+For both cases, the mesh resolution can be fine tuned in the blockMeshDict file that will be copied into the case directory. By default it is running on 4 processors and all the parallelisation setup and execution is done automatically. At the end, some custom python post-processing functions are executed which will plot the kinetic energy evolution as well as its dissipation over time and compared against reference data. Note that the OpenFOAM solvers are rather dissipative and an explicit Runge Kutta based solver may be a better choice here for better accuracy.
 
 ### Storing cases for later reuse
 
