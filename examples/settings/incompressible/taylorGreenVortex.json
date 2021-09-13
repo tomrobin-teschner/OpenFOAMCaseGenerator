@@ -1,23 +1,26 @@
 {
     "file_properties": {
-        "case_name": "naca_0012_compressible",
-        "mesh_treatment": 3,
+        "case_name": "taylorGreenVortex",
+        "mesh_treatment": 1,
         "blockmeshdict_directory": "examples\\mesh\\TaylorGreenVortex",
         "snappyhexmeshdict_directory": "",
-        "polymesh_directory": "examples\\mesh\\airfoil",
+        "polymesh_directory": "",
         "run_directory": "",
         "version": "v2006",
-        "path": "naca_0012_compressible"
+        "path": "taylorGreenVortex"
     },
     "parallel_properties": {
-        "run_in_parallel": false,
+        "run_in_parallel": true,
         "number_of_processors": 4
     },
     "boundary_properties": {
         "boundary_conditions": {
-            "airfoil": 6,
-            "farfield": 2,
-            "BaseAndTop": 7
+            "top": 9,
+            "bottom": 9,
+            "left": 9,
+            "right": 9,
+            "front": 9,
+            "back": 9
         },
         "custom_inlet_boundary_conditions": false,
         "custom_inlet_boundary_conditions_setup": {
@@ -43,29 +46,28 @@
         "number_of_cells_per_eddy": 1
     },
     "flow_properties": {
-        "custom_initial_conditions": false,
+        "custom_initial_conditions": true,
         "custom_initial_conditions_setup": {
             "p": "examples\\scripts\\initialConditions\\taylorGreenVortex\\compressible\\p",
             "U": "examples\\scripts\\initialConditions\\taylorGreenVortex\\compressible\\U"
         },
         "initial_conditions": 0,
-        "flow_type": 1,
+        "flow_type": 0,
         "const_viscosity": true,
-        "input_parameters_specification_mode": 1,
+        "input_parameters_specification_mode": 0,
         "non_dimensional_properties": {
-            "Re": 6000000,
+            "Re": 1600.0,
             "Ma": 0.15
         },
         "dimensional_properties": {
-            "velocity_magnitude": 51.90442177695461,
-            "rho": 1.225,
-            "nu": 8.650736962825768e-06,
-            "p": 100000.0,
-            "T": 298,
-            "speed_of_sound": 346.0294785130307,
-            "mu": 1.0597152779461568e-05,
+            "velocity_magnitude": 1.0,
+            "rho": 1.0,
+            "nu": 0.000625,
+            "p": 100,
+            "T": 300,
+            "mu": 0.000625,
             "velocity_vector": [
-                51.90442177695461,
+                1.0,
                 0.0,
                 0.0
             ]
@@ -77,33 +79,29 @@
         }
     },
     "solver_properties": {
-        "solver": 5,
+        "solver": 3,
         "pressure_solver": 1,
         "startTime": 0,
-        "endTime": 3000,
+        "endTime": 20,
         "startFrom": 0,
         "CFLBasedTimeStepping": false,
         "CFL": 1.0,
-        "deltaT": 1,
+        "deltaT": 0.01,
         "maxDeltaT": 1,
         "write_frequency": 100,
         "write_control": 0,
         "purge_write": 0,
         "under_relaxation_default": 0.7,
-        "under_relaxation_fields": {
-            "rho": 0.01
-        },
-        "under_relaxation_equations": {
-            "U": 0.3
-        }
+        "under_relaxation_fields": {},
+        "under_relaxation_equations": {}
     },
     "numerical_discretisation": {
-        "time_integration": 0,
-        "numerical_schemes_correction": 0,
+        "time_integration": 1,
+        "numerical_schemes_correction": 3,
         "use_first_order_for_turbulence": true
     },
     "turbulence_properties": {
-        "turbulence_type": 1,
+        "turbulence_type": 2,
         "wall_modelling": 0,
         "turbulent_quantities_at_inlet": 1,
         "turbulent_to_laminar_ratio": 10,
@@ -117,12 +115,11 @@
         ]
     },
     "convergence_control": {
-        "convergence_threshold": 1e-06,
+        "convergence_threshold": 0,
         "absolute_convergence_criterion": 1e-14,
-        "relative_convergence_criterion": 0.01,
+        "relative_convergence_criterion": 1e-06,
         "integral_convergence_criterion": [
-            0,
-            1
+            -1
         ],
         "averaging_time_steps": 20,
         "integral_quantities_convergence_threshold": 1e-05,
@@ -137,14 +134,14 @@
             0
         ],
         "wall_boundaries": [
-            "airfoil"
+            ""
         ],
-        "write_force_coefficients": true,
-        "write_pressure_coefficient": true,
+        "write_force_coefficients": false,
+        "write_pressure_coefficient": false,
         "write_wall_shear_stresses": false
     },
     "additional_fields": {
-        "write_additional_fields": false,
+        "write_additional_fields": true,
         "fields": [
             0,
             1
@@ -208,7 +205,7 @@
         "output_probe_at_every_timestep": false
     },
     "cutting_planes": {
-        "write_cutting_planes": false,
+        "write_cutting_planes": true,
         "location": [
             {
                 "name": "plane_x=0",
@@ -258,7 +255,7 @@
         "output_cutting_plane_at_every_timestep": false
     },
     "iso_surfaces": {
-        "write_iso_surfaces": false,
+        "write_iso_surfaces": true,
         "flow_variable": [
             "Q"
         ],
@@ -271,11 +268,11 @@
         "output_iso_surfaces_at_every_timestep": false
     },
     "post_processing": {
-        "execute_function_object": false,
+        "execute_function_object": true,
         "function_objects": {
             "integratedKineticEnergy": "examples\\scripts\\userDefined\\functionObjects\\taylorGreenVortex"
         },
-        "execute_python_scrip": false,
+        "execute_python_scrip": true,
         "python_script": [
             {
                 "script": "examples\\scripts\\userDefined\\postProcessing\\taylorGreenVortex\\plotTaylorGreenVortex.py",

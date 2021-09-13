@@ -10,7 +10,7 @@ class CaseProperties:
         self.properties = {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
-                'case_name': 'taylor_green_vortex20',
+                'case_name': 'taylorGreenVortex',
 
                 # specify how the mesh should be incorporated into the case directory
                 #   The following types are supported
@@ -140,9 +140,9 @@ class CaseProperties:
                 # used to identify for which variable custom initial conditions should be written. The value is a
                 # path to the c++ script which should be used as the custom initial condition
                 'custom_initial_conditions_setup': {
-                    'p': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'incompressible',
+                    'p': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'compressible',
                                       'p'),
-                    'U': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'incompressible',
+                    'U': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'compressible',
                                       'U'),
                 },
 
@@ -155,7 +155,7 @@ class CaseProperties:
                 #   The following types are supported:
                 #     incompressible:   Solve the flow using a constant density approach
                 #     compressible:     Solve the flow using a variable density approach
-                'flow_type': Parameters.incompressible,
+                'flow_type': Parameters.compressible,
 
                 # flag indicating whether viscosity should be constant or variable (only applicable to compressible
                 # flows, in which case sutherland's law will be used to compute it)
@@ -192,7 +192,7 @@ class CaseProperties:
 
                     # specify total pressure at inlet / freestream (ignored for incompressible flows, here,
                     # static pressure will be used and will be set to 0 by default)
-                    'p': 0,
+                    'p': 100,
 
                     # specify temperature at inlet / freestream
                     'T': 300,
@@ -229,7 +229,7 @@ class CaseProperties:
                 #                       mesh motion and mesh topology changes
                 #     sonicFoam:        Transient solver for trans-sonic/supersonic, turbulent flow of a compressible
                 #                       gas
-                'solver': Parameters.pimpleFoam,
+                'solver': Parameters.rhoPimpleFoam,
 
                 # name of the solver to use to solve the implicit system of equations for the pressure
                 #   MULTI_GRID:     Use OpenFOAM's geometric agglomerated algebraic multigrid (GAMG). May be less
@@ -437,9 +437,13 @@ class CaseProperties:
                 # converged)
                 'absolute_convergence_criterion': 1e-14,
 
-                # relative convergence criterion for implicit solvers (used to judge if the current iteration has
-                # converged)
-                'relative_convergence_criterion': 0.01,
+                # relative convergence criterion for implicit solvers
+                #
+                # NOTE: For steady state simulations, we don't have to converge fully within each iteration so a low
+                # relative tolerance may be chosen (e.g. 0.01). For unsteady flows, we need to have an accurate
+                # prediction within each time step and we should take a lower value here (e.g. 1e-6) to avoid diffusive
+                # results in time
+                'relative_convergence_criterion': 1e-6,
 
                 # check if an integral quantity has converged instead of just checking the residuals
                 # recommended if such a integral quantity can be easily defined for the current simulation
@@ -684,9 +688,10 @@ class CaseProperties:
 
     def __calculate_dimensional_properties_from_Re_incompressible(self):
         Re = self.properties['flow_properties']['non_dimensional_properties']['Re']
+        l_ref = self.properties['dimensionless_coefficients']['reference_length']
         order_of_magnitude = floor(log10(Re))
         nu = 1.0 / pow(10, order_of_magnitude)
-        u_mag = Re / pow(10, order_of_magnitude)
+        u_mag = Re * nu / l_ref
 
         self.properties['flow_properties']['dimensional_properties']['nu'] = nu
         self.properties['flow_properties']['dimensional_properties']['rho'] = 1.0
@@ -697,7 +702,7 @@ class CaseProperties:
         T = 298
         Ma = self.properties['flow_properties']['non_dimensional_properties']['Ma']
         c = sqrt(1.4 * 287 * T)
-        self.properties['flow_properties']['non_dimensional_properties']['speed_of_sound'] = c
+        self.properties['flow_properties']['dimensional_properties']['speed_of_sound'] = c
         u_mag = Ma * c
         Re = self.properties['flow_properties']['non_dimensional_properties']['Re']
         l_ref = self.properties['dimensionless_coefficients']['reference_length']
@@ -729,7 +734,7 @@ class CaseProperties:
         self.properties['flow_properties']['dimensional_properties']['mu'] = nu * rho
 
     def __create_inlet_velocity_vector_from_velocity_magnitude_and_direction(self):
-        velocity_vector = [0, 0, 0]
+        velocity_vector = [0.0, 0.0, 0.0]
         RAD_TO_DEG = pi / 180
 
         tangential = self.properties['flow_properties']['axis_aligned_flow_direction']['tangential']

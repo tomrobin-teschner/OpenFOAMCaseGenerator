@@ -68,7 +68,7 @@ class fvSchemesFile:
                 self.file_manager.write(file_id, '    default         Gauss upwind ' + gradient_scheme + ';\n')
             else:
                 self.file_manager.write(file_id, '    default         Gauss limitedLinear 1;\n')
-            self.file_manager.write(file_id, '    div(phi,U)      Gauss linear;\n')
+            self.file_manager.write(file_id, '    div(phi,U)      bounded Gauss MUSCLV grad(U);\n')
         if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
             self.file_manager.write(file_id, '    div((nuEff*dev2(T(grad(U))))) Gauss linear;\n')
         elif self.properties['flow_properties']['flow_type'] == Parameters.compressible:

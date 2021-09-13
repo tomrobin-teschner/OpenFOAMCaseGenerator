@@ -23,7 +23,7 @@ USqr
 // we use the pow function object here as it allows us to scale the result.
 // To obtain the kinetic energy, we multiply the above computed squared
 // magnitude vector by 0.5. Since we integrate over the entire domain (in
-// the next function object), we also need to devide by the volume, i.e.
+// the next function object), we also need to divide by the volume, i.e.
 // 1 / ( (2*pi) * (2*pi) * (2*pi) ). Combined with the factor of 0.5, we
 // end up with a factor approximately of 0.002 which we use here for scaling.
 Ekin

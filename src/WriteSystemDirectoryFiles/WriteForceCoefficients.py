@@ -60,11 +60,8 @@ class WriteForceCoefficients:
                 temp_str += boundary + ' '
             self.file_manager.write(file_id, temp_str[:-1] + ');\n')
         self.file_manager.write(file_id, '    rho             rhoInf;\n')
-        if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
-            self.file_manager.write(file_id, '    rhoInf          1;\n')
-        if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
-            rho = str(self.properties['flow_properties']['dimensional_properties']['rho'])
-            self.file_manager.write(file_id, '    rhoInf          ' + rho + ';\n')
+        rho = str(self.properties['flow_properties']['dimensional_properties']['rho'])
+        self.file_manager.write(file_id, '    rhoInf          ' + rho + ';\n')
         self.file_manager.write(file_id, '    liftDir         ' + lift_dir_str + ';\n')
         self.file_manager.write(file_id, '    dragDir         ' + drag_dir_str + ';\n')
         self.file_manager.write(file_id, '    CofR            ' + cofr_str + ';\n')

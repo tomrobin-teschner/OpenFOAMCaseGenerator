@@ -1,16 +1,16 @@
 {
     "file_properties": {
-        "case_name": "taylor_green_vortex20",
+        "case_name": "taylorGreenVortex",
         "mesh_treatment": 1,
         "blockmeshdict_directory": "examples\\mesh\\TaylorGreenVortex",
         "snappyhexmeshdict_directory": "",
         "polymesh_directory": "",
         "run_directory": "",
         "version": "v2006",
-        "path": "taylor_green_vortex20"
+        "path": "taylorGreenVortex"
     },
     "parallel_properties": {
-        "run_in_parallel": false,
+        "run_in_parallel": true,
         "number_of_processors": 4
     },
     "boundary_properties": {
@@ -48,28 +48,29 @@
     "flow_properties": {
         "custom_initial_conditions": true,
         "custom_initial_conditions_setup": {
-            "p": "examples\\scripts\\initialConditions\\taylorGreenVortex\\incompressible\\p",
-            "U": "examples\\scripts\\initialConditions\\taylorGreenVortex\\incompressible\\U"
+            "p": "examples\\scripts\\initialConditions\\taylorGreenVortex\\compressible\\p",
+            "U": "examples\\scripts\\initialConditions\\taylorGreenVortex\\compressible\\U"
         },
         "initial_conditions": 0,
-        "flow_type": 0,
+        "flow_type": 1,
         "const_viscosity": true,
         "input_parameters_specification_mode": 0,
         "non_dimensional_properties": {
             "Re": 1600.0,
-            "Ma": 0.15
+            "Ma": 0.002880277994805399,
+            "speed_of_sound": 347.18870949384285
         },
         "dimensional_properties": {
             "velocity_magnitude": 1.0,
             "rho": 1.0,
             "nu": 0.000625,
-            "p": 0,
+            "p": 100,
             "T": 300,
             "mu": 0.000625,
             "velocity_vector": [
                 1.0,
                 0.0,
-                0
+                0.0
             ]
         },
         "axis_aligned_flow_direction": {
@@ -79,10 +80,10 @@
         }
     },
     "solver_properties": {
-        "solver": 3,
+        "solver": 6,
         "pressure_solver": 1,
         "startTime": 0,
-        "endTime": 5,
+        "endTime": 20,
         "startFrom": 0,
         "CFLBasedTimeStepping": false,
         "CFL": 1.0,
@@ -117,7 +118,7 @@
     "convergence_control": {
         "convergence_threshold": 0,
         "absolute_convergence_criterion": 1e-14,
-        "relative_convergence_criterion": 0.01,
+        "relative_convergence_criterion": 1e-06,
         "integral_convergence_criterion": [
             -1
         ],

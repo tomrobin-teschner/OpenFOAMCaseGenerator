@@ -1,13 +1,13 @@
 {
     "file_properties": {
-        "case_name": "airfoil_incompressible",
+        "case_name": "naca_0012_incompressible",
         "mesh_treatment": 3,
-        "blockmeshdict_directory": "",
+        "blockmeshdict_directory": "examples\\mesh\\TaylorGreenVortex",
         "snappyhexmeshdict_directory": "",
-        "polymesh_directory": "examples/mesh/airfoil",
+        "polymesh_directory": "examples\\mesh\\airfoil",
         "run_directory": "",
         "version": "v2006",
-        "path": "airfoil_incompressible"
+        "path": "naca_0012_incompressible"
     },
     "parallel_properties": {
         "run_in_parallel": false,
@@ -15,20 +15,20 @@
     },
     "boundary_properties": {
         "boundary_conditions": {
-            "farfield": 2,
             "airfoil": 6,
+            "farfield": 2,
             "BaseAndTop": 7
         },
         "custom_inlet_boundary_conditions": false,
         "custom_inlet_boundary_conditions_setup": {
-            "p": "examples/scripts/boundaryConditions/generic/scalarField",
-            "U": "examples/scripts/boundaryConditions/generic/vectorField"
+            "p": "examples\\scripts\\boundaryConditions\\generic\\scalarField",
+            "U": "examples\\scripts\\boundaryConditions\\generic\\vectorField"
         },
         "custom_DFSEM_conditions": false,
         "custom_DFSEM_conditions_setup": {
-            "R": "examples/scripts/boundaryConditions/generic/tensorField",
-            "U": "examples/scripts/boundaryConditions/generic/vectorField",
-            "L": "examples/scripts/boundaryConditions/generic/scalarField"
+            "R": "examples\\scripts\\boundaryConditions\\generic\\tensorField",
+            "U": "examples\\scripts\\boundaryConditions\\generic\\vectorField",
+            "L": "examples\\scripts\\boundaryConditions\\generic\\scalarField"
         },
         "reynolds_stresses": [
             1,
@@ -45,8 +45,8 @@
     "flow_properties": {
         "custom_initial_conditions": false,
         "custom_initial_conditions_setup": {
-            "p": "examples/scripts/initialConditions/taylorGreenVortex/p",
-            "U": "examples/scripts/initialConditions/taylorGreenVortex/U"
+            "p": "examples\\scripts\\initialConditions\\taylorGreenVortex\\compressible\\p",
+            "U": "examples\\scripts\\initialConditions\\taylorGreenVortex\\compressible\\U"
         },
         "initial_conditions": 0,
         "flow_type": 0,
@@ -61,12 +61,12 @@
             "rho": 1.0,
             "nu": 1e-06,
             "p": 0,
-            "T": 298,
+            "T": 300,
             "mu": 1e-06,
             "velocity_vector": [
                 6.0,
                 0.0,
-                0
+                0.0
             ]
         },
         "axis_aligned_flow_direction": {
@@ -77,9 +77,9 @@
     },
     "solver_properties": {
         "solver": 0,
-        "pressure_solver": 0,
+        "pressure_solver": 1,
         "startTime": 0,
-        "endTime": 5000,
+        "endTime": 3000,
         "startFrom": 0,
         "CFLBasedTimeStepping": false,
         "CFL": 1.0,
@@ -104,7 +104,7 @@
         "turbulent_to_laminar_ratio": 10,
         "freestream_turbulent_intensity": 0.05,
         "RANS_model": 7,
-        "LES_model": 0,
+        "LES_model": 1,
         "LES_filter": 0,
         "delta_model": 3,
         "use_phi_instead_of_grad_U": [
@@ -116,8 +116,8 @@
         "absolute_convergence_criterion": 1e-14,
         "relative_convergence_criterion": 0.01,
         "integral_convergence_criterion": [
-            1,
-            0
+            0,
+            1
         ],
         "averaging_time_steps": 20,
         "integral_quantities_convergence_threshold": 1e-05,
@@ -135,7 +135,7 @@
             "airfoil"
         ],
         "write_force_coefficients": true,
-        "write_pressure_coefficient": false,
+        "write_pressure_coefficient": true,
         "write_wall_shear_stresses": false
     },
     "additional_fields": {
@@ -206,51 +206,78 @@
         "write_cutting_planes": false,
         "location": [
             {
-                "name": "plane_z=5",
+                "name": "plane_x=0",
                 "origin": [
                     0,
                     0,
-                    0.5
+                    0
                 ],
                 "normal": [
+                    1,
                     0,
-                    0,
-                    1
+                    0
                 ]
             },
             {
-                "name": "plane_y=5",
+                "name": "plane_y=0",
                 "origin": [
-                    -1,
                     0,
-                    0.5
+                    0,
+                    0
                 ],
                 "normal": [
                     0,
                     1,
                     0
                 ]
+            },
+            {
+                "name": "plane_z=0",
+                "origin": [
+                    0,
+                    0,
+                    0
+                ],
+                "normal": [
+                    0,
+                    0,
+                    1
+                ]
             }
         ],
         "variables_to_monitor": [
             "U",
-            "p"
+            "p",
+            "vorticity"
         ],
         "output_cutting_plane_at_every_timestep": false
     },
     "iso_surfaces": {
         "write_iso_surfaces": false,
         "flow_variable": [
-            "Q",
-            "Lambda2"
+            "Q"
         ],
         "iso_value": [
-            1e-05,
-            0
+            0.1
         ],
         "additional_field_to_write": [
             "p"
         ],
         "output_iso_surfaces_at_every_timestep": false
+    },
+    "post_processing": {
+        "execute_function_object": false,
+        "function_objects": {
+            "integratedKineticEnergy": "examples\\scripts\\userDefined\\functionObjects\\taylorGreenVortex"
+        },
+        "execute_python_scrip": false,
+        "python_script": [
+            {
+                "script": "examples\\scripts\\userDefined\\postProcessing\\taylorGreenVortex\\plotTaylorGreenVortex.py",
+                "requires": [
+                    "examples\\scripts\\userDefined\\postProcessing\\taylorGreenVortex\\taylor_green_vortex_512_ref.dat"
+                ]
+            }
+        ]
     }
 }

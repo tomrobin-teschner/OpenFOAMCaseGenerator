@@ -28,7 +28,6 @@ class fvSolutionFile:
         self.file_manager.write(file_id, '    pFinal\n')
         self.file_manager.write(file_id, '    {\n')
         self.file_manager.write(file_id, '        $p;\n')
-        self.file_manager.write(file_id, '        relTol           0;\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
@@ -46,7 +45,6 @@ class fvSolutionFile:
                                 '    "(U|T|e|rho|rhoU|k|omega|epsilon|nuTilda|q|zeta|ReThetat|gammaInt|kl|kt|R)Final"\n')
         self.file_manager.write(file_id, '    {\n')
         self.file_manager.write(file_id, '        $U;\n')
-        self.file_manager.write(file_id, '        relTol           0;\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
@@ -67,7 +65,8 @@ class fvSolutionFile:
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    residualControl\n')
         self.file_manager.write(file_id, '    {\n')
-        if self.properties['solver_properties']['solver'] is Parameters.simpleFoam:
+        if ((self.properties['solver_properties']['solver'] is Parameters.simpleFoam) or
+            (self.properties['solver_properties']['solver'] is Parameters.rhoSimpleFoam)):
             self.file_manager.write(file_id, '        "(.*)"    ' +
                                     str(self.properties['convergence_control']['convergence_threshold']) + ';\n')
         else:
