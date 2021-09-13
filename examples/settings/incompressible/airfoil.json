@@ -2,9 +2,9 @@
     "file_properties": {
         "case_name": "naca_0012_incompressible",
         "mesh_treatment": 3,
-        "blockmeshdict_directory": "examples\\mesh\\TaylorGreenVortex",
+        "blockmeshdict_directory": "examples/mesh/TaylorGreenVortex",
         "snappyhexmeshdict_directory": "",
-        "polymesh_directory": "examples\\mesh\\airfoil",
+        "polymesh_directory": "examples/mesh/airfoil",
         "run_directory": "",
         "version": "v2006",
         "path": "naca_0012_incompressible"
@@ -21,14 +21,14 @@
         },
         "custom_inlet_boundary_conditions": false,
         "custom_inlet_boundary_conditions_setup": {
-            "p": "examples\\scripts\\boundaryConditions\\generic\\scalarField",
-            "U": "examples\\scripts\\boundaryConditions\\generic\\vectorField"
+            "p": "examples/scripts/boundaryConditions/generic/scalarField",
+            "U": "examples/scripts/boundaryConditions/generic/vectorField"
         },
         "custom_DFSEM_conditions": false,
         "custom_DFSEM_conditions_setup": {
-            "R": "examples\\scripts\\boundaryConditions\\generic\\tensorField",
-            "U": "examples\\scripts\\boundaryConditions\\generic\\vectorField",
-            "L": "examples\\scripts\\boundaryConditions\\generic\\scalarField"
+            "R": "examples/scripts/boundaryConditions/generic/tensorField",
+            "U": "examples/scripts/boundaryConditions/generic/vectorField",
+            "L": "examples/scripts/boundaryConditions/generic/scalarField"
         },
         "reynolds_stresses": [
             1,
@@ -45,8 +45,8 @@
     "flow_properties": {
         "custom_initial_conditions": false,
         "custom_initial_conditions_setup": {
-            "p": "examples\\scripts\\initialConditions\\taylorGreenVortex\\compressible\\p",
-            "U": "examples\\scripts\\initialConditions\\taylorGreenVortex\\compressible\\U"
+            "p": "examples/scripts/initialConditions/taylorGreenVortex/compressible/p",
+            "U": "examples/scripts/initialConditions/taylorGreenVortex/compressible/U"
         },
         "initial_conditions": 0,
         "flow_type": 0,
@@ -268,14 +268,14 @@
     "post_processing": {
         "execute_function_object": false,
         "function_objects": {
-            "integratedKineticEnergy": "examples\\scripts\\userDefined\\functionObjects\\taylorGreenVortex"
+            "integratedKineticEnergy": "examples/scripts/userDefined/functionObjects/taylorGreenVortex"
         },
         "execute_python_scrip": false,
         "python_script": [
             {
-                "script": "examples\\scripts\\userDefined\\postProcessing\\taylorGreenVortex\\plotTaylorGreenVortex.py",
+                "script": "examples/scripts/userDefined/postProcessing/taylorGreenVortex/plotTaylorGreenVortex.py",
                 "requires": [
-                    "examples\\scripts\\userDefined\\postProcessing\\taylorGreenVortex\\taylor_green_vortex_512_ref.dat"
+                    "examples/scripts/userDefined/postProcessing/taylorGreenVortex/taylor_green_vortex_512_ref.dat"
                 ]
             }
         ]

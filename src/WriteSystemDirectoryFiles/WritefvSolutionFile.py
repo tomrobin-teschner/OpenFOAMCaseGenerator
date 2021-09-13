@@ -60,13 +60,25 @@ class fvSolutionFile:
             self.file_manager.write(file_id, '    consistent                 no;\n')
             self.file_manager.write(file_id, '    nCorrectors                2;\n')
             self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   0;\n')
-            self.file_manager.write(file_id, '    pMaxFactor                 1.5;\n')
-            self.file_manager.write(file_id, '    pMinFactor                 0.9;\n')
+            boundaries = self.properties['boundary_properties']['boundary_conditions']
+            use_pressure_min_max_factors = False
+            for key, value in boundaries.items():
+                if ((value == Parameters.INLET) or (value == Parameters.OUTLET) or (value == Parameters.INLET_OUTLET) or
+                        (value == Parameters.FREESTREAM) or (value == Parameters.BACKFLOW_OUTLET) or
+                        (value == Parameters.ADVECTIVE_OUTLET) or (value == Parameters.DFSEM_INLET)):
+                    use_pressure_min_max_factors = True
+            if use_pressure_min_max_factors:
+                self.file_manager.write(file_id, '    pMaxFactor                 1.5;\n')
+                self.file_manager.write(file_id, '    pMinFactor                 0.9;\n')
+            else:
+                self.file_manager.write(file_id, '    pMax                       1;\n')
+                self.file_manager.write(file_id, '    pMin                       1e10;\n')
+
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    residualControl\n')
         self.file_manager.write(file_id, '    {\n')
         if ((self.properties['solver_properties']['solver'] is Parameters.simpleFoam) or
-            (self.properties['solver_properties']['solver'] is Parameters.rhoSimpleFoam)):
+                (self.properties['solver_properties']['solver'] is Parameters.rhoSimpleFoam)):
             self.file_manager.write(file_id, '        "(.*)"    ' +
                                     str(self.properties['convergence_control']['convergence_threshold']) + ';\n')
         else:
