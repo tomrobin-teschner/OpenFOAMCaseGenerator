@@ -1,4 +1,4 @@
-from input import GlobalVariables as Parameters
+from src.Properties import GlobalVariables as Parameters
 
 
 class ControlDictFile:

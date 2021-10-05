@@ -1,16 +1,15 @@
-from input import GlobalVariables as Parameters
-
-from math import sqrt, pow, log10, floor, sin, cos, pi
+import input.CasePropertiesBase as CPB
+from src.Properties import GlobalVariables as Parameters
 import os
-import json
 
 
-class CaseProperties:
-    def __init__(self):
-        self.properties = {
+class default(CPB.CasePropertiesBase):
+    @staticmethod
+    def get_properties():
+        return {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
-                'case_name': 'taylorGreenVortex',
+                'case_name': 'default',
 
                 # specify how the mesh should be incorporated into the case directory
                 #   The following types are supported
@@ -20,10 +19,10 @@ class CaseProperties:
                 #   BLOCK_MESH_AND_SNAPPY_HEX_MESH_DICT:    Copy both blockMeshDict and snappyHexMeshDict to directory,
                 #                                           requires the path to both files
                 #   POLY_MESH:                              Specify a polyMesh directory and copy it into the case setup
-                'mesh_treatment': Parameters.BLOCK_MESH_DICT,
+                'mesh_treatment': Parameters.NO_MESH,
 
                 # directory where the blockMeshDict file is located (needs to be named blockMeshDict)
-                'blockmeshdict_directory': os.path.join('examples', 'mesh', 'TaylorGreenVortex'),
+                'blockmeshdict_directory': os.path.join(''),
 
                 # directory where the snappyHexMeshDict file is located (needs to be named snappyHexMeshDict)
                 'snappyhexmeshdict_directory': os.path.join(''),
@@ -45,7 +44,7 @@ class CaseProperties:
             'parallel_properties': {
                 # flag indicating if simulation will be run in parallel. If true, additional information for domain
                 # decomposition will be written (and Allrun script modified, accordingly)
-                'run_in_parallel': True,
+                'run_in_parallel': False,
 
                 # number of processors that will be used to run case in parallel
                 'number_of_processors': 4,
@@ -74,23 +73,20 @@ class CaseProperties:
                 #                     (Neumann condition for all quantities)
                 #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
                 'boundary_conditions': {
-                    'top': Parameters.CYCLIC,
-                    'bottom': Parameters.CYCLIC,
-                    'left': Parameters.CYCLIC,
-                    'right': Parameters.CYCLIC,
-                    'front': Parameters.CYCLIC,
-                    'back': Parameters.CYCLIC,
+                    'BC-1': Parameters.INLET,
+                    'BC-2': Parameters.OUTLET,
+                    'BC-3': Parameters.WALL,
+                    'BaseAndTop': Parameters.EMPTY,
                 },
 
                 # specify if custom inlet boundary conditions should be used for this case setup. If set to true, this
                 # will require the dictionary entry for custom_inlet_boundary_conditions_setup
-                'custom_inlet_boundary_conditions': False,
+                'custom_inlet_boundary_conditions': True,
 
                 # if custom inlet boundary conditions should be used, this dictionary provides a mapping where the key
                 # is used to identify for which variable custom inlet boundary conditions should be written. The value
                 # is a path to the c++ script which should be used as the custom inlet boundary condition
                 'custom_inlet_boundary_conditions_setup': {
-                    'p': os.path.join('examples', 'scripts', 'boundaryConditions', 'generic', 'scalarField'),
                     'U': os.path.join('examples', 'scripts', 'boundaryConditions', 'generic', 'vectorField'),
                 },
 
@@ -140,8 +136,6 @@ class CaseProperties:
                 # used to identify for which variable custom initial conditions should be written. The value is a
                 # path to the c++ script which should be used as the custom initial condition
                 'custom_initial_conditions_setup': {
-                    'p': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'compressible',
-                                      'p'),
                     'U': os.path.join('examples', 'scripts', 'initialConditions', 'taylorGreenVortex', 'compressible',
                                       'U'),
                 },
@@ -166,7 +160,7 @@ class CaseProperties:
                 #                       dictionary will be used
                 #   NON_DIMENSIONAL:    Use non-dimensional quantities. Properties from the non_dimensional_properties
                 #                       dictionary will be used
-                'input_parameters_specification_mode': Parameters.DIMENSIONAL,
+                'input_parameters_specification_mode': Parameters.NON_DIMENSIONAL,
 
                 # properties used when input parameters are specified using dimensional properties
                 'non_dimensional_properties': {
@@ -192,7 +186,7 @@ class CaseProperties:
 
                     # specify total pressure at inlet / freestream (ignored for incompressible flows, here,
                     # static pressure will be used and will be set to 0 by default)
-                    'p': 100,
+                    'p': 100000,
 
                     # specify temperature at inlet / freestream
                     'T': 300,
@@ -243,7 +237,7 @@ class CaseProperties:
                 'startTime': 0,
 
                 # end time
-                'endTime': 20,
+                'endTime': 10,
 
                 # specify from which time directory to start from
                 #   START_TIME:  Start from the folder that is defined in the startTime variable
@@ -253,20 +247,20 @@ class CaseProperties:
                 'startFrom': Parameters.START_TIME,
 
                 # flag indicating whether to dynamically calculate time step based on CFL criterion
-                'CFLBasedTimeStepping': False,
+                'CFLBasedTimeStepping': True,
 
                 # CFL number
                 'CFL': 1.0,
 
                 # time step to be used (will be ignored if CFL-based time stepping is chosen)
                 # WARNING: solver needs to support adjustable deltaT calculation
-                'deltaT': 1e-2,
+                'deltaT': 1e-3,
 
                 # largest allowable time step
                 'maxDeltaT': 1,
 
                 # frequency at which to write output files. Behaviour controlled through write control entry below.
-                'write_frequency': 100,
+                'write_frequency': 250,
 
                 # write control, specify when to output results, the options are listed below
                 #   TIME_STEP:           write every 'write_frequency' time steps
@@ -286,11 +280,13 @@ class CaseProperties:
                 # field-specific under-relaxation factors dictionary (leave empty if none) the key needs to be the
                 # variable name such as p, U, T, rho, etc. and the value its under-relaxation factor
                 'under_relaxation_fields': {
+                    'rho': 0.01,
                 },
 
                 # equation-specific under-relaxation factors dictionary (leave empty if none) the key needs to be the
                 # variable name such as p, U, T, rho, etc. and the value its under-relaxation factor
                 'under_relaxation_equations': {
+                    'U': 0.3,
                 },
             },
 
@@ -310,7 +306,7 @@ class CaseProperties:
                 #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used
                 #               after running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order
                 #               accurate with less limiting compared to DEFAULT and TVD.
-                'numerical_schemes_correction': Parameters.ACCURACY,
+                'numerical_schemes_correction': Parameters.DEFAULT,
 
                 # flag to indicate if first order discretisation should be used for turbulent quantities
                 'use_first_order_for_turbulence': True,
@@ -321,11 +317,11 @@ class CaseProperties:
                 #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
                 #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
                 #   RANS:    Use this for scale modelled / averaged simulations (RANS)
-                'turbulence_type': Parameters.LES,
+                'turbulence_type': Parameters.RANS,
 
                 # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
-                #   LOW_RE  : first cell-height near wall is of order y+ <= 1
-                #   HIGH_RE : first cell-height near wall is of order y+ >  30
+                #   LOW_RE  : first cell-height near wall is of the order y+ <= 1
+                #   HIGH_RE : first cell-height near wall is of the order y+ >  30
                 'wall_modelling': Parameters.LOW_RE,
 
                 # select how to calculate turbulent quantities at inlet
@@ -377,7 +373,7 @@ class CaseProperties:
                 #   Based on Reynolds Stresses
                 #     LRR:             Reynolds stress model of Launder, Reece and Rodi
                 #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
-                'RANS_model': Parameters.kOmegaSST,
+                'RANS_model': Parameters.SpalartAllmaras,
 
                 # LES / DES model
                 #   LES:
@@ -431,7 +427,7 @@ class CaseProperties:
 
             'convergence_control': {
                 # convergence criterion for residuals (used to judge if a simulation has converged to a steady state)
-                'convergence_threshold': 0,
+                'convergence_threshold': 1e-6,
 
                 # absolute convergence criterion for implicit solvers (used to judge if the current iteration has
                 # converged)
@@ -454,7 +450,7 @@ class CaseProperties:
                 #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
                 #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
                 #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
-                'integral_convergence_criterion': [Parameters.NONE],
+                'integral_convergence_criterion': [Parameters.C_D, Parameters.C_L],
 
                 # if integral quantities are checked for convergence, specify for how many timesteps their average
                 # should be calculated to check if, on average, the quantity has converged
@@ -494,7 +490,7 @@ class CaseProperties:
             'additional_fields': {
                 # flag indicating if additional fields should be active (written to file). Will be written with all
                 # other variables to file at the same time. If set to false, ignore the rest of this dictionary.
-                'write_additional_fields': True,
+                'write_additional_fields': False,
 
                 # list of additional fields to write, can be more than 1 (Mach number will be automatically written for
                 # compressible flow cases)
@@ -563,7 +559,7 @@ class CaseProperties:
             'cutting_planes': {
                 # flag indicating if point probes should be active (written to file). If set to false, ignore the
                 # rest of this dictionary.
-                'write_cutting_planes': True,
+                'write_cutting_planes': False,
 
                 # specify the origin and normal vector of cutting plane, can be more than 1
                 'location': [
@@ -597,7 +593,7 @@ class CaseProperties:
             'iso_surfaces': {
                 # flag indicating if iso-surfaces should be active (written to file). If set to false, ignore the
                 # rest of this dictionary.
-                'write_iso_surfaces': True,
+                'write_iso_surfaces': False,
 
                 # variables of which to write iso surfaces
                 'flow_variable': ['Q'],
@@ -618,17 +614,16 @@ class CaseProperties:
             # user-defined function objects that will get executed after all other function objects have run
             'post_processing': {
                 # execute user-defined function object?
-                'execute_function_object': True,
+                'execute_function_object': False,
 
                 # path to user-defined function object as a key value pair (dictionary). The key is used as the name of
                 # the file and the value is the path to the function object that should be executed
                 'function_objects': {
-                    'integratedKineticEnergy': os.path.join('examples', 'scripts', 'userDefined', 'functionObjects',
-                                                            'taylorGreenVortex')
+                    'functionObject': os.path.join('')
                 },
 
                 # execute user-defined post processing routines?
-                'execute_python_scrip': True,
+                'execute_python_scrip': False,
 
                 # list of user defined python scripts to copy and execute after the simulation is done
                 # each list entry contains a dictionary with 2 key-value pairs. The first key is named "script" and
@@ -636,121 +631,11 @@ class CaseProperties:
                 # of files requires by the script, for example, reference solution data that is read by the script
                 'python_script': [
                     {
-                        'script': os.path.join('examples', 'scripts', 'userDefined', 'postProcessing',
-                                               'taylorGreenVortex', 'plotTaylorGreenVortex.py'),
+                        'script': os.path.join(''),
                         'requires': [
-                            os.path.join('examples', 'scripts', 'userDefined', 'postProcessing',
-                                         'taylorGreenVortex', 'taylor_green_vortex_512_ref.dat'),
+                            os.path.join(''),
                         ],
                     },
                 ],
             },
         }
-
-    def get_case_properties(self, command_line_arguments):
-        self.__add_default_properties()
-        self.properties = self.__handle_command_line_arguments(command_line_arguments, self.properties)
-        return self.properties
-
-    def __handle_command_line_arguments(self, command_line_arguments, properties):
-        # process properties dictionary (read and write if necessary)
-        if command_line_arguments.option_exists('input'):
-            with open(command_line_arguments['input'], 'r') as json_file:
-                properties = json.load(json_file)
-        elif command_line_arguments.option_exists('output'):
-            with open(command_line_arguments['output'], 'w') as json_file:
-                json.dump(self.properties, json_file, indent=4)
-        elif command_line_arguments.option_exists('write-json-only'):
-            with open(command_line_arguments['write-json-only'], 'w') as json_file:
-                json.dump(self.properties, json_file, indent=4)
-            exit(0)
-        return properties
-
-    def __add_default_properties(self):
-        # absolute path of text case location
-        self.properties['file_properties']['path'] = os.path.join(self.properties['file_properties']['run_directory'],
-                                                                  self.properties['file_properties']['case_name'])
-
-        # check how quantities are specified and calculate the missing properties
-        if self.properties['flow_properties']['input_parameters_specification_mode'] == Parameters.NON_DIMENSIONAL:
-            if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
-                self.__calculate_dimensional_properties_from_Re_incompressible()
-            elif self.properties['flow_properties']['flow_type'] == Parameters.compressible:
-                self.__calculate_dimensional_properties_from_Ma_compressible()
-        if self.properties['flow_properties']['input_parameters_specification_mode'] == Parameters.DIMENSIONAL:
-            self.__calculate_Re_incompressible_from_dimensional_properties()
-            if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
-                self.__calculate_Ma_compressible_from_dimensional_properties()
-
-        self.__add_dynamic_viscosity()
-        self.__create_inlet_velocity_vector_from_velocity_magnitude_and_direction()
-        self.__set_correct_gradient_reconstruction_scheme_for_RANS()
-
-    def __calculate_dimensional_properties_from_Re_incompressible(self):
-        Re = self.properties['flow_properties']['non_dimensional_properties']['Re']
-        l_ref = self.properties['dimensionless_coefficients']['reference_length']
-        order_of_magnitude = floor(log10(Re))
-        nu = 1.0 / pow(10, order_of_magnitude)
-        u_mag = Re * nu / l_ref
-
-        self.properties['flow_properties']['dimensional_properties']['nu'] = nu
-        self.properties['flow_properties']['dimensional_properties']['rho'] = 1.0
-        self.properties['flow_properties']['dimensional_properties']['p'] = 0
-        self.properties['flow_properties']['dimensional_properties']['velocity_magnitude'] = u_mag
-
-    def __calculate_dimensional_properties_from_Ma_compressible(self):
-        T = 298
-        Ma = self.properties['flow_properties']['non_dimensional_properties']['Ma']
-        c = sqrt(1.4 * 287 * T)
-        self.properties['flow_properties']['dimensional_properties']['speed_of_sound'] = c
-        u_mag = Ma * c
-        Re = self.properties['flow_properties']['non_dimensional_properties']['Re']
-        l_ref = self.properties['dimensionless_coefficients']['reference_length']
-        nu = u_mag * l_ref / Re
-
-        self.properties['flow_properties']['dimensional_properties']['nu'] = nu
-        self.properties['flow_properties']['dimensional_properties']['rho'] = 1.225
-        self.properties['flow_properties']['dimensional_properties']['T'] = T
-        self.properties['flow_properties']['dimensional_properties']['p'] = 1e5
-        self.properties['flow_properties']['dimensional_properties']['velocity_magnitude'] = u_mag
-
-    def __calculate_Re_incompressible_from_dimensional_properties(self):
-        # calculate reynolds number
-        u_mag = self.properties['flow_properties']['dimensional_properties']['velocity_magnitude']
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
-        l_ref = self.properties['dimensionless_coefficients']['reference_length']
-        self.properties['flow_properties']['non_dimensional_properties']['Re'] = u_mag * l_ref / nu
-
-    def __calculate_Ma_compressible_from_dimensional_properties(self):
-        u_mag = self.properties['flow_properties']['dimensional_properties']['velocity_magnitude']
-        T = self.properties['flow_properties']['dimensional_properties']['T']
-        c = sqrt(1.4 * 287 * T)
-        self.properties['flow_properties']['non_dimensional_properties']['speed_of_sound'] = c
-        self.properties['flow_properties']['non_dimensional_properties']['Ma'] = u_mag / c
-
-    def __add_dynamic_viscosity(self):
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
-        rho = self.properties['flow_properties']['dimensional_properties']['rho']
-        self.properties['flow_properties']['dimensional_properties']['mu'] = nu * rho
-
-    def __create_inlet_velocity_vector_from_velocity_magnitude_and_direction(self):
-        velocity_vector = [0.0, 0.0, 0.0]
-        RAD_TO_DEG = pi / 180
-
-        tangential = self.properties['flow_properties']['axis_aligned_flow_direction']['tangential']
-        normal = self.properties['flow_properties']['axis_aligned_flow_direction']['normal']
-        aoa = self.properties['flow_properties']['axis_aligned_flow_direction']['angle_of_attack']
-        u_mag = self.properties['flow_properties']['dimensional_properties']['velocity_magnitude']
-
-        velocity_vector[tangential] = cos(aoa * RAD_TO_DEG) * u_mag
-        velocity_vector[normal] = sin(aoa * RAD_TO_DEG) * u_mag
-
-        self.properties['flow_properties']['dimensional_properties']['velocity_vector'] = velocity_vector
-
-    def __set_correct_gradient_reconstruction_scheme_for_RANS(self):
-        self.properties['turbulence_properties']['use_phi_instead_of_grad_U'] = False,
-        if (self.properties['turbulence_properties']['RANS_model'] == Parameters.LienCubicKE or
-                self.properties['turbulence_properties']['RANS_model'] == Parameters.ShihQuadraticKE or
-                self.properties['turbulence_properties']['RANS_model'] == Parameters.LRR or
-                self.properties['turbulence_properties']['RANS_model'] == Parameters.SSG):
-            self.properties['turbulence_properties']['use_phi_instead_of_grad_U'] = True

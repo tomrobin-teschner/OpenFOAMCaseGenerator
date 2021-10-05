@@ -1,4 +1,4 @@
-from input import GlobalVariables as Parameters
+from src.Properties import GlobalVariables as Parameters
 
 
 class ScreenOutput:
@@ -6,10 +6,16 @@ class ScreenOutput:
         self.properties = properties
 
 
-    def print_summary(self):
-        print('Running application OpenFOAMCaseGenerator')
-        print('Copyright by Tom-Robin Teschner, Cranfield University\n')
+    def print_summary(self, command_line_arguments):
+        print('Application: OpenFOAMCaseGenerator')
+        print('Copyright  : Tom-Robin Teschner, Cranfield University')
+        print('License    : MIT')
+        print('Version    : 2.0.0-alpha.9\n')
 
+        if command_line_arguments.option_exists('input'):
+            print('Using input    : input/' + command_line_arguments['input'] + '.py')
+        else:
+            print('Using input    : input/default.py')
         print('Generated case : ' + self.properties['file_properties']['path'])
         print('Reynolds number: ' + str(self.properties['flow_properties']['non_dimensional_properties']['Re']))
 

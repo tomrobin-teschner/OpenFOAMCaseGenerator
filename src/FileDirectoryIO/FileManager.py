@@ -1,7 +1,7 @@
 import os
 import distutils.dir_util
 import distutils.file_util
-from input import GlobalVariables as Parameters
+from src.Properties import GlobalVariables as Parameters
 
 
 class FileManager:

@@ -1,5 +1,5 @@
-import input.CaseProperties as CaseProperties
-import input.GlobalVariables as Parameters
+import src.Properties.CaseProperties as CaseProperties
+import src.Properties.GlobalVariables as Parameters
 
 import src.FileDirectoryIO as FileIO
 import src.Checker as Checker
@@ -13,8 +13,8 @@ def main():
     command_line_arguments = Checker.CheckCommandLineArguments()
 
     # get case specific dictionaries to set up case and write input files
-    case_properties_handler = CaseProperties.CaseProperties()
-    properties = case_properties_handler.get_case_properties(command_line_arguments)
+    case_properties_handler = CaseProperties.CaseProperties(command_line_arguments)
+    properties = case_properties_handler.get_case_properties()
 
     # check case (make sure that current set up will not produce any problem)
     check_case = Checker.CheckCase(properties)
@@ -114,7 +114,7 @@ def main():
 
     # output diagnostics
     screen_output = FileIO.ScreenOutput(properties)
-    screen_output.print_summary()
+    screen_output.print_summary(command_line_arguments)
 
 
 if __name__ == '__main__':

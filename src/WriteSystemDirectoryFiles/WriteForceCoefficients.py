@@ -1,4 +1,3 @@
-from input import GlobalVariables as Parameters
 from math import sin, cos, pi
 
 

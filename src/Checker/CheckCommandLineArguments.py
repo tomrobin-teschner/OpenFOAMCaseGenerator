@@ -14,17 +14,14 @@ class CheckCommandLineArguments:
         the need to copy and modify tutorial cases. See the README.md file for more detailed information.
         
         --help                      prints this help menu
-        --input=name                select a input file to use instead of the properties set in the code
-        --output=name               output a json script along with the case setup as specified by the properties dictionary
-        --write-json-only=name      output the case to a json file only, don't write the case setup
+        --input=name                specify the module to be used for input within the input/properties directory.
+                                    specify file name here without ending, i.e. naca_0012, not naca_0012.py. if no input
+                                    is specified, the default case properties will be processed, i.e.
+                                    input/properties/default.py
         '''
         for i in range(1, len(self.__args)):
             if '--input=' in self.__args[i]:
                 self.__options['input'] = self.__args[i].replace('--input=', '')
-            elif '--output=' in self.__args[i]:
-                self.__options['output'] = self.__args[i].replace('--output=', '')
-            elif '--write-json-only=' in self.__args[i]:
-                self.__options['write-json-only'] = self.__args[i].replace('--write-json-only=', '')
             elif '--help' in self.__args[i]:
                 print(help)
                 exit(0)
