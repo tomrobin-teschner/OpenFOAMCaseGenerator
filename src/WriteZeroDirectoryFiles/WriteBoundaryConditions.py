@@ -536,7 +536,8 @@ class WriteBoundaryConditions:
 
     def __write_custom_inlet_profile(self, file_id, leading_spaces, path_to_script):
         spaces = ' ' * leading_spaces
-        file_id.write(spaces + '#codeStream\n')
+        file_id.write(spaces + 'type fixedValue;\n')
+        file_id.write(spaces + 'value #codeStream\n')
         file_id.write(spaces + '{\n')
         file_id.write(spaces + '    codeInclude\n')
         file_id.write(spaces + '    #{\n')
