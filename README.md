@@ -1,7 +1,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Generic badge](https://img.shields.io/badge/Version-v2.0.0-red.svg)](https://shields.io/)
 
-> :warning: This is a pre-release, version 2.0.0-alpha.9
+> :warning: This is a pre-release, version 2.0.0-alpha.10
 
 ## Motivation
 

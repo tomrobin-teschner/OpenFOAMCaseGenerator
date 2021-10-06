@@ -14,7 +14,7 @@ def main():
 
     # get case specific dictionaries to set up case and write input files
     case_properties_handler = CaseProperties.CaseProperties(command_line_arguments)
-    properties = case_properties_handler.get_case_properties()
+    properties = case_properties_handler.get_case_properties(command_line_arguments)
 
     # check case (make sure that current set up will not produce any problem)
     check_case = Checker.CheckCase(properties)

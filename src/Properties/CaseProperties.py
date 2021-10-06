@@ -3,6 +3,7 @@ from math import sqrt, pow, log10, floor, sin, cos, pi
 import os
 import sys
 import importlib
+from functools import reduce
 
 
 class CaseProperties:
@@ -21,9 +22,52 @@ class CaseProperties:
                      'Program will terminate now.')
         self.properties = file_properties.get_properties()
 
-    def get_case_properties(self):
+    def get_case_properties(self, command_line_arguments):
+        self.__overwrite_file_properties(command_line_arguments)
         self.__add_default_properties()
         return self.properties
+
+    def __overwrite_file_properties(self, command_line_arguments):
+        if len(command_line_arguments['replace']) > 0:
+            for arg in command_line_arguments['replace']:
+                keys = arg.strip().split(':')[0].split('/')
+                value = arg.strip().split(':')[1]
+                self.__change_nested_properties(keys, value)
+
+    def __change_nested_properties(self, keys, value):
+        __doc__ = '''This is a dirty but working solution. We need to recursively update key value pairs of arbitrary
+        depth but in reality we don't have more than 5 nested levels, so this solution may suffice for now. Should be
+        replaced if a more recursive way can be implemented for an arbitrary depth level of the dictionary.'''
+        try:
+            if len(keys) == 1:
+                vartype = type()
+                self.properties[keys[0]] = vartype(value)
+            elif len(keys) == 2:
+                vartype = type(self.properties[keys[0]][keys[1]])
+                self.properties[keys[0]][keys[1]] = vartype(value)
+            elif len(keys) == 3:
+                vartype = type(self.properties[keys[0]][keys[1]][keys[2]])
+                self.properties[keys[0]][keys[1]][keys[2]] = vartype(value)
+            elif len(keys) == 4:
+                vartype = type(self.properties[keys[0]][keys[1]][keys[2]][keys[3]])
+                self.properties[keys[0]][keys[1]][keys[2]][keys[3]] = vartype(value)
+            elif len(keys) == 5:
+                vartype = type(self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]])
+                self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]] = vartype(value)
+            elif len(keys) == 6:
+                vartype = type(self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]])
+                self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]] = vartype(value)
+            elif len(keys) == 7:
+                vartype = type(self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]][keys[6]])
+                self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]][keys[6]] = vartype(value)
+        except:
+            sys.exit('Trying to replace the entry ' + str(keys) + ' which does not exist in the properties dictionary.'
+                     '\nEnsure that it is correctly spelled and try again')
+
+        self.__append_replaced_parameters_to_case_name(keys[-1], value)
+
+    def __append_replaced_parameters_to_case_name(self, key, value):
+        self.properties['file_properties']['case_name'] += '_' + str(key) + '_' + str(value)
 
     def __add_default_properties(self):
         # absolute path of text case location
