@@ -3,13 +3,13 @@ from src.Properties import GlobalVariables as Parameters
 import os
 
 
-class naca_0012(CPB.CasePropertiesBase):
+class wing_and_winglet(CPB.CasePropertiesBase):
     @staticmethod
     def get_properties():
         return {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
-                'case_name': 'naca_0012',
+                'case_name': 'wing_and_winglet',
 
                 # specify how the mesh should be incorporated into the case directory
                 #   The following types are supported
@@ -24,7 +24,7 @@ class naca_0012(CPB.CasePropertiesBase):
                 #                                           copied into the appropriate places and the Allrun script
                 #                                           adjusted accordingly.
                 #   POLY_MESH:                              Specify a polyMesh directory and copy it into the case setup
-                'mesh_treatment': Parameters.POLY_MESH,
+                'mesh_treatment': Parameters.SNAPPY_HEX_MESH_DICT,
 
                 # directory where the blockMeshDict file is located (needs to be named blockMeshDict)
                 'blockmeshdict_directory': os.path.join(''),
@@ -36,18 +36,18 @@ class naca_0012(CPB.CasePropertiesBase):
                 # geometry entry. This is a list entry so that we can specify more than one geometry file. These will be
                 # stored in within the constant/triSurface directory
                 'snappyhexmeshdict': {
-                    'snappyhexmesh_directory': os.path.join(''),
-                    'blockmeshdict_directory': os.path.join(''),
+                    'snappyhexmesh_directory': os.path.join('examples', 'mesh', 'wing_and_winglet'),
+                    'blockmeshdict_directory': os.path.join('examples', 'mesh', 'wing_and_winglet'),
                     'polymesh_directory': os.path.join(''),
                     'geometry': [
-                        os.path.join(''),
+                        os.path.join('examples', 'geometry', 'wing_and_winglet', 'wing_and_winglet.stl'),
                     ]
                 },
 
                 # directory where the polyMesh is located (the specified directory needs to contain a folder called
                 # polyMesh which in turn contains the boundary, cellZones, faces, faceZones, neighbour, owner and points
                 # files)
-                'polymesh_directory': os.path.join('examples', 'mesh', 'airfoil'),
+                'polymesh_directory': os.path.join(''),
 
                 # path to where the currently generated case should be copied to (parent directory)
                 # if left empty, the case will be written into the current directory
@@ -90,9 +90,10 @@ class naca_0012(CPB.CasePropertiesBase):
                 #                     (Neumann condition for all quantities)
                 #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
                 'boundary_conditions': {
-                    'airfoil': Parameters.WALL,
-                    'farfield': Parameters.FREESTREAM,
-                    'BaseAndTop': Parameters.EMPTY,
+                    'wing_and_winglet': Parameters.WALL,
+                    'symmetry': Parameters.SYMMETRY,
+                    'inlet': Parameters.FREESTREAM,
+                    'outlet': Parameters.FREESTREAM,
                 },
 
                 # specify if custom inlet boundary conditions should be used for this case setup. If set to true, this
@@ -164,7 +165,7 @@ class naca_0012(CPB.CasePropertiesBase):
                 #   The following types are supported:
                 #     incompressible:   Solve the flow using a constant density approach
                 #     compressible:     Solve the flow using a variable density approach
-                'flow_type': Parameters.compressible,
+                'flow_type': Parameters.incompressible,
 
                 # flag indicating whether viscosity should be constant or variable (only applicable to compressible
                 # flows, in which case sutherland's law will be used to compute it)
@@ -175,7 +176,7 @@ class naca_0012(CPB.CasePropertiesBase):
                 #                       dictionary will be used
                 #   NON_DIMENSIONAL:    Use non-dimensional quantities. Properties from the non_dimensional_properties
                 #                       dictionary will be used
-                'input_parameters_specification_mode': Parameters.NON_DIMENSIONAL,
+                'input_parameters_specification_mode': Parameters.DIMENSIONAL,
 
                 # properties used when input parameters are specified using dimensional properties
                 'non_dimensional_properties': {
@@ -190,21 +191,21 @@ class naca_0012(CPB.CasePropertiesBase):
                 'dimensional_properties': {
                     # specify the inlet velocity magnitude. The vector components will be constructed using the
                     # axis_aligned_flow_direction properties.
-                    'velocity_magnitude': 1.0,
+                    'velocity_magnitude': 10,
 
                     # specify density at inlet / freestream (only used for compressible calculations)
                     'rho': 1.0,
 
                     # specify the laminar viscosity (used for incompressible flows or compressible, if viscosity is set
                     # to const)
-                    'nu': 6.25e-4,
+                    'nu': 1.46e-5,
 
                     # specify total pressure at inlet / freestream (ignored for incompressible flows, here,
                     # static pressure will be used and will be set to 0 by default)
-                    'p': 100000,
+                    'p': 0,
 
                     # specify temperature at inlet / freestream
-                    'T': 300,
+                    'T': 288,
                 },
 
                 # specify the direction of the inflow velocity vector. Will be used to construct a 3D vector based on
@@ -215,7 +216,7 @@ class naca_0012(CPB.CasePropertiesBase):
                 'axis_aligned_flow_direction': {
                     'tangential': Parameters.X,
                     'normal': Parameters.Y,
-                    'angle_of_attack': 0,
+                    'angle_of_attack': 5,
                 },
             },
 
@@ -238,7 +239,7 @@ class naca_0012(CPB.CasePropertiesBase):
                 #                       mesh motion and mesh topology changes
                 #     sonicFoam:        Transient solver for trans-sonic/supersonic, turbulent flow of a compressible
                 #                       gas
-                'solver': Parameters.rhoSimpleFoam,
+                'solver': Parameters.simpleFoam,
 
                 # name of the solver to use to solve the implicit system of equations for the pressure
                 #   MULTI_GRID:     Use OpenFOAM's geometric agglomerated algebraic multigrid (GAMG). May be less
@@ -295,13 +296,11 @@ class naca_0012(CPB.CasePropertiesBase):
                 # field-specific under-relaxation factors dictionary (leave empty if none) the key needs to be the
                 # variable name such as p, U, T, rho, etc. and the value its under-relaxation factor
                 'under_relaxation_fields': {
-                    'rho': 0.01,
                 },
 
                 # equation-specific under-relaxation factors dictionary (leave empty if none) the key needs to be the
                 # variable name such as p, U, T, rho, etc. and the value its under-relaxation factor
                 'under_relaxation_equations': {
-                    'U': 0.3,
                 },
             },
 
@@ -337,7 +336,7 @@ class naca_0012(CPB.CasePropertiesBase):
                 # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
                 #   LOW_RE  : first cell-height near wall is of the order y+ <= 1
                 #   HIGH_RE : first cell-height near wall is of the order y+ >  30
-                'wall_modelling': Parameters.LOW_RE,
+                'wall_modelling': Parameters.HIGH_RE,
 
                 # select how to calculate turbulent quantities at inlet
                 #   INTERNAL:    Internal flow assumes the turbulent length scale to be limited by the channel /
@@ -388,7 +387,7 @@ class naca_0012(CPB.CasePropertiesBase):
                 #   Based on Reynolds Stresses
                 #     LRR:             Reynolds stress model of Launder, Reece and Rodi
                 #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
-                'RANS_model': Parameters.SpalartAllmaras,
+                'RANS_model': Parameters.kOmegaSST,
 
                 # LES / DES model
                 #   LES:
@@ -480,16 +479,16 @@ class naca_0012(CPB.CasePropertiesBase):
 
             'dimensionless_coefficients': {
                 # reference length (used for RANS initial and boundary conditions)
-                'reference_length': 1.0,
+                'reference_length': 0.34,
 
                 # reference area (used to non-dimensionalise force coefficients)
-                'reference_area': 1.0,
+                'reference_area': 0.326,
 
                 # center of rotation for momentum coefficient
                 'center_of_rotation': [0.25, 0, 0],
 
                 # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-                'wall_boundaries': ['airfoil'],
+                'wall_boundaries': ['wing_and_winglet'],
 
                 # write force coefficients to file
                 'write_force_coefficients': True,

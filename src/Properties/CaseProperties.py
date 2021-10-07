@@ -18,8 +18,10 @@ class CaseProperties:
             file_properties = getattr(importlib.import_module('input.'+properties_module), properties_module)
         except:
             sys.exit('Could not process the input: ' + properties_module + '.py\n' +
-                     'Please ensure the file exists in the input directory and is spelled correctly.\n' +
-                     'Program will terminate now.')
+                     'Please ensure the file exists in the input directory and is spelled correctly. If it does\n' +
+                     'exist, ensure that the class name within ' + properties_module + '.py contains a class of the\n'
+                     'same name and derives from the base class, e.g.:\n\nclass ' + properties_module +
+                     '(CPB.CasePropertiesBase):\n\nThe program will terminate now.')
         self.properties = file_properties.get_properties()
 
     def get_case_properties(self, command_line_arguments):

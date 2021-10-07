@@ -6,7 +6,7 @@ Z = 2
 # mesh treatment
 NO_MESH = 0
 BLOCK_MESH_DICT = 1
-BLOCK_MESH_AND_SNAPPY_HEX_MESH_DICT = 2
+SNAPPY_HEX_MESH_DICT = 2
 POLY_MESH = 3
 
 # boundary condition ID

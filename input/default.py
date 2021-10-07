@@ -16,16 +16,33 @@ class default(CPB.CasePropertiesBase):
                 #   NO_MESH:                                Don't do anything, leave mesh treatment up to user
                 #   BLOCK_MESH_DICT:                        Copy blockMeshDict file into case, requires the path to the
                 #                                           file
-                #   BLOCK_MESH_AND_SNAPPY_HEX_MESH_DICT:    Copy both blockMeshDict and snappyHexMeshDict to directory,
-                #                                           requires the path to both files
+                #   SNAPPY_HEX_MESH_DICT:                   Use snappyHexMesh for meshing. This may require a
+                #                                           blockMeshDict file (or polyMesh directory) for the
+                #                                           background mesh and a geometry file. Thus, the snappyHexMesh
+                #                                           entry is a dictionary with optional entries which, if left
+                #                                           empty, are ignored, otherwise additional files will be
+                #                                           copied into the appropriate places and the Allrun script
+                #                                           adjusted accordingly.
                 #   POLY_MESH:                              Specify a polyMesh directory and copy it into the case setup
                 'mesh_treatment': Parameters.NO_MESH,
 
                 # directory where the blockMeshDict file is located (needs to be named blockMeshDict)
                 'blockmeshdict_directory': os.path.join(''),
 
-                # directory where the snappyHexMeshDict file is located (needs to be named snappyHexMeshDict)
-                'snappyhexmeshdict_directory': os.path.join(''),
+                # dictionary containing the required files for the snappyHexMesh setup. As a minimum, we need to specify
+                # the folder containing the snappyHexMeshDict file. Additionally, we can specify either the
+                # blockMeshDict file or the polyMesh directory for the background mesh. If we have a geometry as well
+                # that the snappyHexMeshDict makes use of (potentially several files), then we can specify these in the
+                # geometry entry. This is a list entry so that we can specify more than one geometry file. These will be
+                # stored in within the constant/triSurface directory
+                'snappyhexmeshdict': {
+                    'snappyhexmesh_directory': os.path.join(''),
+                    'blockmeshdict_directory': os.path.join(''),
+                    'polymesh_directory': os.path.join(''),
+                    'geometry': [
+                        os.path.join(''),
+                    ]
+                },
 
                 # directory where the polyMesh is located (the specified directory needs to contain a folder called
                 # polyMesh which in turn contains the boundary, cellZones, faces, faceZones, neighbour, owner and points

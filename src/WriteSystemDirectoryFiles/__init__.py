@@ -13,3 +13,4 @@ from .WritePointProbes import WritePointProbes
 from .WritePressureCoefficient import WritePressureCoefficient
 from .WriteResiduals import WriteResiduals
 from .WriteYPlus import WriteYPlus
+from .WriteSurfaceFeatureExtract import WriteSurfaceFeatureExtract
