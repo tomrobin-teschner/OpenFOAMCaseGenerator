@@ -5,12 +5,11 @@ class ScreenOutput:
     def __init__(self, properties):
         self.properties = properties
 
-
     def print_summary(self, command_line_arguments):
         print('Application: OpenFOAMCaseGenerator')
-        print('Copyright  : Tom-Robin Teschner, Cranfield University')
+        print('Copyright  : Tom-Robin Teschner, 2020-2021')
         print('License    : MIT')
-        print('Version    : 2.0.0-alpha.11\n')
+        print('Version    : 2.0.0-alpha.12\n')
 
         if command_line_arguments.option_exists('input'):
             print('Using input    : input/' + command_line_arguments['input'] + '.py')
@@ -33,5 +32,3 @@ class ScreenOutput:
         if self.properties['file_properties']['mesh_treatment'] == Parameters.NO_MESH:
             print('\nNo mesh was specified during the generation of case directory.'
                   '\nEnsure you copy a mesh manually before running your case')
-
-

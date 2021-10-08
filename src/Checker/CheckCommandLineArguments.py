@@ -11,7 +11,15 @@ class CheckCommandLineArguments:
         help = \
         '''
         OpenFOAMCaseGenerator is a utility script that quickly produces a base case setup for OpenFOAM that alleviates
-        the need to copy and modify tutorial cases. See the README.md file for more detailed information.
+        the need to copy and modify tutorial cases. See the README.md file for more detailed information. To run all
+        tests, simply run the test_all.py file within the test folder (requires python to be in your PATH) from the root
+        folder.
+        
+        The syntax for running the actual case generator is
+        
+        python3 OpenFOAMCaseGenerator.py <options>
+        
+        A list of options is listed below
         
         --help                      prints this help menu
 

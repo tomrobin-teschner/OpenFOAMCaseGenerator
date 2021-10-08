@@ -66,10 +66,15 @@ class CaseProperties:
             sys.exit('Trying to replace the entry ' + str(keys) + ' which does not exist in the properties dictionary.'
                      '\nEnsure that it is correctly spelled and try again')
 
-        self.__append_replaced_parameters_to_case_name(keys[-1], value)
+        # only append parameters to case name if it does not contain forward / backward slashes which may be seen as
+        # directory separators
+        if (value.find('\\') == -1) and (value.find('/') == -1):
+            self.__append_replaced_parameters_to_case_name(keys[-1], value)
 
     def __append_replaced_parameters_to_case_name(self, key, value):
+        print(self.properties['file_properties']['case_name'])
         self.properties['file_properties']['case_name'] += '_' + str(key) + '_' + str(value)
+        print(self.properties['file_properties']['case_name'])
 
     def __add_default_properties(self):
         # absolute path of text case location

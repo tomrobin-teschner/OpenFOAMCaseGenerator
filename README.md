@@ -1,7 +1,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Generic badge](https://img.shields.io/badge/Version-v2.0.0-red.svg)](https://shields.io/)
 
-> :warning: This is a pre-release, version 2.0.0-alpha.11. This documentation may be outdated and will be revised for the release candidate version 2.0.0. Work in progress. The interface may change, proceed with caution.
+> :warning: This is a pre-release, version 2.0.0-alpha.12. This documentation may be outdated and will be revised for the release candidate version 2.0.0. Work in progress. The interface may change, proceed with caution.
 
 ## Motivation
 
@@ -38,6 +38,8 @@ python3 OpenFOAMCaseGenerator.py --help
 ```
 
 ### Running examples
+
+> :warning: This section is outdated, the json file reading has been removed in favour of direct python module parsing. This section will be updated with the full release of version 2.0.0, run the case generator with the --help flag to see the current supported syntax!
 
 To get started, a couple of examples come by default with the case generator. These are located in the ```examples/settings``` directory. To run any of them, we can use the ```--input=path/to/example/case``` command line argument.
 
