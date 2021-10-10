@@ -100,7 +100,8 @@ def main():
         mach_number = SystemDir.WriteMachNumber(properties, file_manager)
         mach_number.write_mach_number()
 
-    if properties['file_properties']['mesh_treatment'] == Parameters.SNAPPY_HEX_MESH_DICT:
+    if ((properties['file_properties']['mesh_treatment'] == Parameters.SNAPPY_HEX_MESH_DICT) and
+            (len(properties['file_properties']['snappyhexmeshdict']['geometry']) > 0)):
         surface_features = SystemDir.WriteSurfaceFeatureExtract(properties, file_manager)
         surface_features.write_surface_feature_extract()
 
