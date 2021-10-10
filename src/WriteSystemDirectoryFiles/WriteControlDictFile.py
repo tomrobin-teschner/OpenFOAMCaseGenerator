@@ -65,7 +65,7 @@ class ControlDictFile:
             self.file_manager.write(file_id, '    #include "include/fields"\n')
         if self.properties['dimensionless_coefficients']['write_force_coefficients']:
             self.file_manager.write(file_id, '    #include "include/forceCoefficients"\n')
-        if Parameters.NONE not in self.properties['convergence_control']['integral_convergence_criterion']:
+        if len(self.properties['convergence_control']['integral_convergence_criterion']) > 0:
             self.file_manager.write(file_id, '    #include "include/forceCoefficientTrigger"\n')
         if self.properties['dimensionless_coefficients']['write_pressure_coefficient']:
             self.file_manager.write(file_id, '    #include "include/pressureCoefficient"\n')

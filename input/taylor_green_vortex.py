@@ -458,16 +458,16 @@ class taylor_green_vortex(CPB.CasePropertiesBase):
                 # results in time
                 'relative_convergence_criterion': 1e-6,
 
-                # check if an integral quantity has converged instead of just checking the residuals
-                # recommended if such a integral quantity can be easily defined for the current simulation
-                #   NONE:                 Don't write any force coefficient based stopping criterion
+                # check if an integral quantity has converged instead of just checking the residuals.
+                # Recommended if such a integral quantity can be easily defined for the current simulation.
+                # If no quantity is specified (i.e. we have an empty list), no convergence checking is performed.
                 #   C_D:                  Convergence criterion based on the drag force coefficient
                 #   C_L:                  Convergence criterion based on the lift force coefficient
                 #   C_S:                  Convergence criterion based on the side force coefficient
                 #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
                 #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
                 #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
-                'integral_convergence_criterion': [Parameters.NONE],
+                'integral_convergence_criterion': [],
 
                 # if integral quantities are checked for convergence, specify for how many timesteps their average
                 # should be calculated to check if, on average, the quantity has converged

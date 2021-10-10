@@ -56,7 +56,6 @@ MULTI_GRID = 0
 KRYLOV = 1
 
 # integral quantities used for convergence checking
-NONE = -1
 C_D = 0
 C_L = 1
 C_S = 2

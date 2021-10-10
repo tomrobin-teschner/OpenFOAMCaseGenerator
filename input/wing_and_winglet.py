@@ -455,9 +455,9 @@ class wing_and_winglet(CPB.CasePropertiesBase):
                 # results in time
                 'relative_convergence_criterion': 1e-2,
 
-                # check if an integral quantity has converged instead of just checking the residuals
-                # recommended if such a integral quantity can be easily defined for the current simulation
-                #   NONE:                 Don't write any force coefficient based stopping criterion
+                # check if an integral quantity has converged instead of just checking the residuals.
+                # Recommended if such a integral quantity can be easily defined for the current simulation.
+                # If no quantity is specified (i.e. we have an empty list), no convergence checking is performed.
                 #   C_D:                  Convergence criterion based on the drag force coefficient
                 #   C_L:                  Convergence criterion based on the lift force coefficient
                 #   C_S:                  Convergence criterion based on the side force coefficient

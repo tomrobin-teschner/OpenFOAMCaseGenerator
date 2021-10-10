@@ -58,7 +58,7 @@ def main():
         force_coefficients = SystemDir.WriteForceCoefficients(properties, file_manager)
         force_coefficients.write_force_coefficients()
 
-    if Parameters.NONE not in properties['convergence_control']['integral_convergence_criterion']:
+    if len(properties['convergence_control']['integral_convergence_criterion']) > 0:
         force_coefficient_trigger = SystemDir.WriteForceCoefficientConvergence(properties, file_manager)
         force_coefficient_trigger.write_triggers()
 

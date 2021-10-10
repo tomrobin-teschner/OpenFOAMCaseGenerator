@@ -22,7 +22,8 @@ class WriteUtilityScripts:
         elif self.properties['file_properties']['mesh_treatment'] == Parameters.SNAPPY_HEX_MESH_DICT:
             if self.properties['file_properties']['snappyhexmeshdict']['use_blockmeshdict']:
                 self.file_manager.write(file_id, 'blockMesh\n')
-            self.file_manager.write(file_id, 'surfaceFeatureExtract\n')
+            if len(self.properties['file_properties']['snappyhexmeshdict']['geometry']) > 0:
+                self.file_manager.write(file_id, 'surfaceFeatureExtract\n')
             self.file_manager.write(file_id, 'snappyHexMesh -overwrite\n')
 
         pre_solver_flag = ''
