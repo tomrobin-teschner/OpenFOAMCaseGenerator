@@ -283,7 +283,9 @@ class WriteBoundaryConditions:
         if custom_inlet:
             if var in custom_inlet_setup:
                 path_to_script = custom_inlet_setup[var]
-                self.__write_custom_inlet_profile(file_id[var], 8, path_to_script)
+                bc_name = name + 'BC'
+                init_value = 'uniform (0 0 0)'
+                self.__write_custom_inlet_profile(file_id[var], init_value, bc_name, 8, path_to_script)
         if (custom_inlet is False) or (var not in custom_inlet_setup):
             if var == 'U':
                 if bc_type == Parameters.INLET:
@@ -472,17 +474,18 @@ class WriteBoundaryConditions:
             if 'R' in custom_DFSEM_conditions_setup:
                 file_id.write('        R\n        {\n')
                 path_to_script = custom_DFSEM_conditions_setup['R']
-                self.__write_custom_inlet_profile(file_id, 12, path_to_script)
+                self.__write_custom_inlet_profile(file_id, init_reynolds_stresses, 'RBC', 12, path_to_script)
                 file_id.write('        }\n')
             if 'U' in custom_DFSEM_conditions_setup:
                 file_id.write('        U\n        {\n')
                 path_to_script = custom_DFSEM_conditions_setup['U']
-                self.__write_custom_inlet_profile(file_id, 12, path_to_script)
+                init_value = 'uniform (0 0 0)'
+                self.__write_custom_inlet_profile(file_id, init_value, 'UBC', 12, path_to_script)
                 file_id.write('        }\n')
             if 'L' in custom_DFSEM_conditions_setup:
                 file_id.write('        L\n        {\n')
                 path_to_script = custom_DFSEM_conditions_setup['L']
-                self.__write_custom_inlet_profile(file_id, 12, path_to_script)
+                self.__write_custom_inlet_profile(file_id, init_turbulent_length_scale, 'LBC', 12, path_to_script)
                 file_id.write('        }\n')
 
         if (custom_DFSEM_conditions is False) or ('R' not in custom_DFSEM_conditions_setup):
@@ -534,30 +537,31 @@ class WriteBoundaryConditions:
         file_id.write('};\n')
         file_id.write('\n')
 
-    def __write_custom_inlet_profile(self, file_id, leading_spaces, path_to_script):
+    def __write_custom_inlet_profile(self, file_id, init_value, bc_name, leading_spaces, path_to_script):
         spaces = ' ' * leading_spaces
-        file_id.write(spaces + 'type fixedValue;\n')
-        file_id.write(spaces + 'value #codeStream\n')
-        file_id.write(spaces + '{\n')
-        file_id.write(spaces + '    codeInclude\n')
-        file_id.write(spaces + '    #{\n')
-        file_id.write(spaces + '        #include "fvCFD.H"\n')
-        file_id.write(spaces + '    #};\n')
+        file_id.write(spaces + 'type    codedFixedValue;\n')
+        file_id.write(spaces + 'value   ' + init_value + ';\n')
+        file_id.write(spaces + 'name    ' + bc_name + ';\n')
         file_id.write('\n')
-        file_id.write(spaces + '    codeOptions\n')
-        file_id.write(spaces + '    #{\n')
-        file_id.write(spaces + '        -I$(LIB_SRC)/finiteVolume/lnInclude \\\n')
-        file_id.write(spaces + '        -I$(LIB_SRC)/meshTools/lnInclude\n')
-        file_id.write(spaces + '    #};\n')
+        file_id.write(spaces + 'codeInclude\n')
+        file_id.write(spaces + '#{\n')
+        file_id.write(spaces + '    #include "fvCFD.H"\n')
+        file_id.write(spaces + '#};\n')
         file_id.write('\n')
-        file_id.write(spaces + '    codeLibs\n')
-        file_id.write(spaces + '    #{\n')
-        file_id.write(spaces + '        -lmeshTools \\\n')
-        file_id.write(spaces + '        -lfiniteVolume\n')
-        file_id.write(spaces + '    #};\n')
+        file_id.write(spaces + 'codeOptions\n')
+        file_id.write(spaces + '#{\n')
+        file_id.write(spaces + '    -I$(LIB_SRC)/finiteVolume/lnInclude \\\n')
+        file_id.write(spaces + '    -I$(LIB_SRC)/meshTools/lnInclude\n')
+        file_id.write(spaces + '#};\n')
         file_id.write('\n')
-        file_id.write(spaces + '    code\n')
-        file_id.write(spaces + '    #{\n')
+        file_id.write(spaces + 'codeLibs\n')
+        file_id.write(spaces + '#{\n')
+        file_id.write(spaces + '    -lmeshTools \\\n')
+        file_id.write(spaces + '    -lfiniteVolume\n')
+        file_id.write(spaces + '#};\n')
+        file_id.write('\n')
+        file_id.write(spaces + 'code\n')
+        file_id.write(spaces + '#{\n')
 
         custom_inlet_script = open(path_to_script, 'r')
         all_lines = custom_inlet_script.readlines()
@@ -566,5 +570,4 @@ class WriteBoundaryConditions:
             file_id.write(spaces + code_spaces + line)
 
         file_id.write('\n')
-        file_id.write(spaces + '    #};\n')
-        file_id.write(spaces + '};\n')
+        file_id.write(spaces + '#};\n')
