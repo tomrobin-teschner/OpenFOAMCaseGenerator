@@ -18,7 +18,7 @@ USqr
     writeInterval   1;
 }
 
-// compute the kinetic energy
+// compute the (overall) kinetic energy (not turbulent kinetic energy)
 //
 // we use the pow function object here as it allows us to scale the result.
 // To obtain the kinetic energy, we multiply the above computed squared
@@ -56,19 +56,62 @@ Ekin
 // directly compare with published data.
 volIntK
 {
-    // Mandatory entries (unmodifiable)
     type            volFieldValue;
     libs            (fieldFunctionObjects);
 
-    // Mandatory entries (runtime modifiable)
     fields          (Ekin);
     operation       volIntegrate;
     regionType      all;
 
-    // Optional (inherited) entries
     writeFields     false;
     enabled         true;
     log             true;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    timeStep;
+    writeInterval   1;
+}
+
+// write out turbulence fields (mean and RMS values of velocity)
+fieldAverage
+{
+    type            fieldAverage;
+    libs            (fieldFunctionObjects);
+
+    fields
+    (
+        U
+        {
+            mean        yes;
+            prime2Mean  yes;
+            base        iteration;
+            allowRestart true;
+        }
+        p
+        {
+            mean        yes;
+            prime2Mean  yes;
+            base        iteration;
+            allowRestart true;
+        }
+    );
+
+    enabled         true;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    timeStep;
+    writeInterval   1;
+}
+
+// calculate turbulent statistics
+turbulenceFields
+{
+    type            turbulenceFields;
+    libs            (fieldFunctionObjects);
+
+    fields          (k epsilon L);
+
+    enabled         true;
     executeControl  timeStep;
     executeInterval 1;
     writeControl    timeStep;

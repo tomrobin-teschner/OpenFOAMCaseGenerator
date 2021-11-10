@@ -41,6 +41,8 @@ python3 OpenFOAMCaseGenerator.py --help
 
 > :warning: This section is outdated, the json file reading has been removed in favour of direct python module parsing. This section will be updated with the full release of version 2.0.0, run the case generator with the --help flag to see the current supported syntax!
 
+Link to example cases (as of v2.0.0): [Case descriptions](input/README.md)
+
 To get started, a couple of examples come by default with the case generator. These are located in the ```examples/settings``` directory. To run any of them, we can use the ```--input=path/to/example/case``` command line argument.
 
 To run a compressible flow simulation around the NACA 0012 airfoil at a Reynolds number of Re=6 000 000 and Mach number of Ma=0.15, we can use the following command:

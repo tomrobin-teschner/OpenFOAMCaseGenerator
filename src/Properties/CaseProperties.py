@@ -12,12 +12,15 @@ class CaseProperties:
         if command_line_arguments.option_exists('input'):
             properties_module = command_line_arguments['input']
         else:
-            properties_module = 'default'
+            sys.exit('\n===================================== ERROR =====================================\n' +
+                     '\nNo input file specify. Rerun the case generator with the --input flag\n' +
+                     '\n=================================== END ERROR ===================================\n')
 
         try:
-            file_properties = getattr(importlib.import_module('input.'+properties_module), properties_module)
+            file_properties = getattr(importlib.import_module('input.'+properties_module+'.'+properties_module),
+                                      properties_module)
         except:
-            sys.exit('Could not process the input: ' + properties_module + '.py\n' +
+            sys.exit('Could not process the input: input/' + properties_module + '/' + properties_module + '.py\n' +
                      'Please ensure the file exists in the input directory and is spelled correctly. If it does\n' +
                      'exist, ensure that the class name within ' + properties_module + '.py contains a class of the\n'
                      'same name and derives from the base class, e.g.:\n\nclass ' + properties_module +

@@ -71,7 +71,7 @@ class WriteUtilityScripts:
                 self.file_manager.write(file_id, 'isoSurface_' + field + ' ')
             self.file_manager.write(file_id, '\n')
 
-        if self.properties['post_processing']['execute_python_scrip']:
+        if self.properties['post_processing']['execute_python_script']:
             for item in self.properties['post_processing']['python_script']:
                 src = item['script']
                 dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
@@ -80,7 +80,6 @@ class WriteUtilityScripts:
                 for requires in item['requires']:
                     src = requires
                     distutils.file_util.copy_file(src, dst)
-
 
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
@@ -105,15 +104,11 @@ class WriteUtilityScripts:
         self.file_manager.close_file(file_id)
 
     def copy_residual_plotting_script(self):
-        if not os.path.exists(os.path.join(self.properties['file_properties']['path'], 'postProcessing')):
-            os.makedirs(os.path.join(self.properties['file_properties']['path'], 'postProcessing'))
         src = os.path.join('examples', 'scripts', 'userDefined', 'postProcessing', 'plotResiduals.py')
         dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
         distutils.file_util.copy_file(src, dst)
 
     def copy_PVD_loader_script(self):
-        if not os.path.exists(os.path.join(self.properties['file_properties']['path'], 'postProcessing')):
-            os.makedirs(os.path.join(self.properties['file_properties']['path'], 'postProcessing'))
         src = os.path.join('examples', 'scripts', 'userDefined', 'postProcessing', 'addVTPLoader.py')
         dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
         distutils.file_util.copy_file(src, dst)
