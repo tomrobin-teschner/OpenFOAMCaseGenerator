@@ -1,1 +1,1 @@
-from .WriteBoundaryConditions import WriteBoundaryConditions
+from .WriteBoundaryConditions import BoundaryConditionManager

@@ -26,7 +26,7 @@ def main():
     file_manager.copy_mesh_to_destination()
 
     # write out boundary conditions for all relevant flow properties
-    boundary_conditions = ZeroDir.WriteBoundaryConditions(properties, file_manager)
+    boundary_conditions = ZeroDir.BoundaryConditionManager(properties, file_manager)
     boundary_conditions.write_all_boundary_conditions()
 
     # write transport or thermo-physical properties depending on flow type

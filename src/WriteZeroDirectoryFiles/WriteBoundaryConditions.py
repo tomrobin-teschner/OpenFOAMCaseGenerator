@@ -1,13 +1,14 @@
 from src.Properties import GlobalVariables as Parameters
-from math import pow, sqrt
+from src.WriteZeroDirectoryFiles.TurbulentFreestreamConditions import TurbulenceFreestreamConditions
+from math import pow
 import copy
 
 
-class WriteBoundaryConditions:
+class BoundaryConditionManager:
     def __init__(self, properties, file_manager):
-        # assign private variables
         self.properties = properties
         self.file_manager = file_manager
+        tfc = TurbulenceFreestreamConditions(properties)
 
         # list of all variables managed by this class. Each variable is mapped to a list of properties that contains
         # the following information
@@ -31,6 +32,7 @@ class WriteBoundaryConditions:
             'R':        ['volSymmTensorField',  '[0 2 -2 0 0 0 0]'],
         }
 
+        # for compressible flows, pressure is not divided by density and thus its units change
         if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
             self.variables['p'] = ['volScalarField',      '[1 -1 -2 0 0 0 0]']
 
@@ -53,90 +55,12 @@ class WriteBoundaryConditions:
         self.velocity_magnitude = self.properties['flow_properties']['dimensional_properties']['velocity_magnitude']
         self.temperature = self.properties['flow_properties']['dimensional_properties']['T']
         self.turbulence_intensity = self.properties['turbulence_properties']['freestream_turbulent_intensity']
-        self.freestream_k = self.__calculate_freestream_k()
-        self.freestream_omega = self.__calculate_freestream_omega()
-        self.freestream_epsilon = self.__calculate_freestream_epsilon()
-        self.freestream_nuTilda = self.__calculate_freestream_nuTilda()
-        self.freestream_ReThetat = self.__calculate_ReThetaT()
 
-    def __calculate_turbulent_length_scale_for_internal_flows(self):
-        return 0.07 * self.properties['dimensionless_coefficients']['reference_length']
-
-    def __calculate_turbulent_length_scale_for_external_flows(self):
-        Re = self.properties['flow_properties']['non_dimensional_properties']['reynolds_number']
-        L = self.properties['dimensionless_coefficients']['reference_length']
-        delta = 0.37 * L / pow(Re, 0.2)
-        return 0.4 * delta
-
-    def __calculate_turbulent_to_laminar_viscosity_ratio(self):
-        TI = self.turbulence_intensity
-        if TI < 0.01:
-            return 1
-        elif 0.01 <= TI < 0.05:
-            return 1 + 9 * (TI - 0.01) / 0.04
-        elif 0.05 <= TI < 0.1:
-            return 10 + 90 * (TI - 0.05) / 0.05
-        elif TI >= 0.1:
-            return 100
-
-    def __calculate_freestream_k(self):
-        TI = self.turbulence_intensity
-        UMag = self.velocity_magnitude
-        return 1.5 * pow(UMag * TI, 2)
-
-    def __calculate_freestream_omega(self):
-        turbulence_at_inlet = self.properties['turbulence_properties']['turbulent_quantities_at_inlet']
-        turbulent_length_scale = self.__calculate_turbulent_length_scale_for_internal_flows()
-        turbulent_to_laminar_viscosity_ratio = self.properties['turbulence_properties']['turbulent_to_laminar_ratio']
-        turbulent_to_laminar_viscosity_ratio_calculated = self.__calculate_turbulent_to_laminar_viscosity_ratio()
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
-        k = self.freestream_k
-
-        if turbulence_at_inlet == Parameters.INTERNAL:
-            return pow(Parameters.C_MU, -0.25) * pow(k, 0.5) / turbulent_length_scale
-        elif turbulence_at_inlet == Parameters.EXTERNAL:
-            return pow(Parameters.C_MU, -0.25) * pow(k, 0.5) / turbulent_length_scale
-        elif turbulence_at_inlet == Parameters.RATIO:
-            return (k / nu) / turbulent_to_laminar_viscosity_ratio
-        elif turbulence_at_inlet == Parameters.RATIO_AUTO:
-            return (k / nu) / turbulent_to_laminar_viscosity_ratio_calculated
-
-    def __calculate_freestream_epsilon(self):
-        turbulence_at_inlet = self.properties['turbulence_properties']['turbulent_quantities_at_inlet']
-        turbulent_length_scale = self.__calculate_turbulent_length_scale_for_internal_flows()
-        turbulent_to_laminar_viscosity_ratio = self.properties['turbulence_properties']['turbulent_to_laminar_ratio']
-        turbulent_to_laminar_viscosity_ratio_calculated = self.__calculate_turbulent_to_laminar_viscosity_ratio()
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
-        k = self.freestream_k
-
-        if turbulence_at_inlet == Parameters.INTERNAL:
-            return pow(Parameters.C_MU, 0.75) * pow(k, 1.5) / turbulent_length_scale
-        elif turbulence_at_inlet == Parameters.EXTERNAL:
-            return pow(Parameters.C_MU, 0.75) * pow(k, 1.5) / turbulent_length_scale
-        elif turbulence_at_inlet == Parameters.RATIO:
-            return (Parameters.C_MU * pow(k, 2) / nu) / turbulent_to_laminar_viscosity_ratio
-        elif turbulence_at_inlet == Parameters.RATIO_AUTO:
-            return (Parameters.C_MU * pow(k, 2) / nu) / turbulent_to_laminar_viscosity_ratio_calculated
-
-    def __calculate_freestream_nuTilda(self):
-        turbulence_at_inlet = self.properties['turbulence_properties']['turbulent_quantities_at_inlet']
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
-        turbulent_length_scale = self.__calculate_turbulent_length_scale_for_internal_flows()
-        k = self.freestream_k
-        TI = self.turbulence_intensity
-        UMag = self.velocity_magnitude
-
-        if turbulence_at_inlet == Parameters.INTERNAL or turbulence_at_inlet == Parameters.EXTERNAL:
-            return (sqrt(1.5) * UMag * TI * turbulent_length_scale)
-        else:
-            return 5 * nu
-
-    def __calculate_ReThetaT(self):
-        TI = self.turbulence_intensity
-        if TI <= 0.013:
-            return 1173.51 - 589.428 * TI * 100 + 0.2196 / pow(TI * 100, 2)
-        elif TI > 0.013:
-            return 331.5 / pow((TI * 100 - 0.5658), 0.671)
+        self.freestream_k = tfc.calculate_freestream_k()
+        self.freestream_omega = tfc.calculate_freestream_omega()
+        self.freestream_epsilon = tfc.calculate_freestream_epsilon()
+        self.freestream_nuTilda = tfc.calculate_freestream_nuTilda()
+        self.freestream_ReThetat = tfc.calculate_ReThetaT()
 
     def write_all_boundary_conditions(self):
         # open files
