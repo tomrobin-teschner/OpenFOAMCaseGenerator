@@ -102,7 +102,7 @@ class TurbulencePropertiesFile:
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '    printCoeffs     on;\n')
         self.file_manager.write(file_id, '\n')
-        if les_model is Parameters.dynamicKEqn or les_model is Parameters.dynamicLagrangian:
+        if les_model is Parameters.dynamicKEqn:
             self.__write_filter_model(file_id)
         self.__write_delta_model(file_id)
         self.file_manager.write(file_id, '}\n\n')
