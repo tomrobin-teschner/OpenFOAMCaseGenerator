@@ -125,15 +125,13 @@ SSG = 16
 Smagorinsky = 0
 kEqn = 1
 dynamicKEqn = 2
-dynamicLagrangian = 3
-DeardorffDiffStress = 4
-WALE = 5
-SpalartAllmarasDES = 6
-SpalartAllmarasDDES = 7
-SpalartAllmarasIDDES = 8
-kOmegaSSTDES = 9
-kOmegaSSTDDES = 10
-kOmegaSSTIDDES = 11
+WALE = 3
+SpalartAllmarasDES = 4
+SpalartAllmarasDDES = 5
+SpalartAllmarasIDDES = 6
+kOmegaSSTDES = 7
+kOmegaSSTDDES = 8
+kOmegaSSTIDDES = 9
 
 # LES filters
 SIMPLE_FILTER = 0
