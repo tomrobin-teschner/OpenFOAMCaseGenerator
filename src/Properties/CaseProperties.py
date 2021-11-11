@@ -161,7 +161,7 @@ class CaseProperties:
         self.properties['flow_properties']['dimensional_properties']['velocity_vector'] = velocity_vector
 
     def __set_correct_gradient_reconstruction_scheme_for_RANS(self):
-        self.properties['turbulence_properties']['use_phi_instead_of_grad_U'] = False,
+        self.properties['turbulence_properties']['use_phi_instead_of_grad_U'] = False
         if (self.properties['turbulence_properties']['RANS_model'] == Parameters.LienCubicKE or
                 self.properties['turbulence_properties']['RANS_model'] == Parameters.ShihQuadraticKE or
                 self.properties['turbulence_properties']['RANS_model'] == Parameters.LRR or
