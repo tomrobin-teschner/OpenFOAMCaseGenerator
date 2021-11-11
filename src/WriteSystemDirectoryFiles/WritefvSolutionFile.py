@@ -36,6 +36,24 @@ class fvSolutionFile:
                 self.file_manager.write(file_id, '        $p;\n')
                 self.file_manager.write(file_id, '    }\n')
                 self.file_manager.write(file_id, '\n')
+                if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
+                    self.file_manager.write(file_id, '    rho\n')
+                    self.file_manager.write(file_id, '    {\n')
+                    if self.properties['solver_properties']['pressure_solver'] == Parameters.MULTI_GRID:
+                        self.file_manager.write(file_id, '        solver           GAMG;\n')
+                        self.file_manager.write(file_id, '        smoother         FDIC;\n')
+                    elif self.properties['solver_properties']['pressure_solver'] == Parameters.KRYLOV:
+                        self.file_manager.write(file_id, '        solver           PCG;\n')
+                        self.file_manager.write(file_id, '        preconditioner   FDIC;\n')
+                    self.file_manager.write(file_id, '        tolerance        ' + abs_tol + ';\n')
+                    self.file_manager.write(file_id, '        relTol           ' + rel_tol + ';\n')
+                    self.file_manager.write(file_id, '    }\n')
+                    self.file_manager.write(file_id, '\n')
+                    self.file_manager.write(file_id, '    rhoFinal\n')
+                    self.file_manager.write(file_id, '    {\n')
+                    self.file_manager.write(file_id, '        $rho;\n')
+                    self.file_manager.write(file_id, '    }\n')
+                    self.file_manager.write(file_id, '\n')
             else:
                 self.file_manager.write(file_id, '    ' + var + '\n')
                 self.file_manager.write(file_id, '    {\n')
@@ -57,14 +75,14 @@ class fvSolutionFile:
         if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
             self.file_manager.write(file_id, '    consistent                 yes;\n')
             self.file_manager.write(file_id, '    nCorrectors                2;\n')
-            self.file_manager.write(file_id, '    nOuterCorrections          10;\n')
+            self.file_manager.write(file_id, '    nOuterCorrectors           10;\n')
             self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   2;\n')
             self.file_manager.write(file_id, '    pRefCell                   0;\n')
             self.file_manager.write(file_id, '    pRefValue                  0;\n')
         elif self.properties['flow_properties']['flow_type'] == Parameters.compressible:
             self.file_manager.write(file_id, '    consistent                 no;\n')
             self.file_manager.write(file_id, '    nCorrectors                2;\n')
-            self.file_manager.write(file_id, '    nOuterCorrections          10;\n')
+            self.file_manager.write(file_id, '    nOuterCorrectors           10;\n')
             self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   0;\n')
             boundaries = self.properties['boundary_properties']['boundary_conditions']
             use_pressure_min_max_factors = False
