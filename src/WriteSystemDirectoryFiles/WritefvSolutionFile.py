@@ -1,53 +1,57 @@
 from src.Properties import GlobalVariables as Parameters
-
+import src.WriteZeroDirectoryFiles as ZeroDir
 
 class fvSolutionFile:
     def __init__(self, properties, file_manager):
         self.properties = properties
         self.file_manager = file_manager
+        self.state_variable_manager = ZeroDir.StateVariableManager(properties)
+        self.variables = self.state_variable_manager.get_active_variables()
 
     def write_input_file(self):
+        abs_tol = str(self.properties['convergence_control']['absolute_convergence_criterion'])
+        rel_tol = str(self.properties['convergence_control']['relative_convergence_criterion'])
+
         file_id = self.file_manager.create_file('system', 'fvSolution')
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'fvSolution')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, 'solvers\n{\n')
-        self.file_manager.write(file_id, '    p\n')
-        self.file_manager.write(file_id, '    {\n')
-        if self.properties['solver_properties']['pressure_solver'] == Parameters.MULTI_GRID:
-            self.file_manager.write(file_id, '        solver           GAMG;\n')
-            self.file_manager.write(file_id, '        smoother         FDIC;\n')
-        elif self.properties['solver_properties']['pressure_solver'] == Parameters.KRYLOV:
-            self.file_manager.write(file_id, '        solver           PCG;\n')
-            self.file_manager.write(file_id, '        preconditioner   FDIC;\n')
-        self.file_manager.write(file_id, '        tolerance        ' + str(
-            self.properties['convergence_control']['absolute_convergence_criterion']) + ';\n')
-        self.file_manager.write(file_id, '        relTol           ' + str(
-            self.properties['convergence_control']['relative_convergence_criterion']) + ';\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    pFinal\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        $p;\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id,
-                                '    "(U|T|e|rho|rhoU|k|omega|epsilon|nuTilda|q|zeta|ReThetat|gammaInt|kl|kt|R)"\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        solver           PBiCGStab;\n')
-        self.file_manager.write(file_id, '        preconditioner   DILU;\n')
-        self.file_manager.write(file_id, '        tolerance        ' + str(
-            self.properties['convergence_control']['absolute_convergence_criterion']) + ';\n')
-        self.file_manager.write(file_id, '        relTol           ' + str(
-            self.properties['convergence_control']['relative_convergence_criterion']) + ';\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id,
-                                '    "(U|T|e|rho|rhoU|k|omega|epsilon|nuTilda|q|zeta|ReThetat|gammaInt|kl|kt|R)Final"\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        $U;\n')
-        self.file_manager.write(file_id, '    }\n')
+
+        for var in self.variables:
+            if var == 'p':
+                self.file_manager.write(file_id, '    p\n')
+                self.file_manager.write(file_id, '    {\n')
+                if self.properties['solver_properties']['pressure_solver'] == Parameters.MULTI_GRID:
+                    self.file_manager.write(file_id, '        solver           GAMG;\n')
+                    self.file_manager.write(file_id, '        smoother         FDIC;\n')
+                elif self.properties['solver_properties']['pressure_solver'] == Parameters.KRYLOV:
+                    self.file_manager.write(file_id, '        solver           PCG;\n')
+                    self.file_manager.write(file_id, '        preconditioner   FDIC;\n')
+                self.file_manager.write(file_id, '        tolerance        ' + abs_tol + ';\n')
+                self.file_manager.write(file_id, '        relTol           ' + rel_tol + ';\n')
+                self.file_manager.write(file_id, '    }\n')
+                self.file_manager.write(file_id, '\n')
+                self.file_manager.write(file_id, '    pFinal\n')
+                self.file_manager.write(file_id, '    {\n')
+                self.file_manager.write(file_id, '        $p;\n')
+                self.file_manager.write(file_id, '    }\n')
+                self.file_manager.write(file_id, '\n')
+            else:
+                self.file_manager.write(file_id, '    ' + var + '\n')
+                self.file_manager.write(file_id, '    {\n')
+                self.file_manager.write(file_id, '        solver           PBiCGStab;\n')
+                self.file_manager.write(file_id, '        preconditioner   DILU;\n')
+                self.file_manager.write(file_id, '        tolerance        ' + abs_tol + ';\n')
+                self.file_manager.write(file_id, '        relTol           ' + rel_tol + ';\n')
+                self.file_manager.write(file_id, '    }\n')
+                self.file_manager.write(file_id, '\n')
+                self.file_manager.write(file_id, '    ' + var + 'Final\n')
+                self.file_manager.write(file_id, '    {\n')
+                self.file_manager.write(file_id, '        $' + var + ';\n')
+                self.file_manager.write(file_id, '    }\n')
+                self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '}\n')
-        self.file_manager.write(file_id, '\n')
+
         self.file_manager.write(file_id, '"(SIMPLE|PISO|PIMPLE)"\n')
         self.file_manager.write(file_id, '{\n')
         if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
@@ -79,7 +83,7 @@ class fvSolutionFile:
         self.file_manager.write(file_id, '    {\n')
         if ((self.properties['solver_properties']['solver'] is Parameters.simpleFoam) or
                 (self.properties['solver_properties']['solver'] is Parameters.rhoSimpleFoam)):
-            self.file_manager.write(file_id, '        "(.*)"    ' +
+            self.file_manager.write(file_id, '        "(.*)"\t\t' +
                                     str(self.properties['convergence_control']['convergence_threshold']) + ';\n')
         else:
             self.file_manager.write(file_id, '        "(.*)"\n')
