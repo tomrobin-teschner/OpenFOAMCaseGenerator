@@ -46,22 +46,30 @@ class fvSchemesFile:
         self.file_manager.write(file_id, '\n')
 
     def __write_grad_schemes(self, file_id):
-        grad_type = ''
+        grad_type_U = ''
+        grad_type_rest = ''
         if self.properties['numerical_discretisation']['numerical_schemes_correction'] == Parameters.DEFAULT:
-            grad_type += 'cellLimited Gauss linear 0.33;\n'
+            grad_type_U += 'cellLimited Gauss linear 0.33;\n'
+            grad_type_rest = 'Gauss linear;\n'
         elif self.properties['numerical_discretisation']['numerical_schemes_correction'] == Parameters.TVD:
-            grad_type += 'cellLimited Gauss linear 1;\n'
+            grad_type_U += 'cellLimited Gauss linear 1;\n'
+            grad_type_rest = 'cellLimited Gauss linear 1;\n'
         elif self.properties['numerical_discretisation']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
-            grad_type += 'cellLimited Gauss linear 1;\n'
+            grad_type_U += 'cellLimited Gauss linear 1;\n'
+            grad_type_rest = 'cellLimited Gauss linear 1;\n'
         elif self.properties['numerical_discretisation']['numerical_schemes_correction'] == Parameters.ACCURACY:
-            grad_type += 'Gauss linear;\n'
+            grad_type_U += 'Gauss linear;\n'
+            grad_type_rest = 'Gauss linear;\n'
 
         self.file_manager.write(file_id, 'gradSchemes\n')
         self.file_manager.write(file_id, '{\n')
-        self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + grad_type)
+        self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + grad_type_rest)
         for var in self.variables:
             spacing = (self.indentation - len('    grad(' + var + ')') - 1) * ' '
-            self.file_manager.write(file_id, '    grad(' + var + ')' + spacing + grad_type)
+            if var == 'U':
+                self.file_manager.write(file_id, '    grad(' + var + ')' + spacing + grad_type_U)
+            else:
+                self.file_manager.write(file_id, '    grad(' + var + ')' + spacing + grad_type_rest)
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
 

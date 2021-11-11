@@ -51,18 +51,20 @@ class fvSolutionFile:
                 self.file_manager.write(file_id, '    }\n')
                 self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '}\n')
-
+        self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '"(SIMPLE|PISO|PIMPLE)"\n')
         self.file_manager.write(file_id, '{\n')
         if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
             self.file_manager.write(file_id, '    consistent                 yes;\n')
             self.file_manager.write(file_id, '    nCorrectors                2;\n')
+            self.file_manager.write(file_id, '    nOuterCorrections          10;\n')
             self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   2;\n')
             self.file_manager.write(file_id, '    pRefCell                   0;\n')
             self.file_manager.write(file_id, '    pRefValue                  0;\n')
         elif self.properties['flow_properties']['flow_type'] == Parameters.compressible:
             self.file_manager.write(file_id, '    consistent                 no;\n')
             self.file_manager.write(file_id, '    nCorrectors                2;\n')
+            self.file_manager.write(file_id, '    nOuterCorrections          10;\n')
             self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   0;\n')
             boundaries = self.properties['boundary_properties']['boundary_conditions']
             use_pressure_min_max_factors = False
