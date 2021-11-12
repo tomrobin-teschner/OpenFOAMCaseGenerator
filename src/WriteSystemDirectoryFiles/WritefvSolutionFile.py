@@ -72,18 +72,21 @@ class fvSolutionFile:
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, '"(SIMPLE|PISO|PIMPLE)"\n')
         self.file_manager.write(file_id, '{\n')
+        n_correctors = self.properties['solver_properties']['number_of_corrector_steps']
+        n_outer_correctors = self.properties['solver_properties']['number_of_outer_corrector_steps']
+        n_orthogonal_correctors = self.properties['solver_properties']['number_of_non_orthogonal_corrector_steps']
         if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
             self.file_manager.write(file_id, '    consistent                 yes;\n')
-            self.file_manager.write(file_id, '    nCorrectors                2;\n')
-            self.file_manager.write(file_id, '    nOuterCorrectors           10;\n')
-            self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   2;\n')
+            self.file_manager.write(file_id, '    nCorrectors                ' + str(n_correctors) + ';\n')
+            self.file_manager.write(file_id, '    nOuterCorrectors           ' + str(n_outer_correctors) + ';\n')
+            self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   ' + str(n_orthogonal_correctors) + ';\n')
             self.file_manager.write(file_id, '    pRefCell                   0;\n')
             self.file_manager.write(file_id, '    pRefValue                  0;\n')
         elif self.properties['flow_properties']['flow_type'] == Parameters.compressible:
             self.file_manager.write(file_id, '    consistent                 no;\n')
-            self.file_manager.write(file_id, '    nCorrectors                2;\n')
-            self.file_manager.write(file_id, '    nOuterCorrectors           10;\n')
-            self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   0;\n')
+            self.file_manager.write(file_id, '    nCorrectors                ' + str(n_correctors) + ';\n')
+            self.file_manager.write(file_id, '    nOuterCorrectors           ' + str(n_outer_correctors) + ';\n')
+            self.file_manager.write(file_id, '    nNonOrthogonalCorrectors   ' + str(n_orthogonal_correctors) + ';\n')
             boundaries = self.properties['boundary_properties']['boundary_conditions']
             use_pressure_min_max_factors = False
             for key, value in boundaries.items():

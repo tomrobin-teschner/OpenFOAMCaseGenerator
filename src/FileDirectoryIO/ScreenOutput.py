@@ -9,7 +9,7 @@ class ScreenOutput:
         print('Application: OpenFOAMCaseGenerator')
         print('Copyright  : Tom-Robin Teschner, 2020-2021')
         print('License    : MIT')
-        print('Version    : 2.0.0-alpha.23\n')
+        print('Version    : 2.0.0-alpha.24\n')
 
         if command_line_arguments.option_exists('input'):
             print('Using input    : input/' + command_line_arguments['input'] + '.py')

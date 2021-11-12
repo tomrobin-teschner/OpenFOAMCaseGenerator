@@ -7,8 +7,7 @@ class WriteForceCoefficientConvergence:
         self.file_manager = file_manager
 
     def write_triggers(self):
-        wait_n_time_steps =\
-            str(self.properties['convergence_control']['time_steps_to_wait_before_checking_convergence'])
+        wait_n_time_steps = self.properties['convergence_control']['time_steps_to_wait_before_checking_convergence']
         convergence = str(self.properties['convergence_control']['integral_quantities_convergence_threshold'])
         averaging_time = str(self.properties['convergence_control']['averaging_time_steps'])
         quantities_to_observe = self.properties['convergence_control']['integral_convergence_criterion']
@@ -52,7 +51,11 @@ class WriteForceCoefficientConvergence:
         self.file_manager.write(file_id, '        conditions1\n')
         self.file_manager.write(file_id, '        {\n')
         self.file_manager.write(file_id, '            type            maxDuration;\n')
-        self.file_manager.write(file_id, '            duration        ' + wait_n_time_steps + ';\n')
+        if self.properties['time_discretisation']['time_integration'] == Parameters.STEADY_STATE:
+            self.file_manager.write(file_id, '            duration        ' + str(wait_n_time_steps) + ';\n')
+        elif self.properties['time_discretisation']['time_integration'] == Parameters.UNSTEADY:
+            wait_until = self.properties['time_discretisation']['unsteady_properties']['deltaT'] * wait_n_time_steps
+            self.file_manager.write(file_id, '            duration        ' + str(wait_until) + ';\n')
         self.file_manager.write(file_id, '        }\n')
         self.file_manager.write(file_id, '    }\n')
         self.file_manager.write(file_id, '    satisfiedAction setTrigger;\n')

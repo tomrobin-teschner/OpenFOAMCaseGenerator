@@ -242,6 +242,26 @@ class Default(CPB.CasePropertiesBase):
                 #                       gas
                 'solver': Parameters.rhoPimpleFoam,
 
+                # number of times the non-orthogonal correction should be applied to the pressure equation. If the piso
+                # or pimple algorithm is used, this will happen within each corrector step set below in
+                # number_of_corrector_steps. If you have a cartesian mesh (i.e. no orthogonality) or only very small
+                # non-orthogonality (perhaps less than 5 degree), use a value of 0. For mild non-orthogonality (below
+                # 20 - 30 degree, typically achieved with a high quality structured grid) use one step.
+                # For more general cases (e.g. unstructured grids or just higher values of non-orthogonality), use 2
+                # non-orthogonal correction steps at most. More than two steps is unlikely to improve accuracy and will
+                # only increase computational time.
+                'number_of_non_orthogonal_corrector_steps': 2,
+
+                # number of times the pressure equation and momentum corrector step should be solved. Used by the piso
+                # and pimple algorithm only. Typically values are 2-3. A higher value can increase stability, a lower
+                # value will speed up the computation. Stability is mesh and timestep / CFL number dependent.
+                'number_of_corrector_steps': 2,
+
+                # number of outer corrector steps (pimple only). This number will determine how many times we solve the
+                # corrector step named above. If we set this value to 1, we recover the piso algorithm. A higher value
+                # is advisable for CFL numbers larger than one for stability.
+                'number_of_outer_corrector_steps': 1,
+
                 # name of the solver to use to solve the implicit system of equations for the pressure
                 #   MULTI_GRID:     Use OpenFOAM's geometric agglomerated algebraic multigrid (GAMG). May be less
                 #                   efficient for parallel computations and non-elliptic flow problems
@@ -249,47 +269,6 @@ class Default(CPB.CasePropertiesBase):
                 #   KRYLOV:         Use OpenFOAM's Krylov subspace solver (Conjugate Gradient) with preconditioning.
                 #                   Recommended to use for compressible and parallel computations
                 'pressure_solver': Parameters.KRYLOV,
-
-                # start time
-                'startTime': 0,
-
-                # end time
-                'endTime': 10,
-
-                # specify from which time directory to start from
-                #   START_TIME:  Start from the folder that is defined in the startTime variable
-                #   FIRST_TIME:  Start from the first available (lowest time) directory
-                #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a simulation
-                #                from the last calculated solution
-                'startFrom': Parameters.START_TIME,
-
-                # flag indicating whether to dynamically calculate time step based on CFL criterion
-                'CFLBasedTimeStepping': True,
-
-                # CFL number
-                'CFL': 1.0,
-
-                # time step to be used (will be ignored if CFL-based time stepping is chosen)
-                # WARNING: solver needs to support adjustable deltaT calculation
-                'deltaT': 1e-3,
-
-                # largest allowable time step
-                'maxDeltaT': 1,
-
-                # frequency at which to write output files. Behaviour controlled through write control entry below.
-                'write_frequency': 250,
-
-                # write control, specify when to output results, the options are listed below
-                #   TIME_STEP:           write every 'write_frequency' time steps
-                #   RUN_TIME:            write data every 'write_frequency' seconds of simulated time
-                #   ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values
-                #                        (use with 'CFLBasedTimeStepping' = True)
-                #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
-                #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
-                'write_control': Parameters.TIME_STEP,
-
-                # specify how many solutions to keep (specify 0 to keep all)
-                'purge_write': 0,
 
                 # under-relaxation to be used by all fields and equations
                 'under_relaxation_default': 0.7,
@@ -307,12 +286,102 @@ class Default(CPB.CasePropertiesBase):
                 },
             },
 
-            'numerical_discretisation': {
+            'time_discretisation': {
                 # time integration scheme, options are listed below
                 #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
                 #   UNSTEADY:     Integrate in time and resolve  dU / dt
                 'time_integration': Parameters.UNSTEADY,
 
+                # these properties will be used if time_integration is set to Parameters.STEADY_STATE above
+                'steady_state_properties': {
+                    # specify from which time directory to start from
+                    #   START_TIME:  Start from the folder that is defined in the startTime variable
+                    #   FIRST_TIME:  Start from the first available (lowest time) directory
+                    #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a
+                    #                simulation from the last calculated solution
+                    'startFrom': Parameters.START_TIME,
+
+                    # start time
+                    'startTime': 0,
+
+                    # end time
+                    'endTime': 1000,
+
+                    # flag indicating whether to dynamically calculate time step based on CFL criterion
+                    'CFLBasedTimeStepping': False,
+
+                    # CFL number
+                    'CFL': 1.0,
+
+                    # time step to be used (will be ignored if CFL-based time stepping is chosen)
+                    # WARNING: solver needs to support adjustable deltaT calculation
+                    'deltaT': 1,
+
+                    # largest allowable time step
+                    'maxDeltaT': 1,
+
+                    # write control, specify when to output results, the options are listed below
+                    #   TIME_STEP:           write every 'write_frequency' time steps
+                    #   RUN_TIME:            write data every 'write_frequency' seconds of simulated time
+                    #   ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values
+                    #                        (use with 'CFLBasedTimeStepping' = True)
+                    #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
+                    #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
+                    'write_control': Parameters.TIME_STEP,
+
+                    # frequency at which to write output files. Behaviour controlled through write control entry above.
+                    'write_frequency': 100,
+
+                    # specify how many solutions to keep (specify 0 to keep all)
+                    'purge_write': 0,
+                },
+
+                # these properties will be used if time_integration is set to Parameters.UNSTEADY above
+                'unsteady_properties': {
+                    # specify from which time directory to start from
+                    #   START_TIME:  Start from the folder that is defined in the startTime variable
+                    #   FIRST_TIME:  Start from the first available (lowest time) directory
+                    #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a
+                    #                simulation from the last calculated solution
+                    'startFrom': Parameters.START_TIME,
+
+                    # start time
+                    'startTime': 0,
+
+                    # end time
+                    'endTime': 1,
+
+                    # flag indicating whether to dynamically calculate time step based on CFL criterion
+                    'CFLBasedTimeStepping': True,
+
+                    # CFL number
+                    'CFL': 1.0,
+
+                    # time step to be used (will be ignored if CFL-based time stepping is chosen)
+                    # WARNING: solver needs to support adjustable deltaT calculation
+                    'deltaT': 1e-4,
+
+                    # largest allowable time step
+                    'maxDeltaT': 1,
+
+                    # write control, specify when to output results, the options are listed below
+                    #   TIME_STEP:           write every 'write_frequency' time steps
+                    #   RUN_TIME:            write data every 'write_frequency' seconds of simulated time
+                    #   ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values
+                    #                        (use with 'CFLBasedTimeStepping' = True)
+                    #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
+                    #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
+                    'write_control': Parameters.ADJUSTABLE_RUN_TIME,
+
+                    # frequency at which to write output files. Behaviour controlled through write control entry above.
+                    'write_frequency': 0.01,
+
+                    # specify how many solutions to keep (specify 0 to keep all)
+                    'purge_write': 0,
+                },
+            },
+
+            'spatial_discretisation': {
                 # Choose preset of numerical schemes based on accuracy and robustness requirements
                 #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
                 #               achieve second-order accuracy.

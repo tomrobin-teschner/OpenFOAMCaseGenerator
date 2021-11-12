@@ -7,6 +7,12 @@ class ControlDictFile:
         self.file_manager = file_manager
 
     def write_input_file(self):
+        time_discretisation = {}
+        if self.properties['time_discretisation']['time_integration'] == Parameters.STEADY_STATE:
+            time_discretisation = self.properties['time_discretisation']['steady_state_properties']
+        elif self.properties['time_discretisation']['time_integration'] == Parameters.UNSTEADY:
+            time_discretisation = self.properties['time_discretisation']['unsteady_properties']
+
         file_id = self.file_manager.create_file('system', 'controlDict')
         self.file_manager.write_header(file_id, 'dictionary', 'system', 'controlDict')
         self.file_manager.write(file_id, '\n')
@@ -18,41 +24,41 @@ class ControlDictFile:
             self.file_manager.write(file_id, 'application       pisoFoam;\n\n')
         elif self.properties['solver_properties']['solver'] == Parameters.pimpleFoam:
             self.file_manager.write(file_id, 'application       pimpleFoam;\n\n')
-        if self.properties['solver_properties']['startFrom'] == Parameters.START_TIME:
+        if time_discretisation['startFrom'] == Parameters.START_TIME:
             self.file_manager.write(file_id, 'startFrom         startTime;\n\n')
-        elif self.properties['solver_properties']['startFrom'] == Parameters.FIRST_TIME:
+        elif time_discretisation['startFrom'] == Parameters.FIRST_TIME:
             self.file_manager.write(file_id, 'startFrom         firstTime;\n\n')
-        elif self.properties['solver_properties']['startFrom'] == Parameters.LATEST_TIME:
+        elif time_discretisation['startFrom'] == Parameters.LATEST_TIME:
             self.file_manager.write(file_id, 'startFrom         latestTime;\n\n')
         self.file_manager.write(file_id,
-                                'startTime         ' + str(self.properties['solver_properties']['startTime']) + ';\n\n')
+                                'startTime         ' + str(time_discretisation['startTime']) + ';\n\n')
         self.file_manager.write(file_id, 'stopAt            endTime;\n\n')
         self.file_manager.write(file_id,
-                                'endTime           ' + str(self.properties['solver_properties']['endTime']) + ';\n\n')
+                                'endTime           ' + str(time_discretisation['endTime']) + ';\n\n')
         self.file_manager.write(file_id,
-                                'deltaT            ' + str(self.properties['solver_properties']['deltaT']) + ';\n\n')
+                                'deltaT            ' + str(time_discretisation['deltaT']) + ';\n\n')
         self.file_manager.write(file_id,
-                                'maxDeltaT         ' + str(self.properties['solver_properties']['maxDeltaT']) + ';\n\n')
-        if self.properties['solver_properties']['CFLBasedTimeStepping']:
+                                'maxDeltaT         ' + str(time_discretisation['maxDeltaT']) + ';\n\n')
+        if time_discretisation['CFLBasedTimeStepping']:
             self.file_manager.write(file_id, 'adjustTimeStep    yes;\n\n')
         else:
             self.file_manager.write(file_id, 'adjustTimeStep    no;\n\n')
         self.file_manager.write(file_id,
-                                'maxCo             ' + str(self.properties['solver_properties']['CFL']) + ';\n\n')
-        if self.properties['solver_properties']['write_control'] == Parameters.TIME_STEP:
+                                'maxCo             ' + str(time_discretisation['CFL']) + ';\n\n')
+        if time_discretisation['write_control'] == Parameters.TIME_STEP:
             self.file_manager.write(file_id, 'writeControl      timeStep;\n\n')
-        elif self.properties['solver_properties']['write_control'] == Parameters.RUN_TIME:
+        elif time_discretisation['write_control'] == Parameters.RUN_TIME:
             self.file_manager.write(file_id, 'writeControl      runTime;\n\n')
-        elif self.properties['solver_properties']['write_control'] == Parameters.ADJUSTABLE_RUN_TIME:
+        elif time_discretisation['write_control'] == Parameters.ADJUSTABLE_RUN_TIME:
             self.file_manager.write(file_id, 'writeControl      adjustableRunTime;\n\n')
-        elif self.properties['solver_properties']['write_control'] == Parameters.CPU_TIME:
+        elif time_discretisation['write_control'] == Parameters.CPU_TIME:
             self.file_manager.write(file_id, 'writeControl      cpuTime;\n\n')
-        elif self.properties['solver_properties']['write_control'] == Parameters.CLOCK_TIME:
+        elif time_discretisation['write_control'] == Parameters.CLOCK_TIME:
             self.file_manager.write(file_id, 'writeControl      clockTime;\n\n')
         self.file_manager.write(file_id, 'writeInterval     ' +
-                                str(self.properties['solver_properties']['write_frequency']) + ';\n\n')
+                                str(time_discretisation['write_frequency']) + ';\n\n')
         self.file_manager.write(file_id, 'purgeWrite        ' +
-                                str(self.properties['solver_properties']['purge_write']) + ';\n\n')
+                                str(time_discretisation['purge_write']) + ';\n\n')
         self.file_manager.write(file_id, 'writeFormat       ascii;\n\n')
         self.file_manager.write(file_id, 'writePrecision    6;\n\n')
         self.file_manager.write(file_id, 'writeCompression  off;\n\n')

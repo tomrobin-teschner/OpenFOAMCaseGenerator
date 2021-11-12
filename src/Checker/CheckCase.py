@@ -56,9 +56,9 @@ class CheckCase:
 
     def check_correct_time_stepping_setup(self):
         if ((self.properties['solver_properties']['solver'] == Parameters.simpleFoam and
-                self.properties['numerical_discretisation']['time_integration'] == Parameters.UNSTEADY) or
+                self.properties['time_discretisation']['time_integration'] == Parameters.UNSTEADY) or
             (self.properties['solver_properties']['solver'] == Parameters.rhoSimpleFoam and
-                self.properties['numerical_discretisation']['time_integration'] == Parameters.UNSTEADY)):
+                self.properties['time_discretisation']['time_integration'] == Parameters.UNSTEADY)):
             warnings.showwarning(
                 '\n==================================== WARNING ====================================\n' +
                 '\nYou have selected an unsteady discretisation but are using a steady state solver.\n' +
@@ -81,7 +81,7 @@ class CheckCase:
                          '\n=================================== END ERROR ===================================\n')
 
     def check_appropriate_numerical_scheme_combination(self):
-        if (self.properties['numerical_discretisation']['numerical_schemes_correction'] != Parameters.ACCURACY and
+        if (self.properties['spatial_discretisation']['numerical_schemes_correction'] != Parameters.ACCURACY and
                 self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES):
             warnings.showwarning(
                 '\n==================================== WARNING ====================================\n' +
@@ -136,7 +136,7 @@ class CheckCase:
                 UserWarning, '', 0)
 
     def check_sensible_convergence_criterion(self):
-        unsteady = self.properties['numerical_discretisation']['time_integration']
+        unsteady = self.properties['time_discretisation']['time_integration']
         abs_tol = self.properties['convergence_control']['absolute_convergence_criterion']
         rel_tol = self.properties['convergence_control']['relative_convergence_criterion']
         if unsteady:
