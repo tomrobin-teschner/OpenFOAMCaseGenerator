@@ -7,7 +7,7 @@ class ScreenOutput:
 
     def print_summary(self, command_line_arguments):
         print('Application: OpenFOAMCaseGenerator')
-        print('Copyright  : Tom-Robin Teschner, 2020-2021')
+        print('Copyright  : Tom-Robin Teschner, 2020-2022')
         print('License    : MIT')
         print('Version    : 2.0.0-alpha.24\n')
 

@@ -9,7 +9,7 @@ class BackwardFacingStep(CPB.CasePropertiesBase):
         return {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
-                'case_name': 'backward_facing_step',
+                'case_name': 'BackwardFacingStep',
 
                 # specify how the mesh should be incorporated into the case directory
                 #   The following types are supported
@@ -256,12 +256,12 @@ class BackwardFacingStep(CPB.CasePropertiesBase):
                 # For more general cases (e.g. unstructured grids or just higher values of non-orthogonality), use 2
                 # non-orthogonal correction steps at most. More than two steps is unlikely to improve accuracy and will
                 # only increase computational time.
-                'number_of_non_orthogonal_corrector_steps': 2,
+                'number_of_non_orthogonal_corrector_steps': 0,
 
                 # number of times the pressure equation and momentum corrector step should be solved. Used by the piso
                 # and pimple algorithm only. Typically values are 2-3. A higher value can increase stability, a lower
                 # value will speed up the computation. Stability is mesh and timestep / CFL number dependent.
-                'number_of_corrector_steps': 2,
+                'number_of_corrector_steps': 1,
 
                 # number of outer corrector steps (pimple only). This number will determine how many times we solve the
                 # corrector step named above. If we set this value to 1, we recover the piso algorithm. A higher value
@@ -526,7 +526,7 @@ class BackwardFacingStep(CPB.CasePropertiesBase):
                 # relative tolerance may be chosen (e.g. 0.01). For unsteady flows, we need to have an accurate
                 # prediction within each time step and we should take a lower value here (e.g. 1e-6) to avoid diffusive
                 # results in time
-                'relative_convergence_criterion': 1e-2,
+                'relative_convergence_criterion': 1e-4,
 
                 # check if an integral quantity has converged instead of just checking the residuals.
                 # Recommended if such a integral quantity can be easily defined for the current simulation.

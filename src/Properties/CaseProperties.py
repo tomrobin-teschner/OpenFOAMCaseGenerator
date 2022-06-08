@@ -3,7 +3,6 @@ from math import sqrt, pow, log10, floor, sin, cos, pi
 import os
 import sys
 import importlib
-from functools import reduce
 
 
 class CaseProperties:

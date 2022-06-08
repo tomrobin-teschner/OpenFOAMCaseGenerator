@@ -31,13 +31,13 @@ const auto scale = Uref / Umag;
 forAll(field, faceI)
 {   
     // check that velocity at reference location is not too small
-    // after 10 iterations, otherwise prescrive reference velocity
-    if (currentTime > 10 && Uref < 0.1)
+    // after 100 iterations, otherwise prescribe reference velocity
+    if (currentTime > 100 && fabs(Uref - Umag) > 0.1)
     {
-        field[faceI].x() = Umag;
+        field[faceI].x() = Umag / scale;
     }
     else
     {
-        field[faceI].x() = Umag / scale;
+        field[faceI].x() = Umag;
     }
 }

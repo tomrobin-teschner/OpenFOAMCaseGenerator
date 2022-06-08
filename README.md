@@ -1,23 +1,21 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Generic badge](https://img.shields.io/badge/Version-v2.0.0-red.svg)](https://shields.io/)
 
-> :warning: This is a pre-release, version 2.0.0-alpha.24. This documentation may be outdated and will be revised for the release candidate version 2.0.0. Work in progress. The interface may change, proceed with caution.
-
 ## Motivation
 
 OpenFOAM has become the de-facto standard Computational Fluid Dynamics (CFD) solver of choice among open-source projects. It offers a rich set of feature and can easily compete with other commercial solvers. In-fact, for most applications, it offers probably more features than can be found in any other CFD solver of similar nature (i.e. general purpose CFD solvers).
 
-To set up a problem in OpenFOAM requires experience, patience and a good collection of resources for consultation. Perhaps the biggest help here are the tutorial cases that come with the default distribution of OpenFOAM. It is common to copy and paste a tutorial case and then adjust it for one's own flow problem. There is in-fact a dedicated utility script ```foamCloneCase``` which can help with this. Using this approach, however, should be regarded as a rather poor practice and in-fact is exactly going against the DRY (Don't repeat yourself) principle in programming terms, where copy and pasting of source code is discouraged as it is difficult to maintain and a potential source of errors (bugs). In-fact, this copy and pasting approach where tutorial cases are adapted for another problem has shown to be error prone and yielding to a lot of wrong results.
+To set up a problem in OpenFOAM requires experience, patience and a good collection of resources for consultation. Perhaps the biggest help here are the tutorial cases that come with the default distribution of OpenFOAM. It is common to copy and paste a tutorial case and then adjust it for one's own flow problem. There is in-fact a dedicated utility script ```foamCloneCase``` which can help with this. Using this approach, however, should be regarded as a rather poor practice and is exactly going against the DRY (Don't repeat yourself) principle in programming terms, where copy and pasting of source code is discouraged as it is difficult to maintain and a potential source of errors (bugs). In-fact, this copy and pasting approach where tutorial cases are adapted for another problem has shown to be error prone, yielding difficult to trace bugs.
 
 On the other hand, this approach is still better than writing a case setup from scratch, which is done in an almost domain specific language (DSL) based on c++. The syntax is difficult to look up, at times, due to a lack of a well written documentation for advanced features (basic features are reasonably well documented) and also difficult to memorise. Thus, copy and pasting of tutorial files becomes an attractive and appealing approach.
 
-This application, the OpenFOAMCaseGenerator, aims to get rid of the copy and pasting approach by producing reproducible case setups that generate all required files to run a case (along with an OpenFOAM-like Allrun bash script to execute all required steps, i.e. pre-processing, solving and post-processing). The case setups are reproducible as their settings can be written out to a json file which can then be later used as input to the case generator to setup the same case again.
+This application, the OpenFOAMCaseGenerator, aims to get rid of the copy and pasting approach by producing reproducible case setups that generate all required files to run a case (along with an OpenFOAM-like Allrun bash script to execute all required steps, i.e. pre-processing, solving and post-processing). The settings for each case are stored in a dictionary which can be modified for different simulations. 
 
 The idea is very much inspired by build tools such as CMake or Meson, which act as a meta build system for compiled languages such as c/c++ or Fortran. Just as CMake, Meson (or similar meta build systems) produce the actual build script (such as Make or Ninja files) which are then used to perform the actual build, the OpenFOAMCaseGenerator does not interact with OpenFOAM itself but rather perform all required steps to setup a case which can then be used by OpenFOAM, completely eliminating the need to copy and paste tutorial cases from elsewhere.
 
-Thiss is not all, however. OpenFOAM does not make any assumptions about any case and thus requires a lot of boilerplate setup. This offers a really good opportunity to fine tune a specific case but also requires expert knowledge when it comes to setting up a case. Instead of asking for all of these inputs, this case generator offers specific policies instead, which are then used to drive the case setup. For example, instead of providing all required numerical discretisation schemes, the user may choose among several policies (default, robust, accuracy or total-variation diminishing (TVD)). This is a much clearer intend and does not require knowledge about all numerical discretisation schemes. These can still be later modified if needed but a sensible default setup can be achieved in this manner. Another important aspect of the case setup are the boundary conditions, especially for turbulent flow calculations. Here, again, the user expresses only the intent (i.e should walls be resolved or modelled through wall functions, for example, using RANS) and the type of flow (internal or external flow) and the rest of the intitial and boundary conditions are calculated accordingly.
+This is not all, however. OpenFOAM does not make any assumptions about any case and thus requires a lot of boilerplate setup. This offers a really good opportunity to fine tune a specific case but also requires expert knowledge when it comes to setting up a case. Instead of asking for all of these inputs, this case generator offers specific policies instead, which are then used to drive the case setup. For example, instead of providing all required numerical discretisation schemes, the user may choose among several policies (default, robust, accuracy or total-variation diminishing (TVD)). This is a much clearer intend and does not require knowledge about all numerical discretisation schemes. These can still be later modified if needed but a sensible default setup can be achieved in this manner. Another important aspect of the case setup are the boundary conditions, especially for turbulent flow calculations. Here, again, the user expresses only the intent (i.e should walls be resolved or modelled through wall functions, for example, using RANS) and the type of flow (internal or external flow) and the rest of the intitial and boundary conditions are calculated accordingly.
 
-OpenFOAM also offers the ability to inject c++ code directly into the initial and boundary conditions. This can be considered an advanced feature for which little documentation can be found. This case generator, again, provides all the boilerplate code that is required and the user only needs to provide the actual c++ code which will be then inserted in the right place. Example code is also provided along with this case generator which can be used to understand how to query OpenFOAM for domain specific variables such as the coordinate arrays or current timestep.
+OpenFOAM also offers the ability to inject c++ code directly into the initial and boundary conditions. This can be considered an advanced feature for which little documentation can be found. This case generator, again, provides all the boilerplate code that is required and the user only needs to provide the actual c++ code which will be then inserted in the right place. Example codes are also provided along with this case generator which can be used to understand how to query OpenFOAM for domain specific variables such as the coordinate arrays or the current timestep.
 
 In short, the OpenFOAMCaseGenerator takes all the heavy lifting from the user and provides a reproducible case setup with sensible default options that can be used to setup cases for one's own calculations.
 
@@ -25,13 +23,22 @@ In short, the OpenFOAMCaseGenerator takes all the heavy lifting from the user an
 
 ### Running the Case Generator
 
-The root folder has one file, the ```OpenFOAMCaseGenerator.py``` script. All you need to do is to run this script the usual way to generate your case setup:
+The root folder has one file, the ```OpenFOAMCaseGenerator.py``` script. It requires one additional command line argument: ```--input=case_name```. This tells the case generator which case setup to generate. The input file is specific for each case and example case setups can be found in the ```input``` directory. So, to generate the case for the Naca0012 airfoil, run the following command 
 
 ```bash
-python3 OpenFOAMCaseGenerator.py
+python3 OpenFOAMCaseGenerator.py --input=Naca0012
 ```
 
-Some additional command line arguments can be used. To see a list of these and their inputs, run the case generator with the ```--help``` flag, e.g.:
+The name after the ```--input=``` flag should be the same as the folder name found within the ```input``` directory. Also note that within each case setup directory, there is a python file with the same name as the directory and within that python file is a class which also must have the same name as the directory. The python file that is within each directory creates a class which derives from a base class. This base class defines one function (```get_properties()```) which is declared abstract so that each case setup needs to provide an implementation of this function. This function simply returns a dictionary with values that should be used for the case setup.
+
+Sometimes it is necessary to make minor changes to a case setup and it may seem too much to generate a new case setup for each case, for example, changing the angle of attack or Reynolds number. In such a case, we can use a case setup as a baseline and ask the case generator to overwrite just a specific parameter from the command line. Sticking with the Naca0012 example, to change just the Reynolds number, we would provide the following argument
+
+```bash
+python3 OpenFOAMCaseGenerator.py --input=Naca0012 --replace=flow_properties/non_dimensional_properties/Re:1000
+```
+Note that the Reynolds number is within the ```flow_properties``` and ```non_dimensional_properties``` subdictionary. Thus, we need to specify the full path to the dictionary, which we do by providing the separator ```/```. Each changed variable will be appended to the generated case name so that changed variables can be easily tracked. In the case above, the original case name was ```Naca0012``` which would now be changed to ```Naca0012_Re_1000```.
+
+This is also documented if you run the case generator with the ```--help``` flag, e.g.:
 
 ```bash
 python3 OpenFOAMCaseGenerator.py --help
@@ -39,51 +46,11 @@ python3 OpenFOAMCaseGenerator.py --help
 
 ### Running examples
 
-> :warning: This section is outdated, the json file reading has been removed in favour of direct python module parsing. This section will be updated with the full release of version 2.0.0, run the case generator with the --help flag to see the current supported syntax!
-
-Link to example cases (as of v2.0.0): [Case descriptions](input/README.md)
-
-To get started, a couple of examples come by default with the case generator. These are located in the ```examples/settings``` directory. To run any of them, we can use the ```--input=path/to/example/case``` command line argument.
-
-To run a compressible flow simulation around the NACA 0012 airfoil at a Reynolds number of Re=6 000 000 and Mach number of Ma=0.15, we can use the following command:
-
-```python
-python3 OpenFOAMCaseGenerator.py --input=examples/settings/compressible/airfoil.json
-```
-
-To run the same case using an incompressible set up (same Reynolds number), use
-
-```python
-python3 OpenFOAMCaseGenerator.py --input=examples/settings/incompressible/airfoil.json
-```
-
-To run an unsteady simulations using large Eddy simulations (LES), there is a case prepared for the Taylor-Green Vortex problem which uses custom initial conditions and the c++ source code along with its boiler plate code setup is written to the appropriate files.
-
-To run the case using a compressible solver, use
-
-```python
-python3 OpenFOAMCaseGenerator.py --input=examples/settings/compressible/taylorGreenVortex.json
-```
-
-For the incompressible version, use
-
-```python
-python3 OpenFOAMCaseGenerator.py --input=examples/settings/compressible/taylorGreenVortex.json
-```
-
-For both cases, the mesh resolution can be fine tuned in the blockMeshDict file that will be copied into the case directory. By default it is running on 4 processors and all the parallelisation setup and execution is done automatically. At the end, some custom python post-processing functions are executed which will plot the kinetic energy evolution as well as its dissipation over time and compared against reference data. Note that the OpenFOAM solvers are rather dissipative and an explicit Runge Kutta based solver may be a better choice here for better accuracy.
-
-### Storing cases for later reuse
-
-Sometimes we may want to be able to reproduce a case setup at a later stage while setting up some other cases (requiring some input changes which may lose the case setup entirely). To prevent this, there are two additional command line arguments for storing the current case setup to a json file which can later be used to reproduce the case setup by specifying this json file as the ```--input=path/to/json/file``` command line argument.
-
-The option that we have available are ```--output=path/to/json/file/storage/place``` and ```--write-json-only=path/to/json/file/storage/place```. The difference between the two is that the first will write out a json file at the specified location (needs to append the *.json ending at the end) as well as proceed to write out the case setup for OpenFOAM, while the second argument will only proceed to write out the json file but no case setup for OpenFOAM.
+The case generator comes with some default example cases which can be used as a guideline to setup your own simulations. To run them, use the syntax described above (i.e. provide the location of the setup with the ```--input=name``` flag). There is also a template which can be used as a starting point to create your own setup. A list of provided examples can be found here (as of v2.0.0): [Case descriptions](input/README.md)
 
 ### Modifying the input for the case generator
 
-Now that we know how to read and write input files, let us have a look at how we can change the input for the case generator. All input is done within the ```input/CaseProperties.py``` module. Within this module, there is a class called CaseProperties and within the constructor, a dictionary of key value pairs is constructed which is used to generate the case setup. This is the only place where changes to the input should be done.
-
-Most input will require to make a choice from a list of valid parameters. If that is the case (and to avoid typos), the user needs to specify a unique numeric key, rather than a string presenting the choice. The numeric key is specified in the ```input/GlobalVariables.py``` module and accessed through the ```Parameters``` namespace. Where such a choice is required, all options are listed above the choice with a description for each option. To make a choice, we append it to the ```Parameters``` namespace, separated by a dot. For example, within the ```flow_properties```, we can choose the flow to be either incompressible or compressible, the description for that looks as follows:
+If you inspect one of the example cases, you will hopefully quickly get an idea how to modify it for your own case setup. Where there is a choice of parameters available, all options with descriptions are provided. Typically you would need to specify an integer value which is defined by the global variable ```Parameters```. For example, in order to choose between an incompressible or compressible flow setup, we have the following choice available to us:
 
 ```python
 # type of the flow to solve
@@ -93,9 +60,9 @@ Most input will require to make a choice from a list of valid parameters. If tha
 'flow_type': Parameters.incompressible,
 ```
 
-### Structure of the properties dictionary
+To change from one to the other, simply change the string after ```Parameters.``` ,which has the advantage of avoiding typos (i.e. if we were to ask for a string) but also is more descriptive then simply providing integer values such as 0 and 1 which would need to be looked up again. The purpose of this case generator is in part to make a case setup more easier to read / understand, hence this design was adopted. You can see both options which are available in the case above and a description for each. These are provided for all options throughout the case generator. Consult the example cases to see how to use specific options if in doubt.
 
-The only place requiring changes during the case setup is the ```CaseProperties``` class' constructor. As alluded to before, we set up a dictionary here of key value pairs that drive the simulation setup. This dictionary contains a range of sub-dictionaries (which in turn may have additional dictionaries) to organise the input into logical pieces. Each of these sub-dictionary within the main case properties dictionary is described below:
+### Structure of the properties dictionary
 
 - **file_properties:** Specify the case name and where the generated case should be written to. It also deals with how the mesh file is handled and either copies a ```polyMesh``` directory into the ```constant``` directory of the case setup or a corresponding ```blockMeshDict``` and/or a ```snappyHexMeshDict``` into the ```system``` directory.
   
@@ -133,7 +100,7 @@ It is easy to set up a simulation which provides a perfectly acceptable case set
 
 ### Known limitations
 
-> :warning: Any path you specify in the *properties* dictionary should be defined using the ```os.path.join('path', 'to', 'join')``` command, which in turn will write out json files where paths are represented either with ```\ ``` (windows) or ```/``` (unix). The examples have been prepared using windows, thus you may want to change the json files to have unix-styled paths if you encounter problems here.
+> :warning: The case set ups are provided as is, without waranty for correctness. While testing has taken place to ensure that the case set ups are correct, there may still be undetected / unidentified issues. Should you find a problem with any provided example cases, please open a ticket here on github so this case be corrected.
 
 ## License
 
@@ -141,6 +108,6 @@ This software is provided under the MIT license, see the accompanying license fi
 
 ## Contributions / Issues
 
-Unit testing such a case generator is a difficult endeavour as most unit tests would need to test files that are written out to disk which, in turn, result in brittle tests (all it takes is for OpenFOAM to change the name of a parameter to make unit tests fail). Therefore, unit tests are avoided but replaced by system tests (which are provided in the ```examples``` directory). It is these examples that should be checked for physically correct results to ensure a correct case setup is performed, which provides a much stronger confidence.
+Unit testing such a case generator is a difficult endeavour as most unit tests would need to test files that are written out to disk which, in turn, result in brittle tests (all it takes is for OpenFOAM to change the name of a parameter to make unit tests fail). Therefore, unit tests are avoided but replaced by system tests (which are provided in the ```tests``` directory). It is these examples that should be checked for physically correct results to ensure a correct case setup is performed, which provides a much stronger confidence.
 
 There will be, however, cases, where not all possible OpenFOAM specific settings are tested down to their last detail. While all settings were tested during implementation to ensure the case setup would run, there will be boundary cases which have not been tested. Additionally, it is possible that undetected bugs still linger in the source code. If you find such deficiencies, please open an issue here on github. Alternatively, if this is something quick to fix, consider making a contribution and perform a pull request. Contributions by the community are actively encouraged.

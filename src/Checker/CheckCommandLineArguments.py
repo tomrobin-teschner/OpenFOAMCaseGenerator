@@ -23,10 +23,11 @@ class CheckCommandLineArguments:
         
         --help                      prints this help menu
 
-        --input=name                specify the module to be used for input within the input/properties directory.
-                                    specify file name here without ending, i.e. naca_0012, not naca_0012.py. if no input
-                                    is specified, the default case properties will be processed, i.e.
-                                    input/properties/default.py
+        --input=name                (required) Specify here the name of the case setup to be processed. The case setup
+                                    is expected in the input/ directory. Use the name of the folder (case sensitive).
+                                    Note that there is a python file inside each case directory which implements a
+                                    class. The case directory folder, the python name and the name of the class must all
+                                    be the same, otherwise an error is thrown.
 
         --replace=key:value         Replace a key value pair in the settings. This helps to change local parameters
                                     without having to change the actual module file, e.g. changing the angle of attack

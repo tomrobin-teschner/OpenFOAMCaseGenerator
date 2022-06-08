@@ -2,11 +2,6 @@
 
 This case setup is for the Taylor-Green Vortex problem, a 3D cubed domain of length 2*pi in each direction with reference length L=1.
 
-TODO:
-- Add initial conditions
-- Add image of test case at t*=0 and t*=20 ?!
-- Turbulence fields are also calculated but are not readable, fix?!
-
 # Usage
 
 To set up the case, use the following command:
