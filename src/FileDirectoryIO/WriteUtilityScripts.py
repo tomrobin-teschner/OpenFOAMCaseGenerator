@@ -76,7 +76,10 @@ class WriteUtilityScripts:
                 src = item['script']
                 dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
                 distutils.file_util.copy_file(src, dst)
-                self.file_manager.write(file_id, 'python3 postProcessing/' + os.path.basename(src) + '\n')
+                self.file_manager.write(file_id, 'python3 postProcessing/' + os.path.basename(src) + ' ')
+                for arg in item['arguments']:
+                    self.file_manager.write(file_id, str(arg) + ' ')
+                self.file_manager.write(file_id, '\n')
                 for requires in item['requires']:
                     src = requires
                     distutils.file_util.copy_file(src, dst)

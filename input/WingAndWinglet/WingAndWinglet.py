@@ -706,12 +706,15 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 'execute_python_script': False,
 
                 # list of user defined python scripts to copy and execute after the simulation is done
-                # each list entry contains a dictionary with 2 key-value pairs. The first key is named "script" and
-                # needs to point to the location of the python script. The second is the "requires" key which is a list
-                # of files requires by the script, for example, reference solution data that is read by the script
+                # each list entry contains a dictionary with 3 key-value pairs. The first key is named "script" and
+                # needs to point to the location of the python script. The second parameter "arguments" provides
+                # optional command line arguments that can be passed to the script when executed. The final parameter is 
+                # the "requires" key which is a list of files requires by the script, for example, reference solution 
+                # data that is read by the script
                 'python_script': [
                     {
                         'script': os.path.join(''),
+                        'arguments': [''],
                         'requires': [
                             os.path.join(''),
                         ],
