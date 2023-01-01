@@ -98,6 +98,12 @@ class fvSchemesFile:
             div_type = 'Gauss limitedLinear ' + pre_default_test + '1;\n'
             self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + div_type)
 
+        # allow for explicit solvers as well (which may have a div(U) term instead of the linearised
+        # div(phi, U) term only)
+        div_type = 'Gauss linear;\n'
+        spacing = (self.indentation - len('    div(U)') - 1) * ' '
+        self.file_manager.write(file_id, '    div(U)' + spacing + div_type)
+
         for var in self.variables:
             if discretisation_policy == Parameters.DEFAULT:
                 spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
@@ -181,6 +187,11 @@ class fvSchemesFile:
         self.file_manager.write(file_id, 'laplacianSchemes\n')
         self.file_manager.write(file_id, '{\n')
         self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + laplacian_type)
+
+        # allow for explicit solvers as well (which may have a laplacian(p) term as well)
+        spacing = (self.indentation - len('    laplacian(p)') - 1) * ' '
+        self.file_manager.write(file_id, '    laplacian(p)' + spacing + laplacian_type)
+
         for var in self.variables:
             spacing = (self.indentation - len('    laplacian(nuEff,' + var + ')') - 1) * ' '
             self.file_manager.write(file_id, '    laplacian(nuEff,' + var + ')' + spacing + laplacian_type)

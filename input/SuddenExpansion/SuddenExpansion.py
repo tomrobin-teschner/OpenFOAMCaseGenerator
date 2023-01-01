@@ -3,13 +3,13 @@ from src.Properties import GlobalVariables as Parameters
 import os
 
 
-class LidDrivenCavity(CPB.CasePropertiesBase):
+class SuddenExpansion(CPB.CasePropertiesBase):
     @staticmethod
     def get_properties():
         return {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
-                'case_name': 'LidDrivenCavity',
+                'case_name': 'SuddenExpansion',
 
                 # specify how the mesh should be incorporated into the case directory
                 #   The following types are supported
@@ -27,7 +27,7 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 'mesh_treatment': Parameters.BLOCK_MESH_DICT,
 
                 # directory where the blockMeshDict file is located (needs to be named blockMeshDict)
-                'blockmeshdict_directory': os.path.join('examples', 'mesh', 'lidDrivenCavity'),
+                'blockmeshdict_directory': os.path.join('examples', 'mesh', 'suddenExpansion'),
 
                 # dictionary containing the required files for the snappyHexMesh setup. As a minimum, we need to specify
                 # the folder containing the snappyHexMeshDict file. Additionally, we can specify either the
@@ -90,8 +90,11 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 #                     (Neumann condition for all quantities)
                 #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
                 'boundary_conditions': {
-                    'movingWall': Parameters.INLET,
-                    'fixedWalls': Parameters.WALL,
+                    'inlet': Parameters.INLET,
+                    'outlet': Parameters.OUTLET,
+                    'channelAndStep': Parameters.WALL,
+                    'bottom': Parameters.WALL,
+                    'top': Parameters.WALL,
                     'frontAndBack': Parameters.EMPTY,
                 },
 
@@ -102,7 +105,9 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 # if custom inlet boundary conditions should be used, this dictionary provides a mapping where the key
                 # is used to identify for which variable custom inlet boundary conditions should be written. The value
                 # is a path to the c++ script which should be used as the custom inlet boundary condition
-                'custom_inlet_boundary_conditions_setup': {},
+                'custom_inlet_boundary_conditions_setup': {
+                    'U': os.path.join('examples', 'scripts', 'boundaryConditions', 'generic', 'vectorField'),
+                },
 
                 # start DFSEM Inlet only section -----------------------------------------------------------------------
                 # the below options are for the special DFSEM Inlet only. Use with caution. Before using, see remarks at
@@ -144,12 +149,14 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
             'flow_properties': {
                 # specify if custom initial conditions should be used for this case setup. If set to true, this will
                 # require the dictionary entry for custom_initial_conditions_setup
-                'custom_initial_conditions': False,
+                'custom_initial_conditions': True,
 
                 # if custom initial conditions should be used, this dictionary provides a mapping where the key is
                 # used to identify for which variable custom initial conditions should be written. The value is a
                 # path to the c++ script which should be used as the custom initial condition
-                'custom_initial_conditions_setup': {},
+                'custom_initial_conditions_setup': {
+                    'U': os.path.join('examples', 'scripts', 'initialConditions', 'suddenExpansion', 'U'),
+                },
 
                 # specify how the initial field should be set for non-custom initial conditions
                 #   BOUNDARY_CONDITIONED_BASED: set the initial field based on inlet conditions (where applicable)
@@ -176,7 +183,7 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 # properties used when input parameters are specified using dimensional properties
                 'non_dimensional_properties': {
                     # Reynolds number
-                    'Re': 1000,
+                    'Re': 80,
 
                     # Mach number (only used for compressible flows)
                     'Ma': 0.15,
@@ -343,7 +350,7 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                     'startTime': 0,
 
                     # end time
-                    'endTime': 250,
+                    'endTime': 50,
 
                     # flag indicating whether to dynamically calculate time step based on CFL criterion
                     'CFLBasedTimeStepping': True,
@@ -368,7 +375,7 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                     'write_control': Parameters.ADJUSTABLE_RUN_TIME,
 
                     # frequency at which to write output files. Behaviour controlled through write control entry above.
-                    'write_frequency': 2.0,
+                    'write_frequency': 1,
 
                     # specify how many solutions to keep (specify 0 to keep all)
                     'purge_write': 0,
@@ -386,7 +393,7 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used
                 #               after running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order
                 #               accurate with less limiting compared to DEFAULT and TVD.
-                'numerical_schemes_correction': Parameters.DEFAULT,
+                'numerical_schemes_correction': Parameters.ACCURACY,
 
                 # flag to indicate if first order discretisation should be used for turbulent quantities
                 'use_first_order_for_turbulence': True,
@@ -415,7 +422,7 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the
                 #                turbulent to laminar viscosity ratio entirely on the freestream turbulence intensity.
                 #                Use this option if any of the above are not suitable
-                'turbulent_quantities_at_inlet': Parameters.INTERNAL,
+                'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
 
                 # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
                 'turbulent_to_laminar_ratio': 10,
@@ -534,10 +541,10 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 'averaging_time_steps': 20,
 
                 # specify the convergence threshold for the integral quantities
-                'integral_quantities_convergence_threshold': 1e-3,
+                'integral_quantities_convergence_threshold': 1e-5,
 
                 # specify how many iterations to wait before checking convergence criterion
-                'time_steps_to_wait_before_checking_convergence': 0.1,
+                'time_steps_to_wait_before_checking_convergence': 100,
             },
 
             'dimensionless_coefficients': {
@@ -551,7 +558,7 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 'center_of_rotation': [0.25, 0, 0],
 
                 # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-                'wall_boundaries': ['fixedWalls'],
+                'wall_boundaries': [''],
 
                 # write force coefficients to file
                 'write_force_coefficients': False,
@@ -609,14 +616,24 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 # specify the start and end point where line should be placed, can be more than 1
                 'location': [
                     {
-                        'name': 'Uy',
-                        'start': [0.5, 1, 0.05],
-                        'end': [0.5, 0, 0.05],
+                        'name': 'x_by_h=1_25',
+                        'start': [1.25, -1.5, 0.0],
+                        'end':   [1.25,  1.5, 0.0],
                     },
                     {
-                        'name': 'Vx',
-                        'start': [1, 0.5, 0.05],
-                        'end': [0, 0.5, 0.05],
+                        'name': 'x_by_h=2_5',
+                        'start': [2.5, -1.5, 0.0],
+                        'end':   [2.5,  1.5, 0.0],
+                    },
+                    {
+                        'name': 'x_by_h=5_0',
+                        'start': [5.0, -1.5, 0.0],
+                        'end':   [5.0,  1.5, 0.0],
+                    },
+                    {
+                        'name': 'x_by_h=10_0',
+                        'start': [10.0, -1.5, 0.0],
+                        'end':   [10.0,  1.5, 0.0],
                     },
                 ],
 
@@ -700,7 +717,7 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 },
 
                 # execute user-defined post processing routines?
-                'execute_python_script': True,
+                'execute_python_script': False,
 
                 # list of user defined python scripts to copy and execute after the simulation is done
                 # each list entry contains a dictionary with 3 key-value pairs. The first key is named "script" and
@@ -710,21 +727,11 @@ class LidDrivenCavity(CPB.CasePropertiesBase):
                 # data that is read by the script
                 'python_script': [
                     {
-                        'script': os.path.join('examples', 'scripts', 'userDefined', 'postProcessing',
-                                               'lidDrivenCavity', 'plotLidDrivenCavity.py'),
-                        'arguments': [1000],
+                        'script': os.path.join(''),
+                        'arguments': [''],
                         'requires': [
-                            os.path.join('examples', 'scripts', 'userDefined', 'postProcessing', 'lidDrivenCavity',
-                                         'Uy.dat'),
-                            os.path.join('examples', 'scripts', 'userDefined', 'postProcessing', 'lidDrivenCavity',
-                                         'Vx.dat'),
+                            os.path.join(''),
                         ],
-                    },
-                    {
-                        'script': os.path.join('examples', 'scripts', 'userDefined', 'postProcessing',
-                                               'printPerformance.py'),
-                        'arguments': [],
-                        'requires': [],
                     },
                 ],
             },

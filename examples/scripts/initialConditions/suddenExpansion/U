@@ -1,0 +1,25 @@
+const IOdictionary& d = static_cast<const IOdictionary&>(dict);
+const fvMesh& mesh = refCast<const fvMesh>(d.db());
+vectorField U(mesh.nCells());
+
+forAll(U, cellI)
+{
+    auto x = mesh.C()[cellI].x();
+    auto y = mesh.C()[cellI].y();
+    auto z = mesh.C()[cellI].z();
+
+    // apply slight upwash in expanded channel to trigger bifurcation
+    if (x >= 0 && y >= 0)
+    {
+        U[cellI].x() = 8.0;
+        U[cellI].y() = 1.5;
+        U[cellI].z() = 0.0;
+    }
+    else
+    {
+        U[cellI].x() = 8.0;
+        U[cellI].y() = 0.0;
+        U[cellI].z() = 0.0;
+    }
+}
+U.writeEntry("", os);

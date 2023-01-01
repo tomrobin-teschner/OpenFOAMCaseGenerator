@@ -7,9 +7,9 @@ class ScreenOutput:
 
     def print_summary(self, command_line_arguments):
         print('Application: OpenFOAMCaseGenerator')
-        print('Copyright  : Tom-Robin Teschner, 2020-2022')
+        print('Copyright  : Tom-Robin Teschner, 2020-2023')
         print('License    : MIT')
-        print('Version    : 2.0.0\n')
+        print('Version    : 2.1.1\n')
 
         if command_line_arguments.option_exists('input'):
             print('Using input    : input/' + command_line_arguments['input'] + '.py')
