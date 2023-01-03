@@ -1,6 +1,6 @@
 import unittest
-import src.WriteConstantDirectoryFiles as ConstantDir
-from src.Properties import GlobalVariables as Parameters
+import src.CaseGenerator.WriteConstantDirectoryFiles as ConstantDir
+from src.CaseGenerator.Properties import GlobalVariables as Parameters
 
 
 class TestTransportPropertiesFileCreation(unittest.TestCase):

@@ -1,5 +1,5 @@
 import input.CasePropertiesBase as CPB
-from src.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties import GlobalVariables as Parameters
 import os
 
 

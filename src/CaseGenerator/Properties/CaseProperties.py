@@ -1,4 +1,4 @@
-from src.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties import GlobalVariables as Parameters
 from math import sqrt, pow, log10, floor, sin, cos, pi
 import os
 import sys

@@ -1,11 +1,11 @@
-import src.Properties.CaseProperties as CaseProperties
-import src.Properties.GlobalVariables as Parameters
+import src.CaseGenerator.Properties.CaseProperties as CaseProperties
+import src.CaseGenerator.Properties.GlobalVariables as Parameters
 
-import src.FileDirectoryIO as FileIO
-import src.Checker as Checker
-import src.WriteSystemDirectoryFiles as SystemDir
-import src.WriteConstantDirectoryFiles as ConstantDir
-import src.WriteZeroDirectoryFiles as ZeroDir
+import src.CaseGenerator.FileDirectoryIO as FileIO
+import src.CaseGenerator.Checker as Checker
+import src.CaseGenerator.WriteSystemDirectoryFiles as SystemDir
+import src.CaseGenerator.WriteConstantDirectoryFiles as ConstantDir
+import src.CaseGenerator.WriteZeroDirectoryFiles as ZeroDir
 
 
 def main():

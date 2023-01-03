@@ -1,6 +1,6 @@
-from src.Properties import GlobalVariables as Parameters
-from src.WriteZeroDirectoryFiles.TurbulentFreestreamConditions import TurbulenceFreestreamConditions
-from src.WriteZeroDirectoryFiles.StateVariableManager import StateVariableManager
+from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.WriteZeroDirectoryFiles.TurbulentFreestreamConditions import TurbulenceFreestreamConditions
+from src.CaseGenerator.WriteZeroDirectoryFiles.StateVariableManager import StateVariableManager
 import copy
 
 

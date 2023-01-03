@@ -1,5 +1,5 @@
-from src.Properties import GlobalVariables as Parameters
-import src.WriteZeroDirectoryFiles as ZeroDir
+from src.CaseGenerator.Properties import GlobalVariables as Parameters
+import src.CaseGenerator.WriteZeroDirectoryFiles as ZeroDir
 
 class fvSolutionFile:
     def __init__(self, properties, file_manager):
