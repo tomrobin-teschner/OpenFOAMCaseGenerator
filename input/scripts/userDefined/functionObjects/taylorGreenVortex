@@ -1,0 +1,119 @@
+// compute the squared magnitude of the velocity vector (2*kinetic_energy)
+USqr
+{
+    // Mandatory entries (unmodifiable)
+    type            magSqr;
+    libs            (fieldFunctionObjects);
+
+    // Mandatory (inherited) entries (runtime modifiable)
+    field           U;
+
+    // Optional (inherited) entries
+    result          USqr;
+    enabled         true;
+    log             true;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    none;
+    writeInterval   1;
+}
+
+// compute the (overall) kinetic energy (not turbulent kinetic energy)
+//
+// we use the pow function object here as it allows us to scale the result.
+// To obtain the kinetic energy, we multiply the above computed squared
+// magnitude vector by 0.5. Since we integrate over the entire domain (in
+// the next function object), we also need to divide by the volume, i.e.
+// 1 / ( (2*pi) * (2*pi) * (2*pi) ). Combined with the factor of 0.5, we
+// end up with a factor approximately of 0.002 which we use here for scaling.
+Ekin
+{
+    // Mandatory entries (unmodifiable)
+    type            pow;
+    libs            (fieldFunctionObjects);
+    n               1;
+
+    // Mandatory (inherited) entry (runtime modifiable)
+    field           USqr;
+
+    // Optional entries (runtime modifiable)
+    checkDimensions false;
+    scale           0.002;
+    offset          0.0;
+
+    // Optional (inherited) entries
+    result          Ekin;
+    enabled         true;
+    pow             true;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    none;
+    writeInterval   1;
+}
+
+// integrate the kinetic energy over the entire volume of the domain. The
+// result is already divided by the volume of the domain, giving results we can
+// directly compare with published data.
+volIntK
+{
+    type            volFieldValue;
+    libs            (fieldFunctionObjects);
+
+    fields          (Ekin);
+    operation       volIntegrate;
+    regionType      all;
+
+    writeFields     false;
+    enabled         true;
+    log             true;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    timeStep;
+    writeInterval   1;
+}
+
+// write out turbulence fields (mean and RMS values of velocity)
+fieldAverage
+{
+    type            fieldAverage;
+    libs            (fieldFunctionObjects);
+
+    fields
+    (
+        U
+        {
+            mean        yes;
+            prime2Mean  yes;
+            base        iteration;
+            allowRestart true;
+        }
+        p
+        {
+            mean        yes;
+            prime2Mean  yes;
+            base        iteration;
+            allowRestart true;
+        }
+    );
+
+    enabled         true;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    timeStep;
+    writeInterval   1;
+}
+
+// calculate turbulent statistics
+turbulenceFields
+{
+    type            turbulenceFields;
+    libs            (fieldFunctionObjects);
+
+    fields          (k epsilon L);
+
+    enabled         true;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    timeStep;
+    writeInterval   1;
+}

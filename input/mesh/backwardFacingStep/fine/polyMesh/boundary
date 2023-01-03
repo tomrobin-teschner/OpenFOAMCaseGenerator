@@ -1,0 +1,88 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+10
+(
+    post_inlet_bottom
+    {
+        type            wall;
+        inGroups        1(wall);
+        nFaces          336;
+        startFace       637664;
+    }
+    inlet
+    {
+        type            patch;
+        nFaces          256;
+        startFace       638000;
+    }
+    left
+    {
+        type            cyclic;
+        neighbourPatch  right;
+        nFaces          319488;
+        startFace       638256;
+    }
+    right
+    {
+        type            cyclic;
+        neighbourPatch  left;
+        nFaces          319488;
+        startFace       957744;
+    }
+    post_inlet_top
+    {
+        type            wall;
+        inGroups        1(wall);
+        nFaces          848;
+        startFace       1277232;
+    }
+    bottom_wall
+    {
+        type            wall;
+        inGroups        1(wall);
+        nFaces          512;
+        startFace       1278080;
+    }
+    step
+    {
+        type            wall;
+        inGroups        1(wall);
+        nFaces          192;
+        startFace       1278592;
+    }
+    outlet
+    {
+        type            patch;
+        nFaces          448;
+        startFace       1278784;
+    }
+    pre_inlet_bottom
+    {
+        type            patch;
+        nFaces          16;
+        startFace       1279232;
+    }
+    pre_inlet_top
+    {
+        type            patch;
+        nFaces          16;
+        startFace       1279248;
+    }
+)
+
+// ************************************************************************* //

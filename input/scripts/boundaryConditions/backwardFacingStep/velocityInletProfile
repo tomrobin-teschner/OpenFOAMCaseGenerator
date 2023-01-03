@@ -1,0 +1,43 @@
+// get access to current boundary patch and field
+vectorField& field = *this;
+
+// get access to computational mesh and velocity vector
+const fvMesh& mesh = refCast<const fvMesh>(this->db());
+const volVectorField& U = this->db().lookupObject<volVectorField>("U");
+
+// current (total) time
+const scalar currentTime = this->db().time().value();
+
+// find reference cell in which velocity should be fixed to Uref = 3.6
+// according to experiments
+vector refCell(-4.0, -0.5, 5.0);
+label refCellID = mesh.findCell(refCell);
+auto Uref = 0.0;
+
+// get the velocity at the reference cell
+if (refCellID != -1)
+{
+    Uref = U[refCellID].x();
+}
+
+// ensure each processor is aware of the reference cell velocity
+reduce(Uref, sumOp<scalar>());
+
+// find scaling value for inlet velocity
+const auto Umag = 3.6;
+const auto scale = Uref / Umag;
+
+// loop over all boundary faces at inlet
+forAll(field, faceI)
+{   
+    // check that velocity at reference location is not too small
+    // after 100 iterations, otherwise prescribe reference velocity
+    if (currentTime > 100 && fabs(Uref - Umag) > 0.1)
+    {
+        field[faceI].x() = Umag / scale;
+    }
+    else
+    {
+        field[faceI].x() = Umag;
+    }
+}

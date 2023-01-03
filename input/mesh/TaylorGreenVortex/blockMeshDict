@@ -1,0 +1,312 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1812                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// block dimension
+block
+{
+    lx      6.283184;
+    ly      6.283184;
+    lz      6.283184;
+}
+
+// meshing parameters per sub-block. There are two sub-blocks in each direction,
+// thus, the total number of points in the x, y or z direction is twice the
+// number specified for spacingX, Y or Z. For example, using 32 points for all
+// spacing entries, results in a 64^3 block.
+mesh
+{
+    spacingX        32;
+    spacingY        32;
+    spacingZ        32;
+
+    gradingX        1.0;
+    gradingY        1.0;
+    gradingZ        1.0;
+}
+
+// The block is subdivided into 8 sub-blocks to allow grading towards all
+// boundaries and is depeicted below:
+//
+//
+//                              Y
+//                              |
+//                              |
+//                              |
+//              6---------------7---------------8
+//             /|       1.3    /|       1.4    /|
+//            / 3---------------4---------------5
+//           /  |       1.1  /  |       1.2  /  |
+//          /   0---------------1---------------2
+//         /   /           /   /           /   /
+//        15--------------16-------------17   /
+//       /|  /           /|  /           /|  /
+//      / 12--------------13-------------14 /  ------> x
+//     /  |/           /  |/           /  |/
+//    /   9---------------10-------------11
+//   /   /           /   /           /   /
+//  24--------------25-------------26   /
+//  |  /    1.7     |  /    1.8     |  /
+//  21--------------22-------------23 /
+//  |/      1.5     |/      1.6     |/
+//  18--------------19-------------20
+//              /
+//             /
+//            /
+//           Z
+// There are a total of 27 vertices which are shown above, numbered from 0 to
+// 26. These vertices make up 8 sub-blocks 1.1 - 1.8, whose numbering is given
+// on the boundary faces. The coordinate axis is located on vertex 14, i.e. in
+// the middle of the block and the x, y and z axes are shown outside the block.
+
+// define vertices, entirly based on input variables
+vertices
+(
+    (#calc "-$:block.lx / 2.0" #calc "-$:block.ly / 2.0" #calc "-$:block.lz / 2.0" ) // 0
+    (0.0                       #calc "-$:block.ly / 2.0" #calc "-$:block.lz / 2.0" ) // 1
+    (#calc "$:block.lx / 2.0"  #calc "-$:block.ly / 2.0" #calc "-$:block.lz / 2.0" ) // 2
+
+    (#calc "-$:block.lx / 2.0" 0.0                       #calc "-$:block.lz / 2.0" ) // 3
+    (0.0                       0.0                       #calc "-$:block.lz / 2.0" ) // 4
+    (#calc "$:block.lx / 2.0"  0.0                       #calc "-$:block.lz / 2.0" ) // 5
+
+    (#calc "-$:block.lx / 2.0" #calc "$:block.ly / 2.0"  #calc "-$:block.lz / 2.0" ) // 6
+    (0.0                       #calc "$:block.ly / 2.0"  #calc "-$:block.lz / 2.0" ) // 7
+    (#calc "$:block.lx / 2.0"  #calc "$:block.ly / 2.0"  #calc "-$:block.lz / 2.0" ) // 8
+
+    (#calc "-$:block.lx / 2.0" #calc "-$:block.ly / 2.0" 0.0                       ) // 9
+    (0.0                       #calc "-$:block.ly / 2.0" 0.0                       ) // 10
+    (#calc "$:block.lx / 2.0"  #calc "-$:block.ly / 2.0" 0.0                       ) // 11
+
+    (#calc "-$:block.lx / 2.0" 0.0                       0.0                       ) // 12
+    (0.0                       0.0                       0.0                       ) // 13
+    (#calc "$:block.lx / 2.0"  0.0                       0.0                       ) // 14
+
+    (#calc "-$:block.lx / 2.0" #calc "$:block.ly / 2.0"  0.0                       ) // 15
+    (0.0                       #calc "$:block.ly / 2.0"  0.0                       ) // 16
+    (#calc "$:block.lx / 2.0"  #calc "$:block.ly / 2.0"  0.0                       ) // 17
+
+    (#calc "-$:block.lx / 2.0" #calc "-$:block.ly / 2.0" #calc "$:block.lz / 2.0"  ) // 18
+    (0.0                       #calc "-$:block.ly / 2.0" #calc "$:block.lz / 2.0"  ) // 19
+    (#calc "$:block.lx / 2.0"  #calc "-$:block.ly / 2.0" #calc "$:block.lz / 2.0"  ) // 20
+
+    (#calc "-$:block.lx / 2.0" 0.0                       #calc "$:block.lz / 2.0"  ) // 21
+    (0.0                       0.0                       #calc "$:block.lz / 2.0"  ) // 22
+    (#calc "$:block.lx / 2.0"  0.0                       #calc "$:block.lz / 2.0"  ) // 23
+
+    (#calc "-$:block.lx / 2.0" #calc "$:block.ly / 2.0"  #calc "$:block.lz / 2.0"  ) // 24
+    (0.0                       #calc "$:block.ly / 2.0"  #calc "$:block.lz / 2.0"  ) // 25
+    (#calc "$:block.lx / 2.0"  #calc "$:block.ly / 2.0"  #calc "$:block.lz / 2.0"  ) // 26
+);
+
+// define sub-blocks, entirly based on input variables
+blocks
+(
+    // block 1.1
+        hex (0  1  4  3  9  10 13 12)
+        (
+            #calc "$:mesh.spacingX"
+            #calc "$:mesh.spacingY"
+            #calc "$:mesh.spacingZ"
+        )
+        simpleGrading
+        (
+            #calc "$:mesh.gradingX"
+            #calc "$:mesh.gradingY"
+            #calc "$:mesh.gradingZ"
+        )
+    // block 1.2
+        hex (1  2  5  4  10 11 14 13)
+        (
+            #calc "$:mesh.spacingX"
+            #calc "$:mesh.spacingY"
+            #calc "$:mesh.spacingZ"
+        )
+        simpleGrading
+        (
+            #calc "1.0 / $:mesh.gradingX"
+            #calc "$:mesh.gradingY"
+            #calc "$:mesh.gradingZ"
+        )
+    // block 1.3
+        hex (3  4  7  6  12 13 16 15)
+        (
+            #calc "$:mesh.spacingX"
+            #calc "$:mesh.spacingY"
+            #calc "$:mesh.spacingZ"
+        )
+        simpleGrading
+        (
+            #calc "$:mesh.gradingX"
+            #calc "1.0 / $:mesh.gradingY"
+            #calc "$:mesh.gradingZ"
+        )
+    // block 1.4
+        hex (4  5  8  7  13 14 17 16)
+        (
+            #calc "$:mesh.spacingX"
+            #calc "$:mesh.spacingY"
+            #calc "$:mesh.spacingZ"
+        )
+        simpleGrading
+        (
+            #calc "1.0 / $:mesh.gradingX"
+            #calc "1.0 / $:mesh.gradingY"
+            #calc "$:mesh.gradingZ"
+        )
+    // block 1.5
+        hex (9  10 13 12 18 19 22 21)
+        (
+            #calc "$:mesh.spacingX"
+            #calc "$:mesh.spacingY"
+            #calc "$:mesh.spacingZ"
+        )
+        simpleGrading
+        (
+            #calc "$:mesh.gradingX"
+            #calc "$:mesh.gradingY"
+            #calc "1.0 / $:mesh.gradingZ"
+        )
+    // block 1.6
+        hex (10 11 14 13 19 20 23 22)
+        (
+            #calc "$:mesh.spacingX"
+            #calc "$:mesh.spacingY"
+            #calc "$:mesh.spacingZ"
+        )
+        simpleGrading
+        (
+            #calc "1.0 / $:mesh.gradingX"
+            #calc "$:mesh.gradingY"
+            #calc "1.0 / $:mesh.gradingZ"
+        )
+    // block 1.7
+        hex (12 13 16 15 21 22 25 24)
+        (
+            #calc "$:mesh.spacingX"
+            #calc "$:mesh.spacingY"
+            #calc "$:mesh.spacingZ"
+        )
+        simpleGrading
+        (
+            #calc "$:mesh.gradingX"
+            #calc "1.0 / $:mesh.gradingY"
+            #calc "1.0 / $:mesh.gradingZ"
+        )
+    // block 1.8
+        hex (13 14 17 16 22 23 26 25)
+        (
+            #calc "$:mesh.spacingX"
+            #calc "$:mesh.spacingY"
+            #calc "$:mesh.spacingZ"
+        )
+        simpleGrading
+        (
+            #calc "1.0 / $:mesh.gradingX"
+            #calc "1.0 / $:mesh.gradingY"
+            #calc "1.0 / $:mesh.gradingZ"
+        )
+);
+
+edges
+(
+);
+
+boundary
+(
+    top
+    {
+        type            cyclic;
+        neighbourPatch  bottom;
+        faces
+        (
+            (25 16 15 24)
+            (16 7 6 15)
+            (26 17 16 25)
+            (17 8 7 16)
+        );
+    }
+
+    bottom
+    {
+        type            cyclic;
+        neighbourPatch  top;
+        faces
+        (
+            (18 9 10 19)
+            (9 0 1 10)
+            (19 10 11 20)
+            (10 1 2 11)
+        );
+    }
+
+    left
+    {
+        type            cyclic;
+        neighbourPatch  right;
+        faces
+        (
+            (24 15 12 21)
+            (15 6 3 12)
+            (21 12 9 18)
+            (12 3 0 9)
+        );
+    }
+
+    right
+    {
+        type            cyclic;
+        neighbourPatch  left;
+        faces
+        (
+            (17 26 23 14)
+            (8 17 14 5)
+            (14 23 20 11)
+            (5 14 11 2)
+        );
+    }
+
+    front
+    {
+        type            cyclic;
+        neighbourPatch  back;
+        faces
+        (
+            (21 22 25 24)
+            (22 23 26 25)
+            (18 19 22 21)
+            (19 20 23 22)
+        );
+    }
+
+    back
+    {
+        type            cyclic;
+        neighbourPatch  front;
+        faces
+        (
+            (6 7 4 3)
+            (7 8 5 4)
+            (3 4 1 0)
+            (4 5 2 1)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //
