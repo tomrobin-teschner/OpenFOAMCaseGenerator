@@ -12,7 +12,7 @@ class StateVariableManager:
         #   second index:   dimension of of boundary field
         #
         # As a minimum, we need at least velocity and pressure but this list will increase based on other variables
-        # that need to bne solved for, i.e. for turbulent calculations, which is managed below.
+        # that need to be solved for, i.e. for turbulent calculations, which is managed below.
         self.variables = {}
         self.__add_variable_based_on_flow_type()
         if self.properties['turbulence_properties']['turbulence_type'] == Parameters.RANS:
