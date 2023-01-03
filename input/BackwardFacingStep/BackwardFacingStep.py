@@ -475,6 +475,9 @@ class BackwardFacingStep(CPB.CasePropertiesBase):
                 #                           Eddy viscosity SGS model using a modeled balance equation to simulate
                 #                           the behaviour of k in which a dynamic procedure is applied to evaluate the
                 #                           coefficients
+                #     dynamicLagrangian:    Dynamic SGS model with Lagrangian averaging
+                #     DeardorffDiffStress:  Differential SGS Stress Equation Model for incompressible and compressible
+                #                           flows
                 #     WALE:                 The Wall-adapting local eddy-viscosity (WALE) SGS model
                 #
                 #   DES:

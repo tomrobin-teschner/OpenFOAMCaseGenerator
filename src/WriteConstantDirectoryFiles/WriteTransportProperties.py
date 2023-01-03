@@ -1,15 +1,32 @@
 class TransportPropertiesFile:
-    def __init__(self, properties, file_manager):
+    def __init__(self, properties):
         self.properties = properties
-        self.file_manager = file_manager
-
-    def write_input_file(self):
+    
+    def get_file_content(self):
+        version = self.properties['file_properties']['version']
         nu = self.properties['flow_properties']['dimensional_properties']['nu']
-        file_id = self.file_manager.create_file('constant', 'transportProperties')
-        self.file_manager.write_header(file_id, 'dictionary', 'constant', 'transportProperties')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'transportModel  Newtonian;\n\n')
-        self.file_manager.write(file_id, 'nu              ' + str(nu) + ';\n\n')
-        self.file_manager.write(file_id,
-                                '// ************************************************************************* //\n')
-        self.file_manager.close_file(file_id)
+
+        return (
+            f'/*--------------------------------*- C++ -*----------------------------------*\\\n'
+            f'| =========                 |                                                 |\n'
+            f'| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n'
+            f'|  \\\    /   O peration     | Version:  {version}                                 |\n'
+            f'|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n'
+            f'|    \\\/     M anipulation  |                                                 |\n'
+            f'\*---------------------------------------------------------------------------*/\n'
+            f'FoamFile\n'
+            f'{{\n'
+            f'    version     2.0;\n'
+            f'    format      ascii;\n'
+            f'    class       dictionary;\n'
+            f'    location    "constant";\n'
+            f'    object      transportProperties;\n'
+            f'}}\n'
+            f'// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n'
+            f'\n'
+            f'transportModel  Newtonian;\n'
+            f'\n'
+            f'nu              {str(nu)};\n'
+            f'\n'
+            f'// ************************************************************************* //\n'
+        )

@@ -1,0 +1,47 @@
+# --------------------------- #
+# Roadmap towards version 3.0 #
+# --------------------------- #
+
+☐ Testing
+  ☐ Refactor code so that classes emit text / strings but do not write, delegate that to the file_manager class
+    ☐ 0 directory
+    ✔ constant directory @done(23-01-03 07:41)
+    ☐ system directory
+  ☐ Provide unit-tests for 0 directory
+  ✔ Provide unit-tests for constant directory @done(23-01-03 07:41)
+  ☐ Provide unit-tests for system directory
+  ☐ Rethink system tests, find a way to test automatically, without manually adding cases. Should also test all turbulence models!
+  ☐ Set up CI/CD server
+
+☐ Refactoring
+  ☐ Rething global parameter handling, instead of globals use Enums? Should still be int based in input to avoid typos.
+
+☐ File properties
+  ☐ Implement cascading file properties, deriving from a base case and then overwriting only specific quantities. This can be any test case from which properties will be derived
+  ☐ Establish a way to set private variables per class in constructor which will be used when setting the file properties dictionary
+
+☐ Features
+  ☐ Retire DFSEM inlet boundary condition, replace by offset BC instead
+  ☐ Add a material properties database (as json implementation), implement air and use that in thermophysical properties instead
+
+☐ Cases
+  ☐ Provide an internal and external LES example case setup
+  ☐ Redo case file directory structure, currently input and example folders are missleading and should be combined
+
+☐ Scripts
+  ☐ Provide custom function object for residuals (L0 and L2 norm) with python script to extract and plot data
+  ☐ Provide script for LES (calculate percentage of domain that resolves scales (should be 80% or above))
+
+☐ Solver extensions
+  ☐ Allow for custom solvers / postProcessing functions to be compiled as part of the case setup
+
+☐ Documentation
+  ☐ Provide readthedocs page
+
+☐ GUI
+  ☐ Provide initial implementation with wxPython to set up cases (later, extend towards meshing with OpenGL as well)
+  ☐ Provide a way to use existing cases as tempaltes in file menu
+  ☐ Provide a setup wizard to set up cases quickly
+
+☐ Parameterisation
+  ☐ Provide velocity template functionality within any script that ends in *.vel (automatically add python layer to transform *.vel file into normal openfoam file)

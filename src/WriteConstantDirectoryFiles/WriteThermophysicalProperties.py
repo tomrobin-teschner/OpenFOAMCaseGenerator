@@ -1,49 +1,69 @@
 class ThermophysicalProperties:
-    def __init__(self, properties, file_manager):
+    def __init__(self, properties):
         self.properties = properties
-        self.file_manager = file_manager
 
-    def write_input_file(self):
+    def get_file_content(self):
+        version = self.properties['file_properties']['version']
+        is_const_viscosity = self.properties['flow_properties']['const_viscosity']
         mu = str(self.properties['flow_properties']['dimensional_properties']['mu'])
-        file_id = self.file_manager.create_file('constant', 'thermophysicalProperties')
-        self.file_manager.write_header(file_id, 'dictionary', 'constant', 'thermophysicalProperties')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'thermoType\n')
-        self.file_manager.write(file_id, '{\n')
-        self.file_manager.write(file_id, '    type            hePsiThermo;\n')
-        self.file_manager.write(file_id, '    mixture         pureMixture;\n')
-        if self.properties['flow_properties']['const_viscosity']:
-            self.file_manager.write(file_id, '    transport       const;\n')
+        if is_const_viscosity:
+            transport = f'const'
+            transport_content = (
+                f'        mu          {mu};\n'
+                f'        Pr          0.71;\n'
+            )
         else:
-            self.file_manager.write(file_id, '    transport       sutherland;\n')
-        self.file_manager.write(file_id, '    thermo          hConst;\n')
-        self.file_manager.write(file_id, '    equationOfState perfectGas;\n')
-        self.file_manager.write(file_id, '    specie          specie;\n')
-        self.file_manager.write(file_id, '    energy          sensibleInternalEnergy;\n')
-        self.file_manager.write(file_id, '}\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'mixture\n')
-        self.file_manager.write(file_id, '{\n')
-        self.file_manager.write(file_id, '    specie\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        molWeight   28.9;\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '    thermodynamics\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        Cp          1005;\n')
-        self.file_manager.write(file_id, '        Hf          0;\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '    transport\n')
-        self.file_manager.write(file_id, '    {\n')
-        if self.properties['flow_properties']['const_viscosity']:
-            self.file_manager.write(file_id, '        mu          ' + mu + ';\n')
-            self.file_manager.write(file_id, '        Pr          0.71;\n')
-        else:
-            self.file_manager.write(file_id, '        As          1.4792e-06;\n')
-            self.file_manager.write(file_id, '        Ts          116;\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '}\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id,
-                                '// ************************************************************************* //\n')
-        self.file_manager.close_file(file_id)
+            transport = f'sutherland'
+            transport_content = (
+                f'        As          1.4792e-06;\n'
+                f'        Ts          116;\n'
+            )
+        
+        return (
+            f'/*--------------------------------*- C++ -*----------------------------------*\\\n'
+            f'| =========                 |                                                 |\n'
+            f'| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n'
+            f'|  \\\    /   O peration     | Version:  {version}                                 |\n'
+            f'|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n'
+            f'|    \\\/     M anipulation  |                                                 |\n'
+            f'\*---------------------------------------------------------------------------*/\n'
+            f'FoamFile\n'
+            f'{{\n'
+            f'    version     2.0;\n'
+            f'    format      ascii;\n'
+            f'    class       dictionary;\n'
+            f'    location    "constant";\n'
+            f'    object      thermophysicalProperties;\n'
+            f'}}\n'
+            f'// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n'
+            f'\n'
+            f'thermoType\n'
+            f'{{\n'
+            f'    type            hePsiThermo;\n'
+            f'    mixture         pureMixture;\n'
+            f'    transport       {transport};\n'
+            f'    thermo          hConst;\n'
+            f'    equationOfState perfectGas;\n'
+            f'    specie          specie;\n'
+            f'    energy          sensibleInternalEnergy;\n'
+            f'}}\n'
+            f'\n'
+            f'mixture\n'
+            f'{{\n'
+            f'    specie\n'
+            f'    {{\n'
+            f'        molWeight   28.9;\n'
+            f'    }}\n'
+            f'    thermodynamics\n'
+            f'    {{\n'
+            f'        Cp          1005;\n'
+            f'        Hf          0;\n'
+            f'    }}\n'
+            f'    transport\n'
+            f'    {{\n'
+            f'{transport_content}'
+            f'    }}\n'
+            f'}}\n'
+            f'\n'
+            f'// ************************************************************************* //\n'
+        )

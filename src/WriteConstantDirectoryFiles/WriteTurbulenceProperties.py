@@ -2,198 +2,240 @@ from src.Properties import GlobalVariables as Parameters
 
 
 class TurbulencePropertiesFile:
-    def __init__(self, properties, file_manager):
-        self.file_manager = file_manager
+    def __init__(self, properties):
         self.properties = properties
 
-    def write_input_file(self):
-        file_id = self.file_manager.create_file('constant', 'turbulenceProperties')
-        self.file_manager.write_header(file_id, 'dictionary', 'constant', 'turbulenceProperties')
-        self.file_manager.write(file_id, '\n')
-        if self.properties['turbulence_properties']['turbulence_type'] == Parameters.LAMINAR:
-            self.file_manager.write(file_id, 'simulationType laminar;\n')
-        elif self.properties['turbulence_properties']['turbulence_type'] == Parameters.RANS:
-            self.file_manager.write(file_id, 'simulationType RAS;\n')
-        elif self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES:
-            self.file_manager.write(file_id, 'simulationType LES;\n')
-        self.file_manager.write(file_id, '\n')
-        if self.properties['turbulence_properties']['turbulence_type'] != Parameters.LAMINAR:
-            if self.properties['turbulence_properties']['turbulence_type'] == Parameters.RANS:
-                self.__write_RANS(file_id)
-            if self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES:
-                self.__write_LES(file_id)
-        self.file_manager.write(file_id,
-                                '// ************************************************************************* //\n')
-        self.file_manager.close_file(file_id)
+    def get_file_content(self):
+        version = self.properties['file_properties']['version']
+        turbulence_type = self.properties['turbulence_properties']['turbulence_type']
 
-    def __write_RANS(self, file_id):
-        self.file_manager.write(file_id, 'RAS\n{\n')
-        if self.properties['turbulence_properties']['RANS_model'] == Parameters.kEpsilon:
-            self.file_manager.write(file_id, '    RASModel        kEpsilon;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.realizableKE:
-            self.file_manager.write(file_id, '    RASModel        realizableKE;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.RNGkEpsilon:
-            self.file_manager.write(file_id, '    RASModel        RNGkEpsilon;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.LienLeschziner:
-            self.file_manager.write(file_id, '    RASModel        LienLeschziner;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.LamBremhorstKE:
-            self.file_manager.write(file_id, '    RASModel        LamBremhorstKE;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.LaunderSharmaKE:
-            self.file_manager.write(file_id, '    RASModel        LaunderSharmaKE;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmega:
-            self.file_manager.write(file_id, '    RASModel        kOmega;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSST:
-            self.file_manager.write(file_id, '    RASModel        kOmegaSST;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSSTLM:
-            self.file_manager.write(file_id, '    RASModel        kOmegaSSTLM;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.kkLOmega:
-            self.file_manager.write(file_id, '    RASModel        kkLOmega;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSSTSAS:
-            self.file_manager.write(file_id, '    RASModel        kOmegaSSTSAS;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.qZeta:
-            self.file_manager.write(file_id, '    RASModel        qZeta;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.SpalartAllmaras:
-            self.file_manager.write(file_id, '    RASModel        SpalartAllmaras;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.LienCubicKE:
-            self.file_manager.write(file_id, '    RASModel        LienCubicKE;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.ShihQuadraticKE:
-            self.file_manager.write(file_id, '    RASModel        ShihQuadraticKE;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.LRR:
-            self.file_manager.write(file_id, '    RASModel        LRR;\n')
-        elif self.properties['turbulence_properties']['RANS_model'] == Parameters.SSG:
-            self.file_manager.write(file_id, '    RASModel        SSG;\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    turbulence      on;\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    printCoeffs     on;\n')
-        if self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSSTSAS:
-            self.__write_delta_model(file_id)
-        self.file_manager.write(file_id, '}\n\n')
+        if turbulence_type == Parameters.LAMINAR:
+            simulation_type = f'simulationType laminar;\n'
+            turbulence_setup = ''
+        if turbulence_type == Parameters.RANS:
+            simulation_type = f'simulationType RAS;\n'
+            turbulence_setup = self.__get_RANS()
+        if turbulence_type == Parameters.LES:
+            simulation_type = f'simulationType LES;\n'
+            turbulence_setup = self.__get_LES()
 
-    def __write_LES(self, file_id):
+        return (
+            f'/*--------------------------------*- C++ -*----------------------------------*\\\n'
+            f'| =========                 |                                                 |\n'
+            f'| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n'
+            f'|  \\\    /   O peration     | Version:  {version}                                 |\n'
+            f'|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n'
+            f'|    \\\/     M anipulation  |                                                 |\n'
+            f'\*---------------------------------------------------------------------------*/\n'
+            f'FoamFile\n'
+            f'{{\n'
+            f'    version     2.0;\n'
+            f'    format      ascii;\n'
+            f'    class       dictionary;\n'
+            f'    location    "constant";\n'
+            f'    object      turbulenceProperties;\n'
+            f'}}\n'
+            f'// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n'
+            f'\n'
+            f'{simulation_type}'
+            f'\n'
+            f'{turbulence_setup}'
+            f'\n'
+            f'// ************************************************************************* //\n'
+        )
+    
+    def __get_RANS(self):
+        rans_model = self.properties['turbulence_properties']['RANS_model']
+        if rans_model == Parameters.kEpsilon:
+            rans_string = f'    RASModel        kEpsilon;\n'
+        elif rans_model == Parameters.realizableKE:
+            rans_string = f'    RASModel        realizableKE;\n'
+        elif rans_model == Parameters.RNGkEpsilon:
+            rans_string = f'    RASModel        RNGkEpsilon;\n'
+        elif rans_model == Parameters.LienLeschziner:
+            rans_string = f'    RASModel        LienLeschziner;\n'
+        elif rans_model == Parameters.LamBremhorstKE:
+            rans_string = f'    RASModel        LamBremhorstKE;\n'
+        elif rans_model == Parameters.LaunderSharmaKE:
+            rans_string = f'    RASModel        LaunderSharmaKE;\n'
+        elif rans_model == Parameters.kOmega:
+            rans_string = f'    RASModel        kOmega;\n'
+        elif rans_model == Parameters.kOmegaSST:
+            rans_string = f'    RASModel        kOmegaSST;\n'
+        elif rans_model == Parameters.kOmegaSSTLM:
+            rans_string = f'    RASModel        kOmegaSSTLM;\n'
+        elif rans_model == Parameters.kkLOmega:
+            rans_string = f'    RASModel        kkLOmega;\n'
+        elif rans_model == Parameters.kOmegaSSTSAS:
+            rans_string = f'    RASModel        kOmegaSSTSAS;\n'
+        elif rans_model == Parameters.qZeta:
+            rans_string = f'    RASModel        qZeta;\n'
+        elif rans_model == Parameters.SpalartAllmaras:
+            rans_string = f'    RASModel        SpalartAllmaras;\n'
+        elif rans_model == Parameters.LienCubicKE:
+            rans_string = f'    RASModel        LienCubicKE;\n'
+        elif rans_model == Parameters.ShihQuadraticKE:
+            rans_string = f'    RASModel        ShihQuadraticKE;\n'
+        elif rans_model == Parameters.LRR:
+            rans_string = f'    RASModel        LRR;\n'
+        elif rans_model == Parameters.SSG:
+            rans_string = f'    RASModel        SSG;\n'
+        
+        delta_model = ''
+        if rans_model == Parameters.kOmegaSSTSAS:
+            delta_model = self.__get_delta_model()
+        
+        return (
+            f'RAS\n{{\n'
+            f'{rans_string}'
+            f'\n'
+            f'    turbulence      on;\n'
+            f'\n'
+            f'    printCoeffs     on;\n'
+            f'{delta_model}'
+            f'}}\n'
+        )
+
+    def __get_LES(self):
         les_model = self.properties['turbulence_properties']['LES_model']
-        self.file_manager.write(file_id, 'LES\n{\n')
+
         if les_model == Parameters.Smagorinsky:
-            self.file_manager.write(file_id, '    LESModel        Smagorinsky;\n')
+            les_model_string = f'    LESModel        Smagorinsky;\n'
         elif les_model == Parameters.kEqn:
-            self.file_manager.write(file_id, '    LESModel        kEqn;\n')
+            les_model_string = f'    LESModel        kEqn;\n'
         elif les_model == Parameters.dynamicKEqn:
-            self.file_manager.write(file_id, '    LESModel        dynamicKEqn;\n')
+            les_model_string = f'    LESModel        dynamicKEqn;\n'
         elif les_model == Parameters.dynamicLagrangian:
-            self.file_manager.write(file_id, '    LESModel        dynamicLagrangian;\n')
+            les_model_string = f'    LESModel        dynamicLagrangian;\n'
         elif les_model == Parameters.DeardorffDiffStress:
-            self.file_manager.write(file_id, '    LESModel        DeardorffDiffStress;\n')
+            les_model_string = f'    LESModel        DeardorffDiffStress;\n'
         elif les_model == Parameters.WALE:
-            self.file_manager.write(file_id, '    LESModel        WALE;\n')
+            les_model_string = f'    LESModel        WALE;\n'
         elif les_model == Parameters.SpalartAllmarasDES:
-            self.file_manager.write(file_id, '    LESModel        SpalartAllmarasDES;\n')
+            les_model_string = f'    LESModel        SpalartAllmarasDES;\n'
         elif les_model == Parameters.SpalartAllmarasDDES:
-            self.file_manager.write(file_id, '    LESModel        SpalartAllmarasDDES;\n')
+            les_model_string = f'    LESModel        SpalartAllmarasDDES;\n'
         elif les_model == Parameters.SpalartAllmarasIDDES:
-            self.file_manager.write(file_id, '    LESModel        SpalartAllmarasIDDES;\n')
+            les_model_string = f'    LESModel        SpalartAllmarasIDDES;\n'
         elif les_model == Parameters.kOmegaSSTDES:
-            self.file_manager.write(file_id, '    LESModel        kOmegaSSTDES;\n')
+            les_model_string = f'    LESModel        kOmegaSSTDES;\n'
         elif les_model == Parameters.kOmegaSSTDDES:
-            self.file_manager.write(file_id, '    LESModel        kOmegaSSTDDES;\n')
+            les_model_string = f'    LESModel        kOmegaSSTDDES;\n'
         elif les_model == Parameters.kOmegaSSTIDDES:
-            self.file_manager.write(file_id, '    LESModel        kOmegaSSTIDDES;\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    turbulence      on;\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    printCoeffs     on;\n')
-        self.file_manager.write(file_id, '\n')
+            les_model_string = f'    LESModel        kOmegaSSTIDDES;\n'
+        
+        filter_string = ''
         if les_model is Parameters.dynamicKEqn:
-            self.__write_filter_model(file_id)
-        self.__write_delta_model(file_id)
-        self.file_manager.write(file_id, '}\n\n')
+            filter_string = self.__get_filter_model()
+        
+        delta_string = self.__get_delta_model()
 
-    def __write_filter_model(self, file_id):
-        if self.properties['turbulence_properties']['LES_filter'] is Parameters.SIMPLE_FILTER:
-            self.file_manager.write(file_id, '    filter          simple;\n')
-        elif self.properties['turbulence_properties']['LES_filter'] is Parameters.ANISOTROPIC_FILTER:
-            self.file_manager.write(file_id, '    filter          anisotropic;\n')
-        elif self.properties['turbulence_properties']['LES_filter'] is Parameters.LAPLACE_FILTER:
-            self.file_manager.write(file_id, '    filter          laplace;\n')
-        self.file_manager.write(file_id, '\n')
 
-    def __write_delta_model(self, file_id):
+        return (
+            f'LES\n{{\n'
+            f'{les_model_string}'
+            f'\n'
+            f'    turbulence      on;\n'
+            f'\n'
+            f'    printCoeffs     on;\n'
+            f'\n'
+            f'{filter_string}'
+            f'{delta_string}'
+            f'}}\n\n'
+        )
+
+    def __get_filter_model(self):
+        les_filter = self.properties['turbulence_properties']['LES_filter']
+        if les_filter is Parameters.SIMPLE_FILTER:
+            return '    filter          simple;\n\n'
+        elif les_filter is Parameters.ANISOTROPIC_FILTER:
+            return '    filter          anisotropic;\n\n'
+        elif les_filter is Parameters.LAPLACE_FILTER:
+            return '    filter          laplace;\n\n'
+
+    def __get_delta_model(self):
         # if IDDES is used, delta model must be IDDES, silently overwrite it here in case wrong model is set
         les_model = self.properties['turbulence_properties']['LES_model']
         if les_model == Parameters.SpalartAllmarasIDDES or les_model is Parameters.kOmegaSSTIDDES:
             self.properties['turbulence_properties']['delta_model'] = Parameters.IDDESDelta
 
-        if self.properties['turbulence_properties']['delta_model'] == Parameters.smooth:
-            self.file_manager.write(file_id, '    delta           smooth;\n')
-        elif self.properties['turbulence_properties']['delta_model'] == Parameters.Prandtl:
-            self.file_manager.write(file_id, '    delta           Prandtl;\n')
-        elif self.properties['turbulence_properties']['delta_model'] == Parameters.maxDeltaxyz:
-            self.file_manager.write(file_id, '    delta           maxDeltaxyz;\n')
-        elif self.properties['turbulence_properties']['delta_model'] == Parameters.cubeRootVol:
-            self.file_manager.write(file_id, '    delta           cubeRootVol;\n')
-        elif self.properties['turbulence_properties']['delta_model'] == Parameters.maxDeltaxyzCubeRoot:
-            self.file_manager.write(file_id, '    delta           maxDeltaxyzCubeRoot;\n')
-        elif self.properties['turbulence_properties']['delta_model'] == Parameters.vanDriest:
-            self.file_manager.write(file_id, '    delta           vanDriest;\n')
-        elif self.properties['turbulence_properties']['delta_model'] == Parameters.IDDESDelta:
-            self.file_manager.write(file_id, '    delta           IDDESDelta;\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    cubeRootVolCoeffs\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        deltaCoeff        1;\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    PrandtlCoeffs\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        delta           cubeRootVol;\n')
-        self.file_manager.write(file_id, '        cubeRootVolCoeffs\n')
-        self.file_manager.write(file_id, '        {\n')
-        self.file_manager.write(file_id, '            deltaCoeff      1;\n')
-        self.file_manager.write(file_id, '        }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '        smoothCoeffs\n')
-        self.file_manager.write(file_id, '        {\n')
-        self.file_manager.write(file_id, '            delta           cubeRootVol;\n')
-        self.file_manager.write(file_id, '            cubeRootVolCoeffs\n')
-        self.file_manager.write(file_id, '            {\n')
-        self.file_manager.write(file_id, '                deltaCoeff      1;\n')
-        self.file_manager.write(file_id, '            }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '            maxDeltaRatio   1.1;\n')
-        self.file_manager.write(file_id, '        }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '        Cdelta          0.158;\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    vanDriestCoeffs\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        delta           cubeRootVol;\n')
-        self.file_manager.write(file_id, '        cubeRootVolCoeffs\n')
-        self.file_manager.write(file_id, '        {\n')
-        self.file_manager.write(file_id, '            deltaCoeff      1;\n')
-        self.file_manager.write(file_id, '        }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '        smoothCoeffs\n')
-        self.file_manager.write(file_id, '        {\n')
-        self.file_manager.write(file_id, '            delta           cubeRootVol;\n')
-        self.file_manager.write(file_id, '            cubeRootVolCoeffs\n')
-        self.file_manager.write(file_id, '            {\n')
-        self.file_manager.write(file_id, '                deltaCoeff      1;\n')
-        self.file_manager.write(file_id, '            }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '            maxDeltaRatio   1.1;\n')
-        self.file_manager.write(file_id, '        }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '        Aplus           26;\n')
-        self.file_manager.write(file_id, '        Cdelta          0.158;\n')
-        self.file_manager.write(file_id, '    }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    smoothCoeffs\n')
-        self.file_manager.write(file_id, '    {\n')
-        self.file_manager.write(file_id, '        delta           cubeRootVol;\n')
-        self.file_manager.write(file_id, '        cubeRootVolCoeffs\n')
-        self.file_manager.write(file_id, '        {\n')
-        self.file_manager.write(file_id, '            deltaCoeff      1;\n')
-        self.file_manager.write(file_id, '        }\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '        maxDeltaRatio   1.1;\n')
-        self.file_manager.write(file_id, '    }\n')
+        delta_model = self.properties['turbulence_properties']['delta_model']
+
+        if delta_model == Parameters.smooth:
+            delta_string = f'    delta           smooth;\n'
+        elif delta_model == Parameters.Prandtl:
+            delta_string = f'    delta           Prandtl;\n'
+        elif delta_model == Parameters.maxDeltaxyz:
+            delta_string = f'    delta           maxDeltaxyz;\n'
+        elif delta_model == Parameters.cubeRootVol:
+            delta_string = f'    delta           cubeRootVol;\n'
+        elif delta_model == Parameters.maxDeltaxyzCubeRoot:
+            delta_string = f'    delta           maxDeltaxyzCubeRoot;\n'
+        elif delta_model == Parameters.vanDriest:
+            delta_string = f'    delta           vanDriest;\n'
+        elif delta_model == Parameters.IDDESDelta:
+            delta_string = f'    delta           IDDESDelta;\n'
+        
+        return (
+            f'{delta_string}\n'
+            f'    cubeRootVolCoeffs\n'
+            f'    {{\n'
+            f'        deltaCoeff        1;\n'
+            f'    }}\n'
+            f'\n'
+            f'    PrandtlCoeffs\n'
+            f'    {{\n'
+            f'        delta           cubeRootVol;\n'
+            f'        cubeRootVolCoeffs\n'
+            f'        {{\n'
+            f'            deltaCoeff      1;\n'
+            f'        }}\n'
+            f'\n'
+            f'        smoothCoeffs\n'
+            f'        {{\n'
+            f'            delta           cubeRootVol;\n'
+            f'            cubeRootVolCoeffs\n'
+            f'            {{\n'
+            f'                deltaCoeff      1;\n'
+            f'            }}\n'
+            f'\n'
+            f'            maxDeltaRatio   1.1;\n'
+            f'        }}\n'
+            f'\n'
+            f'        Cdelta          0.158;\n'
+            f'    }}\n'
+            f'\n'
+            f'    vanDriestCoeffs\n'
+            f'    {{\n'
+            f'        delta           cubeRootVol;\n'
+            f'        cubeRootVolCoeffs\n'
+            f'        {{\n'
+            f'            deltaCoeff      1;\n'
+            f'        }}\n'
+            f'\n'
+            f'        smoothCoeffs\n'
+            f'        {{\n'
+            f'            delta           cubeRootVol;\n'
+            f'            cubeRootVolCoeffs\n'
+            f'            {{\n'
+            f'                deltaCoeff      1;\n'
+            f'            }}\n'
+            f'\n'
+            f'            maxDeltaRatio   1.1;\n'
+            f'        }}\n'
+            f'\n'
+            f'        Aplus           26;\n'
+            f'        Cdelta          0.158;\n'
+            f'    }}\n'
+            f'\n'
+            f'    smoothCoeffs\n'
+            f'    {{\n'
+            f'        delta           cubeRootVol;\n'
+            f'        cubeRootVolCoeffs\n'
+            f'        {{\n'
+            f'            deltaCoeff      1;\n'
+            f'        }}\n'
+            f'\n'
+            f'        maxDeltaRatio   1.1;\n'
+            f'    }}\n'
+        )

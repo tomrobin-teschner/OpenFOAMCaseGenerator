@@ -31,15 +31,15 @@ def main():
 
     # write transport or thermo-physical properties depending on flow type
     if properties['flow_properties']['flow_type'] == Parameters.incompressible:
-        transport_dict = ConstantDir.TransportPropertiesFile(properties, file_manager)
-        transport_dict.write_input_file()
+        transport_dict = ConstantDir.TransportPropertiesFile(properties)
+        file_manager.write_content_to_file('constant', 'transportProperties', transport_dict.get_file_content())
     elif properties['flow_properties']['flow_type'] == Parameters.compressible:
-        thermo_dict = ConstantDir.ThermophysicalProperties(properties, file_manager)
-        thermo_dict.write_input_file()
+        thermo_dict = ConstantDir.ThermophysicalProperties(properties)
+        file_manager.write_content_to_file('constant', 'thermophysicalProperties', thermo_dict.get_file_content())
 
     # write turbulence properties to file
-    turbulence_dict = ConstantDir.TurbulencePropertiesFile(properties, file_manager)
-    turbulence_dict.write_input_file()
+    turbulence_dict = ConstantDir.TurbulencePropertiesFile(properties)
+    file_manager.write_content_to_file('constant', 'turbulenceProperties', turbulence_dict.get_file_content())
 
     # write control dict file out
     control_dict = SystemDir.ControlDictFile(properties, file_manager)

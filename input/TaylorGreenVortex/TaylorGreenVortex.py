@@ -9,7 +9,7 @@ class TaylorGreenVortex(CPB.CasePropertiesBase):
         return {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
-                'case_name': 'taylor_green_vortex',
+                'case_name': 'TaylorGreenVortex',
 
                 # specify how the mesh should be incorporated into the case directory
                 #   The following types are supported
@@ -471,6 +471,9 @@ class TaylorGreenVortex(CPB.CasePropertiesBase):
                 #                           Eddy viscosity SGS model using a modeled balance equation to simulate
                 #                           the behaviour of k in which a dynamic procedure is applied to evaluate the
                 #                           coefficients
+                #     dynamicLagrangian:    Dynamic SGS model with Lagrangian averaging
+                #     DeardorffDiffStress:  Differential SGS Stress Equation Model for incompressible and compressible
+                #                           flows
                 #     WALE:                 The Wall-adapting local eddy-viscosity (WALE) SGS model
                 #
                 #   DES:

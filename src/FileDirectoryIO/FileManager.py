@@ -60,9 +60,15 @@ class FileManager:
         self.__create_directory(os.path.join(self.properties['file_properties']['path'], 'postProcessing'))
         self.__create_case_file()
 
+    #TODO: deprecated, use write_content_to_file instead
     def create_file(self, folder, file_name):
         file_id = open(os.path.join(self.properties['file_properties']['path'], folder, file_name), 'w')
         return file_id
+
+    def write_content_to_file(self, folder, file_name, content):
+        file_id = open(os.path.join(self.properties['file_properties']['path'], folder, file_name), 'w')
+        file_id.write(content)
+        file_id.close()
 
     def close_file(self, file_id):
         file_id.close()
@@ -70,6 +76,7 @@ class FileManager:
     def write(self, file_id, message):
         file_id.write(message)
 
+    # TODO: deprecated, remove once refactored
     def write_header(self, file_id, class_type, location, object_type):
         file_id.write('/*--------------------------------*- C++ -*----------------------------------*\\\n')
         file_id.write('| =========                 |                                                 |\n')
