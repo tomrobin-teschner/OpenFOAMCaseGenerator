@@ -1,0 +1,17 @@
+const IOdictionary& d = static_cast<const IOdictionary&>(dict);
+const fvMesh& mesh = refCast<const fvMesh>(d.db());
+vectorField U(mesh.nCells());
+
+auto U_0 = 1.0;
+
+forAll(U, cellI)
+{
+    auto x = mesh.C()[cellI].x();
+    auto y = mesh.C()[cellI].y();
+    auto z = mesh.C()[cellI].z();
+
+    U[cellI].x() =   U_0 * Foam::sin(x) * Foam::cos(y) * Foam::cos(z);
+    U[cellI].y() = - U_0 * Foam::cos(x) * Foam::sin(y) * Foam::cos(z);
+    U[cellI].z() =   0.0;
+}
+U.writeEntry("", os);

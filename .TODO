@@ -1,0 +1,55 @@
+# --------------------------- #
+# Roadmap towards version 3.0 #
+# --------------------------- #
+
+☐ Testing
+  ✔ Refactor code so that classes emit text / strings but do not write, delegate that to the file_manager class @done(23-01-17 07:10)
+    ✔ 0 directory @done(23-01-05 08:18)
+    ✔ constant directory @done(23-01-03 07:41)
+    ✔ system directory @done(23-01-17 07:10)
+  ✔ Provide unit-tests for 0 directory @done(23-01-05 08:18)
+  ✔ Provide unit-tests for constant directory @done(23-01-03 07:41)
+  ✔ Provide unit-tests for system directory @done(23-01-17 07:10)
+  ✔ Rethink system tests, find a way to test automatically, without manually adding cases. Should also test all turbulence models! @done(23-01-23 08:39)
+  ☐ Set up CI/CD server
+
+✔ File properties @done(23-01-12 08:27)
+  ✔ Implement cascading file properties, deriving from a base case and then overwriting only specific quantities. This can be any test case from which properties will be derived @done(23-01-12 08:26)
+  ✔ Establish a way to set private variables per class in constructor which will be used when setting the file properties dictionary @done(23-01-12 08:26)
+
+☐ Refactoring
+  ✔ Rething global parameter handling, instead of globals use Enums? Should still be int based in input to avoid typos. @done(23-01-09 08:04)
+  ✔ Take isoSurface include out of additional fields and put in controlDict file, ensure correct order there @done(23-01-17 08:05)
+  ✔ Provide case factory class that generates cases based on command line arguments @done(23-01-17 07:31)
+  ✔ Reduce complexity in main function, should only handle command line arguments and hand off case generation to someone else @done(23-01-18 07:00)
+
+☐ Features
+  ☐ Retire DFSEM inlet boundary condition, replace by offset BC instead
+  ☐ Add a material properties database (as json implementation), implement air and use that in thermophysical properties instead
+  ☐ Select compressible model based on enthalpy or energy (check which one is available in OF)
+  ☐ Allow for parameter overwriting in script if required by the user
+  ☐ Use LUST instead of linearUpwind for LES discretisation of convective terms
+
+☐ Cases
+  ☐ Provide an internal and external LES example case setup
+  ✔ Redo case file directory structure, currently input and example folders are missleading and should be combined @done(23-01-12 08:04)
+  ☐ Provide FFT calculation to cylinder case setup so that Strouhal number can be executed
+  ☐ Provide plotting script to Sudden Expansion
+
+☐ Scripts
+  ☐ Provide custom function object for residuals (L0 and L2 norm) with python script to extract and plot data
+  ☐ Provide script for LES (calculate percentage of domain that resolves scales (should be 80% or above))
+
+☐ Solver extensions
+  ☐ Allow for custom solvers / postProcessing functions to be compiled as part of the case setup
+
+☐ Documentation
+  ☐ Provide readthedocs page
+
+☐ GUI
+  ☐ Provide initial implementation with wxPython to set up cases (later, extend towards meshing with OpenGL as well)
+  ☐ Provide a way to use existing cases as tempaltes in file menu
+  ☐ Provide a setup wizard to set up cases quickly
+
+☐ Parameterisation
+  ☐ Provide velocity template functionality within any script that ends in *.vel (automatically add python layer to transform *.vel file into normal openfoam file)
