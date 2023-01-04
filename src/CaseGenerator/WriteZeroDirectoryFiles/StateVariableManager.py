@@ -23,8 +23,23 @@ class StateVariableManager:
         # list storing all state variables that are not part of a turbulence model
         self.non_turbulence_state_variable = ['U', 'p', 'T']
 
-    def get_active_variables(self):
-        return self.variables
+    def get_active_variable_names(self):
+        names = []
+        for key, value in self.variables.items():
+            names.append(key)
+        return names
+
+    def get_active_variable_field_types(self):
+        field_types = []
+        for key, value in self.variables.items():
+            field_types.append(value[0])
+        return field_types
+
+    def get_active_variable_dimensions(self):
+        dimensions = []
+        for key, value in self.variables.items():
+            dimensions.append(value[1])
+        return dimensions
 
     def var_is_from_rans_turbulence_model(self, var):
         if var in self.non_turbulence_state_variable:

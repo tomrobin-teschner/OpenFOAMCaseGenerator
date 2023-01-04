@@ -7,7 +7,7 @@ class fvSchemesFile:
         self.properties = properties
         self.file_manager = file_manager
         self.state_variable_manager = ZeroDir.StateVariableManager(properties)
-        self.variables = self.state_variable_manager.get_active_variables()
+        self.variable_names = self.state_variable_manager.get_active_variable_names()
         self.indentation = 38
 
     def write_input_file(self):
@@ -64,7 +64,7 @@ class fvSchemesFile:
         self.file_manager.write(file_id, 'gradSchemes\n')
         self.file_manager.write(file_id, '{\n')
         self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + grad_type_rest)
-        for var in self.variables:
+        for var in self.variable_names:
             spacing = (self.indentation - len('    grad(' + var + ')') - 1) * ' '
             if var == 'U':
                 self.file_manager.write(file_id, '    grad(' + var + ')' + spacing + grad_type_U)
@@ -104,7 +104,7 @@ class fvSchemesFile:
         spacing = (self.indentation - len('    div(U)') - 1) * ' '
         self.file_manager.write(file_id, '    div(U)' + spacing + div_type)
 
-        for var in self.variables:
+        for var in self.variable_names:
             if discretisation_policy == Parameters.DEFAULT:
                 spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                 if var == 'U':
@@ -192,7 +192,7 @@ class fvSchemesFile:
         spacing = (self.indentation - len('    laplacian(p)') - 1) * ' '
         self.file_manager.write(file_id, '    laplacian(p)' + spacing + laplacian_type)
 
-        for var in self.variables:
+        for var in self.variable_names:
             spacing = (self.indentation - len('    laplacian(nuEff,' + var + ')') - 1) * ' '
             self.file_manager.write(file_id, '    laplacian(nuEff,' + var + ')' + spacing + laplacian_type)
         self.file_manager.write(file_id, '}\n')
@@ -202,7 +202,7 @@ class fvSchemesFile:
         self.file_manager.write(file_id, 'interpolationSchemes\n')
         self.file_manager.write(file_id, '{\n')
         self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + 'linear;\n')
-        for var in self.variables:
+        for var in self.variable_names:
             spacing = (self.indentation - len('    flux(' + var + ')') - 1) * ' '
             self.file_manager.write(file_id, '    flux(' + var + ')' + spacing + 'linear;\n')
         self.file_manager.write(file_id, '}\n')
@@ -222,7 +222,7 @@ class fvSchemesFile:
         self.file_manager.write(file_id, 'snGradSchemes\n')
         self.file_manager.write(file_id, '{\n')
         self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + surface_type)
-        for var in self.variables:
+        for var in self.variable_names:
             spacing = (self.indentation - len('    snGrad(' + var + ')') - 1) * ' '
             self.file_manager.write(file_id, '    snGrad(' + var + ')' + spacing + surface_type)
         self.file_manager.write(file_id, '}\n')

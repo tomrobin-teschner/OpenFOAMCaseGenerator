@@ -6,7 +6,7 @@ class fvSolutionFile:
         self.properties = properties
         self.file_manager = file_manager
         self.state_variable_manager = ZeroDir.StateVariableManager(properties)
-        self.variables = self.state_variable_manager.get_active_variables()
+        self.variable_names = self.state_variable_manager.get_active_variable_names()
 
     def write_input_file(self):
         abs_tol = str(self.properties['convergence_control']['absolute_convergence_criterion'])
@@ -17,7 +17,7 @@ class fvSolutionFile:
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, 'solvers\n{\n')
 
-        for var in self.variables:
+        for var in self.variable_names:
             if var == 'p':
                 self.file_manager.write(file_id, '    p\n')
                 self.file_manager.write(file_id, '    {\n')
