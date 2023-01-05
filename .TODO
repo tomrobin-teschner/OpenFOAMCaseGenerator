@@ -4,21 +4,21 @@
 
 ☐ Testing
   ☐ Refactor code so that classes emit text / strings but do not write, delegate that to the file_manager class
-    ☐ 0 directory
+    ✔ 0 directory @done(23-01-05 08:18)
     ✔ constant directory @done(23-01-03 07:41)
     ☐ system directory
-  ☐ Provide unit-tests for 0 directory
+  ✔ Provide unit-tests for 0 directory @done(23-01-05 08:18)
   ✔ Provide unit-tests for constant directory @done(23-01-03 07:41)
   ☐ Provide unit-tests for system directory
   ☐ Rethink system tests, find a way to test automatically, without manually adding cases. Should also test all turbulence models!
   ☐ Set up CI/CD server
 
-☐ Refactoring
-  ☐ Rething global parameter handling, instead of globals use Enums? Should still be int based in input to avoid typos.
-
 ☐ File properties
   ☐ Implement cascading file properties, deriving from a base case and then overwriting only specific quantities. This can be any test case from which properties will be derived
   ☐ Establish a way to set private variables per class in constructor which will be used when setting the file properties dictionary
+
+☐ Refactoring
+  ☐ Rething global parameter handling, instead of globals use Enums? Should still be int based in input to avoid typos.
 
 ☐ Features
   ☐ Retire DFSEM inlet boundary condition, replace by offset BC instead

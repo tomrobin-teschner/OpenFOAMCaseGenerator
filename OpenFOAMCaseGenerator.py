@@ -25,9 +25,10 @@ def main():
     file_manager.create_directory_structure()
     file_manager.copy_mesh_to_destination()
 
-    # write out boundary conditions for all relevant flow properties
-    boundary_conditions = ZeroDir.BoundaryConditionManager(properties, file_manager)
-    boundary_conditions.write_all_boundary_conditions()
+    boundary_conditions = ZeroDir.BoundaryConditionManager(properties)
+    [variables, bcs] = boundary_conditions.get_all_boundary_conditions()
+    for variable, bc in zip(variables, bcs):
+        file_manager.write_content_to_file('0', variable, bc)
 
     # write transport or thermo-physical properties depending on flow type
     if properties['flow_properties']['flow_type'] == Parameters.incompressible:

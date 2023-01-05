@@ -1,2 +1,3 @@
 from .BoundaryConditionManager import BoundaryConditionManager
 from .StateVariableManager import StateVariableManager
+from .TurbulentFreestreamConditions import TurbulenceFreestreamConditions
