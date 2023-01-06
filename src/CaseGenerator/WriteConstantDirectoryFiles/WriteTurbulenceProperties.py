@@ -1,4 +1,5 @@
 from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.FileDirectoryIO.WriteHeader import WriteHeader
 
 
 class TurbulencePropertiesFile:
@@ -18,29 +19,10 @@ class TurbulencePropertiesFile:
         if turbulence_type == Parameters.LES:
             simulation_type = f'simulationType LES;\n'
             turbulence_setup = self.__get_LES()
+        header = WriteHeader.get_header(version, 'dictionary', 'constant', 'turbulenceProperties')
 
         return (
-            f'/*--------------------------------*- C++ -*----------------------------------*\\\n'
-            f'| =========                 |                                                 |\n'
-            f'| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n'
-            f'|  \\\    /   O peration     | Version:  {version}                                 |\n'
-            f'|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n'
-            f'|    \\\/     M anipulation  |                                                 |\n'
-            f'|                                                                             |\n'
-            f'| This file was automatically generated using the OpenFOAMCaseGenerator       |\n'
-            f'| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |\n'
-            f'|                                                                             |\n'
-            f'\*---------------------------------------------------------------------------*/\n'
-            f'FoamFile\n'
-            f'{{\n'
-            f'    version     2.0;\n'
-            f'    format      ascii;\n'
-            f'    class       dictionary;\n'
-            f'    location    "constant";\n'
-            f'    object      turbulenceProperties;\n'
-            f'}}\n'
-            f'// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n'
-            f'\n'
+            f'{header}'
             f'{simulation_type}'
             f'\n'
             f'{turbulence_setup}'

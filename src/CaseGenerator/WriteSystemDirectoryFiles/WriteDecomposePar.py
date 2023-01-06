@@ -1,16 +1,18 @@
-class WriteDecomposeParDictionary:
-    def __init__(self, properties, file_manager):
-        self.properties = properties
-        self.file_manager = file_manager
+from src.CaseGenerator.FileDirectoryIO import WriteHeader
 
-    def write_decompose_par_dict(self):
-        file_id = self.file_manager.create_file('system', 'decomposeParDict')
-        self.file_manager.write_header(file_id, 'dictionary', 'system', 'decomposeParDict')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'numberOfSubdomains ' +
-                                str(self.properties['parallel_properties']['number_of_processors']) + ';\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, 'method          scotch;\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id,
-                                '// ************************************************************************* //\n')
+class WriteDecomposeParDictionary:
+    def __init__(self, properties):
+        self.properties = properties
+
+    def get_decompose_par_dict(self):
+        version = self.properties['file_properties']['version']
+        num_processors = self.properties['parallel_properties']['number_of_processors']
+        header = WriteHeader.get_header(version, 'dictionary', 'system', 'decomposeParDict')
+        return (
+            f'{header}'
+            f'numberOfSubdomains {num_processors};\n'
+            f'\n'
+            f'method          scotch;\n'
+            f'\n'
+            f'// ************************************************************************* //\n'
+        )

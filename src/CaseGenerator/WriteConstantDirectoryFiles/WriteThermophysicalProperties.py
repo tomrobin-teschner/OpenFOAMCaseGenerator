@@ -1,3 +1,5 @@
+from src.CaseGenerator.FileDirectoryIO.WriteHeader import WriteHeader
+
 class ThermophysicalProperties:
     def __init__(self, properties):
         self.properties = properties
@@ -18,29 +20,10 @@ class ThermophysicalProperties:
                 f'        As          1.4792e-06;\n'
                 f'        Ts          116;\n'
             )
+        header = WriteHeader.get_header(version, 'dictionary', 'constant', 'thermophysicalProperties')
         
         return (
-            f'/*--------------------------------*- C++ -*----------------------------------*\\\n'
-            f'| =========                 |                                                 |\n'
-            f'| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n'
-            f'|  \\\    /   O peration     | Version:  {version}                                 |\n'
-            f'|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n'
-            f'|    \\\/     M anipulation  |                                                 |\n'
-            f'|                                                                             |\n'
-            f'| This file was automatically generated using the OpenFOAMCaseGenerator       |\n'
-            f'| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |\n'
-            f'|                                                                             |\n'
-            f'\*---------------------------------------------------------------------------*/\n'
-            f'FoamFile\n'
-            f'{{\n'
-            f'    version     2.0;\n'
-            f'    format      ascii;\n'
-            f'    class       dictionary;\n'
-            f'    location    "constant";\n'
-            f'    object      thermophysicalProperties;\n'
-            f'}}\n'
-            f'// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n'
-            f'\n'
+            f'{header}'
             f'thermoType\n'
             f'{{\n'
             f'    type            hePsiThermo;\n'

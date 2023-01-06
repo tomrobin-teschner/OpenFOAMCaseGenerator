@@ -1,6 +1,7 @@
 from src.CaseGenerator.Properties import GlobalVariables as Parameters
 from src.CaseGenerator.WriteZeroDirectoryFiles.TurbulentFreestreamConditions import TurbulenceFreestreamConditions
 from src.CaseGenerator.WriteZeroDirectoryFiles.StateVariableManager import StateVariableManager
+from src.CaseGenerator.FileDirectoryIO.WriteHeader import WriteHeader
 import copy
 
 
@@ -71,31 +72,10 @@ class BoundaryConditionManager:
 
     def __get_headers(self, index):
         version = self.properties['file_properties']['version']
-        return (
-            f'/*--------------------------------*- C++ -*----------------------------------*\\\n'
-            f'| =========                 |                                                 |\n'
-            f'| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n'
-            f'|  \\\    /   O peration     | Version:  {version}                                 |\n'
-            f'|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n'
-            f'|    \\\/     M anipulation  |                                                 |\n'
-            f'|                                                                             |\n'
-            f'| This file was automatically generated using the OpenFOAMCaseGenerator       |\n'
-            f'| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |\n'
-            f'|                                                                             |\n'
-            f'\*---------------------------------------------------------------------------*/\n'
-            f'FoamFile\n'
-            f'{{\n'
-            f'    version     2.0;\n'
-            f'    format      ascii;\n'
-            f'    class       {self.variable_field_types[index]};\n'
-            f'    location    "0";\n'
-            f'    object      {self.variable_names[index]};\n'
-            f'}}\n'
-            f'// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n'
-        )
+        return WriteHeader.get_header(version, self.variable_field_types[index], '0', self.variable_names[index])
 
     def __get_dimensions(self, index):
-        return f'\ndimensions      {self.variable_dimensions[index]};\n\n'
+        return f'dimensions      {self.variable_dimensions[index]};\n\n'
 
     def __get_initial_conditions(self, var, bc_freestream_conditions, bc_zero_initial_conditions):
         initial_conditions_type = self.properties['flow_properties']['initial_conditions']
