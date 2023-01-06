@@ -5,7 +5,7 @@ class WriteMachNumber:
 
     def write_mach_number(self):
         file_id = self.file_manager.create_file('system/include', 'MachNo')
-        self.file_manager.write_header(file_id, 'dictionary', 'system', 'yPlus')
+        self.file_manager.write_header(file_id, 'dictionary', 'system', 'MachNo')
         self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id, 'MachNo\n')
         self.file_manager.write(file_id, '{\n')
