@@ -1,30 +1,35 @@
-import input.CasePropertiesBase as CPB
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 import os
+import collections.abc
+from abc import ABCMeta, abstractmethod
 
 
-class WingAndWinglet(CPB.CasePropertiesBase):
-    @staticmethod
-    def get_properties():
-        return {
+class BaseCase(metaclass = ABCMeta):
+    """Base case properties defining all exiting properties
+    
+    This is the place where all properties are defined and all cases must
+    derive from this base class to inherit default properties.
+    """
+    def create_case(self, updated_properties):
+        self.properties = {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
-                'case_name': 'wing_and_winglet',
+                'case_name': 'default',
 
                 # specify how the mesh should be incorporated into the case directory
                 #   The following types are supported
-                #   NO_MESH:                                Don't do anything, leave mesh treatment up to user
-                #   BLOCK_MESH_DICT:                        Copy blockMeshDict file into case, requires the path to the
+                #   no_mesh:                                Don't do anything, leave mesh treatment up to user
+                #   block_mesh_dict:                        Copy blockMeshDict file into case, requires the path to the
                 #                                           file
-                #   SNAPPY_HEX_MESH_DICT:                   Use snappyHexMesh for meshing. This may require a
+                #   snappy_hex_mesh_dict:                   Use snappyHexMesh for meshing. This may require a
                 #                                           blockMeshDict file (or polyMesh directory) for the
                 #                                           background mesh and a geometry file. Thus, the snappyHexMesh
                 #                                           entry is a dictionary with optional entries which, if left
                 #                                           empty, are ignored, otherwise additional files will be
                 #                                           copied into the appropriate places and the Allrun script
                 #                                           adjusted accordingly.
-                #   POLY_MESH:                              Specify a polyMesh directory and copy it into the case setup
-                'mesh_treatment': Parameters.SNAPPY_HEX_MESH_DICT,
+                #   poly_mesh:                              Specify a polyMesh directory and copy it into the case setup
+                'mesh_treatment': Mesh.no_mesh,
 
                 # directory where the blockMeshDict file is located (needs to be named blockMeshDict)
                 'blockmeshdict_directory': os.path.join(''),
@@ -36,11 +41,11 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 # geometry entry. This is a list entry so that we can specify more than one geometry file. These will be
                 # stored in within the constant/triSurface directory
                 'snappyhexmeshdict': {
-                    'snappyhexmesh_directory': os.path.join('examples', 'mesh', 'wing_and_winglet'),
-                    'blockmeshdict_directory': os.path.join('examples', 'mesh', 'wing_and_winglet'),
+                    'snappyhexmesh_directory': os.path.join(''),
+                    'blockmeshdict_directory': os.path.join(''),
                     'polymesh_directory': os.path.join(''),
                     'geometry': [
-                        os.path.join('examples', 'geometry', 'wing_and_winglet', 'wing_and_winglet.stl'),
+                        os.path.join(''),
                     ]
                 },
 
@@ -64,7 +69,7 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 'run_in_parallel': False,
 
                 # number of processors that will be used to run case in parallel
-                'number_of_processors': 4,
+                'number_of_processors': 1,
             },
 
             # properties imposed at boundaries / freestream
@@ -89,12 +94,7 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 #   SYMMETRY:         Symmetry plane condition, i.e. wall with slip condition
                 #                     (Neumann condition for all quantities)
                 #   CYCLIC:           Use for periodic flows (mesh needs to have CYCLIC conditions defined)
-                'boundary_conditions': {
-                    'wing_and_winglet': Parameters.WALL,
-                    'symmetry': Parameters.SYMMETRY,
-                    'inlet': Parameters.FREESTREAM,
-                    'outlet': Parameters.FREESTREAM,
-                },
+                'boundary_conditions': {},
 
                 # specify if custom inlet boundary conditions should be used for this case setup. If set to true, this
                 # will require the dictionary entry for custom_inlet_boundary_conditions_setup
@@ -103,9 +103,12 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 # if custom inlet boundary conditions should be used, this dictionary provides a mapping where the key
                 # is used to identify for which variable custom inlet boundary conditions should be written. The value
                 # is a path to the c++ script which should be used as the custom inlet boundary condition
-                'custom_inlet_boundary_conditions_setup': {
-                    'variable': os.path.join('path', 'to', 'inlet', 'boundary', 'condition', 'script'),
-                },
+                # 
+                # Syntax:
+                # 'custom_inlet_boundary_conditions_setup': {
+                #   'variableName (e.g. U)': os.path.join('path', 'to', 'boundaryConditions', 'bc_script_name'),
+                # },
+                'custom_inlet_boundary_conditions_setup': {},
 
                 # start DFSEM Inlet only section -----------------------------------------------------------------------
                 # the below options are for the special DFSEM Inlet only. Use with caution. Before using, see remarks at
@@ -152,60 +155,63 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 # if custom initial conditions should be used, this dictionary provides a mapping where the key is
                 # used to identify for which variable custom initial conditions should be written. The value is a
                 # path to the c++ script which should be used as the custom initial condition
-                'custom_initial_conditions_setup': {
-                    'variable': os.path.join('path', 'to', 'initial', 'condition', 'script'),
-                },
+                #
+                # Syntax:
+                # 'custom_initial_conditions_setup': {
+                #   'variableName (e.g. U)': os.path.join('path', 'to', 'initial_conditions', 'init_script_name'),
+                # },
+                'custom_initial_conditions_setup': {},
 
                 # specify how the initial field should be set for non-custom initial conditions
-                #   BOUNDARY_CONDITIONED_BASED: set the initial field based on inlet conditions (where applicable)
-                #   ZERO_VELOCITY:              set the initial field to a zero velocity field
-                'initial_conditions': Parameters.BOUNDARY_CONDITIONED_BASED,
+                #   boundary_condition_based:   set the initial field based on inlet conditions (where applicable)
+                #   zero_velocity:              set the initial field to a zero velocity field
+                'initial_conditions': InitialConditions.boundary_condition_based,
 
                 # type of the flow to solve
                 #   The following types are supported:
                 #     incompressible:   Solve the flow using a constant density approach
                 #     compressible:     Solve the flow using a variable density approach
-                'flow_type': Parameters.incompressible,
+                'flow_type': FlowType.incompressible,
 
                 # flag indicating whether viscosity should be constant or variable (only applicable to compressible
                 # flows, in which case sutherland's law will be used to compute it)
                 'const_viscosity': True,
 
                 # specify whether input parameters should be specified using dimensional or non-dimensional parameters
-                #   DIMENSIONAL:        Use dimensional quantities. Properties from the dimensional_properties
+                #   dimensional:        Use dimensional quantities. Properties from the dimensional_properties
                 #                       dictionary will be used
-                #   NON_DIMENSIONAL:    Use non-dimensional quantities. Properties from the non_dimensional_properties
+                #   non_dimensional:    Use non-dimensional quantities. Properties from the non_dimensional_properties
                 #                       dictionary will be used
-                'input_parameters_specification_mode': Parameters.DIMENSIONAL,
+                'input_parameters_specification_mode': Dimensionality.non_dimensional,
 
                 # properties used when input parameters are specified using dimensional properties
                 'non_dimensional_properties': {
                     # Reynolds number
-                    'Re': 6000000,
+                    'Re': 1,
 
                     # Mach number (only used for compressible flows)
-                    'Ma': 0.15,
+                    'Ma': 0.1,
                 },
 
                 # properties used when input parameters are specified using dimensional properties
                 'dimensional_properties': {
                     # specify the inlet velocity magnitude. The vector components will be constructed using the
                     # axis_aligned_flow_direction properties.
-                    'velocity_magnitude': 10,
+                    'velocity_magnitude': 1.0,
 
                     # specify density at inlet / freestream (only used for compressible calculations)
                     'rho': 1.0,
 
                     # specify the laminar viscosity (used for incompressible flows or compressible, if viscosity is set
                     # to const)
-                    'nu': 1.46e-5,
+                    'nu': 1e-6,
 
                     # specify total pressure at inlet / freestream (ignored for incompressible flows, here,
                     # static pressure will be used and will be set to 0 by default)
-                    'p': 0,
+                    'p': 0.0,
 
                     # specify temperature at inlet / freestream
-                    'T': 288,
+                    'T': 273.15,
                 },
 
                 # specify the direction of the inflow velocity vector. Will be used to construct a 3D vector based on
@@ -214,9 +220,9 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 # span, use the angle_of_attack property. The property specified here will also be used to set up the
                 # force coefficient calculation if required.
                 'axis_aligned_flow_direction': {
-                    'tangential': Parameters.X,
-                    'normal': Parameters.Y,
-                    'angle_of_attack': 5,
+                    'tangential': Coordinates.x,
+                    'normal': Coordinates.y,
+                    'angle_of_attack': 0,
                 },
             },
 
@@ -239,7 +245,7 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 #                       mesh motion and mesh topology changes
                 #     sonicFoam:        Transient solver for trans-sonic/supersonic, turbulent flow of a compressible
                 #                       gas
-                'solver': Parameters.pimpleFoam,
+                'solver': Solver.simpleFoam,
 
                 # number of times the non-orthogonal correction should be applied to the pressure equation. If the piso
                 # or pimple algorithm is used, this will happen within each corrector step set below in
@@ -262,47 +268,55 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 'number_of_outer_corrector_steps': 1,
 
                 # name of the solver to use to solve the implicit system of equations for the pressure
-                #   MULTI_GRID:     Use OpenFOAM's geometric agglomerated algebraic multigrid (GAMG). May be less
+                #   multi_grid:     Use OpenFOAM's geometric agglomerated algebraic multigrid (GAMG). May be less
                 #                   efficient for parallel computations and non-elliptic flow problems
                 #                   (e.g. compressible flows)
-                #   KRYLOV:         Use OpenFOAM's Krylov subspace solver (Conjugate Gradient) with preconditioning.
+                #   krylov:         Use OpenFOAM's Krylov subspace solver (Conjugate Gradient) with preconditioning.
                 #                   Recommended to use for compressible and parallel computations
-                'pressure_solver': Parameters.KRYLOV,
+                'pressure_solver': PressureSolver.krylov,
 
                 # under-relaxation to be used by all fields and equations
                 'under_relaxation_default': 0.7,
 
                 # field-specific under-relaxation factors dictionary (leave empty if none) the key needs to be the
                 # variable name such as p, U, T, rho, etc. and the value its under-relaxation factor
-                'under_relaxation_fields': {
-                },
+                #
+                # Syntax:
+                # 'under_relaxation_fields': {
+                #     'U': 0.7,
+                # },
+                'under_relaxation_fields': {},
 
                 # equation-specific under-relaxation factors dictionary (leave empty if none) the key needs to be the
                 # variable name such as p, U, T, rho, etc. and the value its under-relaxation factor
-                'under_relaxation_equations': {
-                },
+                #
+                # Syntax:
+                # 'under_relaxation_fields': {
+                #     'U': 0.7,
+                # },
+                'under_relaxation_equations': {},
             },
 
             'time_discretisation': {
                 # time integration scheme, options are listed below
-                #   STEADY_STATE: Do not integrate in time, i.e. dU / dt = 0
-                #   UNSTEADY:     Integrate in time and resolve  dU / dt
-                'time_integration': Parameters.STEADY_STATE,
+                #   steady_state: Do not integrate in time, i.e. dU / dt = 0
+                #   unsteady:     Integrate in time and resolve  dU / dt
+                'time_integration': TimeTreatment.steady_state,
 
-                # these properties will be used if time_integration is set to Parameters.STEADY_STATE above
+                # these properties will be used if time_integration is set to TimeTreatment.steady_state above
                 'steady_state_properties': {
                     # specify from which time directory to start from
-                    #   START_TIME:  Start from the folder that is defined in the startTime variable
-                    #   FIRST_TIME:  Start from the first available (lowest time) directory
-                    #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a
-                    #                simulation from the last calculated solution
-                    'startFrom': Parameters.START_TIME,
+                    #   startTime:  Start from the folder that is defined in the startTime variable
+                    #   firstTime:  Start from the first available (lowest time) directory
+                    #   latestTime: Start from the latest available (highest time) directory. Use to restart a
+                    #               simulation from the last calculated solution
+                    'startFrom': SimulationStart.startTime,
 
                     # start time
                     'startTime': 0,
 
                     # end time
-                    'endTime': 2000,
+                    'endTime': 1000,
 
                     # flag indicating whether to dynamically calculate time step based on CFL criterion
                     'CFLBasedTimeStepping': False,
@@ -318,29 +332,29 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                     'maxDeltaT': 1,
 
                     # write control, specify when to output results, the options are listed below
-                    #   TIME_STEP:           write every 'write_frequency' time steps
-                    #   RUN_TIME:            write data every 'write_frequency' seconds of simulated time
-                    #   ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values
-                    #                        (use with 'CFLBasedTimeStepping' = True)
-                    #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
-                    #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
-                    'write_control': Parameters.TIME_STEP,
+                    #   timeStep:           write every 'write_frequency' time steps
+                    #   runTime:            write data every 'write_frequency' seconds of simulated time
+                    #   adjustableRunTime:  same as runTime, but may adjust time step for nice values
+                    #                       (use with 'CFLBasedTimeStepping' = True)
+                    #   cpuTime:            write data every 'write_frequency' seconds of CPU time
+                    #   clockTime:          write data every 'write_frequency' seconds of real time
+                    'write_control': OutputWriteControl.timeStep,
 
                     # frequency at which to write output files. Behaviour controlled through write control entry above.
-                    'write_frequency': 250,
+                    'write_frequency': 100,
 
                     # specify how many solutions to keep (specify 0 to keep all)
                     'purge_write': 0,
                 },
 
-                # these properties will be used if time_integration is set to Parameters.UNSTEADY above
+                # these properties will be used if time_integration is set to TimeTreatment.unsteady above
                 'unsteady_properties': {
                     # specify from which time directory to start from
-                    #   START_TIME:  Start from the folder that is defined in the startTime variable
-                    #   FIRST_TIME:  Start from the first available (lowest time) directory
-                    #   LATEST_TIME: Start from the latest available (highest time) directory. Use to restart a
-                    #                simulation from the last calculated solution
-                    'startFrom': Parameters.START_TIME,
+                    #   startTime:  Start from the folder that is defined in the startTime variable
+                    #   firstTime:  Start from the first available (lowest time) directory
+                    #   latestTime: Start from the latest available (highest time) directory. Use to restart a
+                    #               simulation from the last calculated solution
+                    'startFrom': SimulationStart.startTime,
 
                     # start time
                     'startTime': 0,
@@ -356,19 +370,19 @@ class WingAndWinglet(CPB.CasePropertiesBase):
 
                     # time step to be used (will be ignored if CFL-based time stepping is chosen)
                     # WARNING: solver needs to support adjustable deltaT calculation
-                    'deltaT': 1e-4,
+                    'deltaT': 1e-6,
 
                     # largest allowable time step
                     'maxDeltaT': 1,
 
                     # write control, specify when to output results, the options are listed below
-                    #   TIME_STEP:           write every 'write_frequency' time steps
-                    #   RUN_TIME:            write data every 'write_frequency' seconds of simulated time
-                    #   ADJUSTABLE_RUN_TIME: same as RUN_TIME, but may adjust time step for nice values
-                    #                        (use with 'CFLBasedTimeStepping' = True)
-                    #   CPU_TIME:            write data every 'write_frequency' seconds of CPU time
-                    #   CLOCK_TIME:          write data every 'write_frequency' seconds of real time
-                    'write_control': Parameters.ADJUSTABLE_RUN_TIME,
+                    #   timeStep:           write every 'write_frequency' time steps
+                    #   runTime:            write data every 'write_frequency' seconds of simulated time
+                    #   adjustableRunTime:  same as runTime, but may adjust time step for nice values
+                    #                       (use with 'CFLBasedTimeStepping' = True)
+                    #   cpuTime:            write data every 'write_frequency' seconds of CPU time
+                    #   clockTime:          write data every 'write_frequency' seconds of real time
+                    'write_control': OutputWriteControl.adjustableRunTime,
 
                     # frequency at which to write output files. Behaviour controlled through write control entry above.
                     'write_frequency': 0.01,
@@ -380,16 +394,16 @@ class WingAndWinglet(CPB.CasePropertiesBase):
 
             'spatial_discretisation': {
                 # Choose preset of numerical schemes based on accuracy and robustness requirements
-                #   DEFAULT:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
+                #   default:    Optimal trade-off between accuracy and stability. Recommended for most cases. Tries to
                 #               achieve second-order accuracy.
-                #   TVD:        Same as DEFAULT, but use bounded Total Variation Diminishing (TVD) schemes instead of
+                #   tvd:        Same as default, but use bounded Total Variation Diminishing (tvd) schemes instead of
                 #               upwind schemes
-                #   ROBUSTNESS: Use this option if your simulation does not converge or your mesh has bad mesh quality
+                #   robustness: Use this option if your simulation does not converge or your mesh has bad mesh quality
                 #               metrics. First-order accurate in space and time
-                #   ACCURACY:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used
-                #               after running a simulation with DEFAULT or ROBUSTNESS to increase accuracy. Second-order
-                #               accurate with less limiting compared to DEFAULT and TVD.
-                'numerical_schemes_correction': Parameters.DEFAULT,
+                #   accuracy:   Recommended for accuracy and scale resolved simulations (LES, DES, SAS). May be used
+                #               after running a simulation with default or robustness to increase accuracy. Second-order
+                #               accurate with less limiting compared to default and tvd.
+                'numerical_schemes_correction': DiscretisationPolicy.default,
 
                 # flag to indicate if first order discretisation should be used for turbulent quantities
                 'use_first_order_for_turbulence': True,
@@ -397,34 +411,34 @@ class WingAndWinglet(CPB.CasePropertiesBase):
 
             'turbulence_properties': {
                 # turbulence treatment type
-                #   LAMINAR: Use this to run simulations without turbulence model (laminar or DNS)
-                #   LES:     Use this for scale resolved simulations (LES, DES, SAS)
-                #   RANS:    Use this for scale modelled / averaged simulations (RANS)
-                'turbulence_type': Parameters.RANS,
+                #   laminar: Use this to run simulations without turbulence model (laminar or DNS)
+                #   les:     Use this for scale resolved simulations (LES, DES, SAS)
+                #   rans:    Use this for scale modelled / averaged simulations (RANS)
+                'turbulence_type': TurbulenceType.laminar,
 
                 # for RANS only, describe fidelity of wall modelling (i.e. usage of wall functions)
-                #   LOW_RE  : first cell-height near wall is of the order y+ <= 1
-                #   HIGH_RE : first cell-height near wall is of the order y+ >  30
-                'wall_modelling': Parameters.HIGH_RE,
+                #   low_re  : first cell-height near wall is of the order y+ <= 1
+                #   high_re : first cell-height near wall is of the order y+ >  30
+                'wall_modelling': WallModelling.low_re,
 
                 # select how to calculate turbulent quantities at inlet
-                #   INTERNAL:    Internal flow assumes the turbulent length scale to be limited by the channel /
+                #   internal:    Internal flow assumes the turbulent length scale to be limited by the channel /
                 #                wind tunnel height or diameter, expressed through the reference_length parameter.
                 #                It is calculated as 0.07 * reference length
-                #   EXTERNAL:    External flow assumes the turbulent length scale to be limited by the scales within the
+                #   external:    External flow assumes the turbulent length scale to be limited by the scales within the
                 #                fully turbulent boundary layer and approximately equal to 40% of the boundary layer
                 #                thickness
-                #   RATIO:       Alternatively, the turbulent to laminar viscosity ratio may be prescribed
-                #   RATIO_AUTO:  In absence of any turbulent quantities, we may instead base the approximation of the
+                #   ratio:       Alternatively, the turbulent to laminar viscosity ratio may be prescribed
+                #   ratio_auto:  In absence of any turbulent quantities, we may instead base the approximation of the
                 #                turbulent to laminar viscosity ratio entirely on the freestream turbulence intensity.
                 #                Use this option if any of the above are not suitable
-                'turbulent_quantities_at_inlet': Parameters.EXTERNAL,
+                'turbulent_quantities_at_inlet': TurbulenceLengthScaleCalculation.external,
 
-                # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to RATIO
+                # turbulent to laminar viscosity ratio. Only used when turbulent_quantities_at_inlet is set to ratio
                 'turbulent_to_laminar_ratio': 10,
 
                 # freestream turbulent intensity (between 0 - 1), used for RANS initial and boundary conditions
-                'freestream_turbulent_intensity': 0.05,
+                'freestream_turbulent_intensity': 0.0005,
 
                 # RANS turbulence model (will be ignored if turbulence_type != RANS)
                 #   Based on linear eddy viscosity:
@@ -456,7 +470,7 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 #   Based on Reynolds Stresses
                 #     LRR:             Reynolds stress model of Launder, Reece and Rodi
                 #     SSG:             Reynolds stress model of Speziale, Sarkar and Gatski
-                'RANS_model': Parameters.kOmegaSST,
+                'RansModel': RansModel.kOmegaSST,
 
                 # LES / DES model
                 #   LES:
@@ -481,13 +495,13 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 #     kOmegaSSTDES:         Detached Eddy Simulation based on the k-omega SST model
                 #     kOmegaSSTDDES:        Delayed Detached Eddy Simulation based on the k-omega SST model
                 #     kOmegaSSTIDDES:       Improved Delayed Detached Eddy Simulation based on the k-omega SST model
-                'LES_model': Parameters.kEqn,
+                'LesModel': LesModel.WALE,
 
                 # filter for spatial LES filtering, used for dynamic subgrid-scale models
-                #   SIMPLE_FILTER:      Simple top-hat filter used in dynamic LES models
-                #   ANISOTROPIC_FILTER: Anisotropic filter
-                #   LAPLACE_FILTER:     Laplace filter
-                'LES_filter': Parameters.SIMPLE_FILTER,
+                #   simple:      Simple top-hat filter used in dynamic LES models
+                #   anisotropic: Anisotropic filter
+                #   laplace:     Laplace filter
+                'LesFilter': LesFilter.simple,
 
                 # model to calculate delta coefficient in LES / DES model
                 #   smooth:                 Smoothed delta which takes a given simple geometric delta and applies
@@ -505,7 +519,7 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 #   IDDESDelta:             IDDESDelta used by the IDDES (improved low Re Spalart-Allmaras DES model)
                 #                           The min and max delta are calculated using the face to face distance of
                 #                           the cell
-                'delta_model': Parameters.cubeRootVol,
+                'DeltaModel': DeltaModel.cubeRootVol,
             },
 
             'convergence_control': {
@@ -527,13 +541,16 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 # check if an integral quantity has converged instead of just checking the residuals.
                 # Recommended if such a integral quantity can be easily defined for the current simulation.
                 # If no quantity is specified (i.e. we have an empty list), no convergence checking is performed.
-                #   C_D:                  Convergence criterion based on the drag force coefficient
-                #   C_L:                  Convergence criterion based on the lift force coefficient
-                #   C_S:                  Convergence criterion based on the side force coefficient
-                #   C_M_YAW:              Convergence criterion based on the yaw momentum coefficient
-                #   C_M_ROLL:             Convergence criterion based on the roll momentum coefficient
-                #   C_M_PITCH:            Convergence criterion based on the pitch momentum coefficient
-                'integral_convergence_criterion': [Parameters.C_D, Parameters.C_L],
+                #   
+                #   c_d:                  Convergence criterion based on the drag force coefficient
+                #   c_l:                  Convergence criterion based on the lift force coefficient
+                #   c_s:                  Convergence criterion based on the side force coefficient
+                #   c_m_yaw:              Convergence criterion based on the yaw momentum coefficient
+                #   c_m_roll:             Convergence criterion based on the roll momentum coefficient
+                #   c_m_pitch:            Convergence criterion based on the pitch momentum coefficient
+                #   
+                #   Syntax: 'integral_convergence_criterion': [IntegralQuantities.c_d, IntegralQuantities.c_l],
+                'integral_convergence_criterion': [],
 
                 # if integral quantities are checked for convergence, specify for how many timesteps their average
                 # should be calculated to check if, on average, the quantity has converged
@@ -543,27 +560,27 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 'integral_quantities_convergence_threshold': 1e-5,
 
                 # specify how many iterations to wait before checking convergence criterion
-                'time_steps_to_wait_before_checking_convergence': 100,
+                'time_steps_to_wait_before_checking_convergence': 10,
             },
 
             'dimensionless_coefficients': {
                 # reference length (used for RANS initial and boundary conditions)
-                'reference_length': 0.34,
+                'reference_length': 1.0,
 
                 # reference area (used to non-dimensionalise force coefficients)
-                'reference_area': 0.326,
+                'reference_area': 1.0,
 
                 # center of rotation for momentum coefficient
                 'center_of_rotation': [0.25, 0, 0],
 
                 # group of wall boundaries, which should be used to calculate force coefficients on (enter as list)
-                'wall_boundaries': ['wing_and_winglet'],
+                'wall_boundaries': [''],
 
                 # write force coefficients to file
-                'write_force_coefficients': True,
+                'write_force_coefficients': False,
 
                 # write pressure coefficient (cp) to file
-                'write_pressure_coefficient': True,
+                'write_pressure_coefficient': False,
 
                 # write wall shear stresses (can be used to obtain skin friction coefficient) to file
                 'write_wall_shear_stresses': False,
@@ -577,11 +594,13 @@ class WingAndWinglet(CPB.CasePropertiesBase):
 
                 # list of additional fields to write, can be more than 1 (Mach number will be automatically written for
                 # compressible flow cases)
-                #   Q:         Write out the Q-criterion, useful for isoSurfaces to visualise turbulence structures
-                #   VORTICITY: Write out vorticity field
-                #   LAMBDA_2:  Write out the Lambda-2 criterion, useful for vortex core detection
-                #   ENSTROPHY: Write out enstrophy field
-                'fields': [Parameters.Q, Parameters.VORTICITY],
+                #   q:         Write out the Q-criterion, useful for isoSurfaces to visualise turbulence structures
+                #   vorticity: Write out vorticity field
+                #   lambda_2:  Write out the Lambda-2 criterion, useful for vortex core detection
+                #   enstrophy: Write out enstrophy field
+                #
+                # Syntax: 'fields': [Fields.q, Fields.vorticity],
+                'fields': [],
             },
 
             # specify 0-D point probes to which will output flow variables at each timestep at a given location x,
@@ -592,13 +611,17 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 'write_point_probes': False,
 
                 # specify the location at which to output information, can be more than 1
-                'location': [
-                    [1, 0.01, 0],
-                    [2, 0, 0],
-                ],
+                # 
+                # Syntax: 'location': [
+                #    [1, 0.01, 0],
+                #    [2, 0, 0],
+                #],
+                'location': [],
 
                 # specify variables that should be monitored at the specified point
-                'variables_to_monitor': ['U', 'p'],
+                #
+                # Syntax: 'variables_to_monitor': ['U', 'p'],
+                'variables_to_monitor': [],
 
                 # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only
                 # be written according to the settings in the controlDict (i.e. every time a new time directory is
@@ -613,24 +636,28 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 'write_line_probes': False,
 
                 # specify the start and end point where line should be placed, can be more than 1
-                'location': [
-                    {
-                        'name': 'x=2',
-                        'start': [2, 1, 0.5],
-                        'end': [2, -1, 0.5],
-                    },
-                    {
-                        'name': 'x=5',
-                        'start': [5, 1, 0.5],
-                        'end': [5, -1, 0.5],
-                    },
-                ],
+                #
+                # Syntax: 'location': [
+                #     {
+                #         'name': 'x=2',
+                #         'start': [2, 1, 0.5],
+                #         'end': [2, -1, 0.5],
+                #     },
+                #     {
+                #         'name': 'x=5',
+                #         'start': [5, 1, 0.5],
+                #         'end': [5, -1, 0.5],
+                #     },
+                # ],
+                'location': [],
 
                 # number of points along line
                 'number_of_samples_on_line': 100,
 
                 # specify variables that should be monitored along line
-                'variables_to_monitor': ['U', 'p'],
+                #
+                # Syntax: 'variables_to_monitor': ['U', 'p'],
+                'variables_to_monitor': [],
 
                 # if flag is set to true, solution will be written at every time step. Otherwise, the probe will only
                 # be written according to the settings in the controlDict (i.e. every time a new time directory is
@@ -645,26 +672,30 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 'write_cutting_planes': False,
 
                 # specify the origin and normal vector of cutting plane, can be more than 1
-                'location': [
-                    {
-                        'name': 'plane_x=0',
-                        'origin': [0, 0, 0],
-                        'normal': [1, 0, 0],
-                    },
-                    {
-                        'name': 'plane_y=0',
-                        'origin': [0, 0, 0],
-                        'normal': [0, 1, 0],
-                    },
-                    {
-                        'name': 'plane_z=0',
-                        'origin': [0, 0, 0],
-                        'normal': [0, 0, 1],
-                    },
-                ],
+                #
+                # Syntax: 'location': [
+                #     {
+                #         'name': 'plane_x=0',
+                #         'origin': [0, 0, 0],
+                #         'normal': [1, 0, 0],
+                #     },
+                #     {
+                #         'name': 'plane_y=0',
+                #         'origin': [0, 0, 0],
+                #         'normal': [0, 1, 0],
+                #     },
+                #     {
+                #         'name': 'plane_z=0',
+                #         'origin': [0, 0, 0],
+                #         'normal': [0, 0, 1],
+                #     },
+                # ],
+                'location': [],
 
                 # specify variables that should be monitored along line
-                'variables_to_monitor': ['U', 'p', 'vorticity'],
+                #
+                # Syntax: 'variables_to_monitor': ['U', 'p'],
+                'variables_to_monitor': [],
 
                 # if flag is set to true, solution will be written at every time step. Otherwise, the cutting plane will
                 # only be written according to the settings in the controlDict (i.e. every time a new time directory is
@@ -679,14 +710,14 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 'write_iso_surfaces': False,
 
                 # variables of which to write iso surfaces
-                'flow_variable': ['Q'],
+                'flow_variable': [],
 
                 # iso value at which point the surface should be written. List entry correspond to order specified in
                 # flow_variable list
-                'iso_value': [0.1],
+                'iso_value': [],
 
                 # additional fields to write (can be more than 1, can be used to colour iso-surface in post-processing)
-                'additional_field_to_write': ['p'],
+                'additional_field_to_write': [],
 
                 # if flag is set to true, iso-surfaces will be written at every time step. Otherwise,
                 # the iso surfaces will only be written according to the settings in the controlDict (i.e. every time
@@ -701,9 +732,11 @@ class WingAndWinglet(CPB.CasePropertiesBase):
 
                 # path to user-defined function object as a key value pair (dictionary). The key is used as the name of
                 # the file and the value is the path to the function object that should be executed
-                'function_objects': {
-                    'functionObject': os.path.join('')
-                },
+                #
+                # Syntax: 'function_objects': {
+                #     'functionObjectName': os.path.join('path', 'to', 'function_object'),
+                # },
+                'function_objects': {},
 
                 # execute user-defined post processing routines?
                 'execute_python_script': False,
@@ -714,14 +747,48 @@ class WingAndWinglet(CPB.CasePropertiesBase):
                 # optional command line arguments that can be passed to the script when executed. The final parameter is 
                 # the "requires" key which is a list of files requires by the script, for example, reference solution 
                 # data that is read by the script
-                'python_script': [
-                    {
-                        'script': os.path.join(''),
-                        'arguments': [''],
-                        'requires': [
-                            os.path.join(''),
-                        ],
-                    },
-                ],
+                #
+                # Syntax: 'python_script': [
+                #     {
+                #         'script': os.path.join('path', 'to', 'script'),
+                #         'arguments': ['arg1', 'arg2],
+                #         'requires': [
+                #             os.path.join('path', 'to', 'experimentalData'),
+                #         ],
+                #     },
+                # ],
+                'python_script': [],
             },
         }
+        self.update_properties(self.properties, updated_properties)
+
+    @abstractmethod
+    def update_case(self):
+        """will be defined in derived class"""
+        pass
+
+    def get_properties(self):
+        return self.properties
+
+    def update_properties(self, old_dict, updated_dict):
+        for k, v in updated_dict.items():
+            if isinstance(v, collections.abc.Mapping):
+                old_dict[k] = self.update_properties(old_dict.get(k, {}), v)
+            else:
+                old_dict[k] = v
+        return old_dict
+
+    def to_int(self, parameter):
+        return int(parameter)
+
+    def to_float(self, parameter):
+        return float(parameter)
+
+    def to_bool(self, parameter):
+        return bool(parameter)
+
+    def to_python_expression(self, parameter):
+        if type(parameter) is str:
+            return eval(parameter)
+        else:
+            return parameter
