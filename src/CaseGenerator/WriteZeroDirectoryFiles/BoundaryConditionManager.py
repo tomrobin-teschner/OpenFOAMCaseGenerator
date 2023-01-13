@@ -1,4 +1,4 @@
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 from src.CaseGenerator.WriteZeroDirectoryFiles.TurbulentFreestreamConditions import TurbulenceFreestreamConditions
 from src.CaseGenerator.WriteZeroDirectoryFiles.StateVariableManager import StateVariableManager
 from src.CaseGenerator.FileDirectoryIO.WriteHeader import WriteHeader
@@ -87,17 +87,17 @@ class BoundaryConditionManager:
                 path_to_script = custom_initial_conditions_setup[var]
                 return self.__get_custom_initial_conditions(path_to_script)
         if (custom_initial_conditions_flag is False) or (var not in custom_initial_conditions_setup):
-            if initial_conditions_type == Parameters.BOUNDARY_CONDITIONED_BASED:
+            if initial_conditions_type == InitialConditions.boundary_condition_based:
                 return f'internalField   {bc_freestream_conditions[var]};\n\n'
-            elif initial_conditions_type == Parameters.ZERO_VELOCITY:
+            elif initial_conditions_type == InitialConditions.zero_velocity:
                 return f'internalField   {bc_zero_initial_conditions[var]};\n\n'
 
     def __construct_initial_conditions(self):
         U = self.properties['flow_properties']['dimensional_properties']['velocity_vector']
         uiui = (2.0 / 3.0) * self.freestream_k
-        if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
+        if self.properties['flow_properties']['flow_type'] == FlowType.incompressible:
             p_initial = '0'
-        elif self.properties['flow_properties']['flow_type'] == Parameters.compressible:
+        elif self.properties['flow_properties']['flow_type'] == FlowType.compressible:
             p_initial = str(self.properties['flow_properties']['dimensional_properties']['p'])
         bc_freestream_conditions = {
             'U': 'uniform (' + str(U[0]) + ' ' + str(U[1]) + ' ' + str(U[2]) + ')',
@@ -129,39 +129,39 @@ class BoundaryConditionManager:
         for name, bc_type in self.properties['boundary_properties']['boundary_conditions'].items():
             bc_string += f'    {name}\n    {{\n'
             # write inlet boundary conditions
-            if bc_type == Parameters.INLET or bc_type == Parameters.DFSEM_INLET:
+            if bc_type == BoundaryConditions.inlet or bc_type == BoundaryConditions.dfsem_inlet:
                 bc_string += self.__inlet_boundary_condition(var, name, bc_type, bc_freestream_conditions)
 
             # write standard outlet boundary conditions
-            if bc_type == Parameters.OUTLET:
+            if bc_type == BoundaryConditions.outlet:
                 bc_string += self.__outlet_boundary_condition(bc_freestream_conditions, var)
 
             # write backflow outlet boundary conditions
-            if bc_type == Parameters.BACKFLOW_OUTLET:
+            if bc_type == BoundaryConditions.backflow_outlet:
                 bc_string += self.__backflow_boundary_condition(bc_freestream_conditions, var)
 
             # write advective outlet boundary conditions
-            if bc_type == Parameters.ADVECTIVE_OUTLET:
+            if bc_type == BoundaryConditions.advective_outlet:
                 bc_string += self.__advective_boundary_condition()
 
             # wall boundary condition
-            if bc_type == Parameters.WALL:
+            if bc_type == BoundaryConditions.wall:
                 bc_string += self._wall_boundary_condition(var, bc_freestream_conditions)
 
             # freestream boundary condition
-            if bc_type == Parameters.FREESTREAM:
+            if bc_type == BoundaryConditions.freestream:
                 bc_string += self.__freestream_boundary_condition(var, bc_freestream_conditions)
 
             # symmetry boundary condition
-            if bc_type == Parameters.SYMMETRY:
+            if bc_type == BoundaryConditions.symmetry:
                 bc_string += self.__symmetry_boundary_condition(var)
 
             # cyclic boundary conditions
-            if bc_type == Parameters.CYCLIC:
+            if bc_type == BoundaryConditions.cyclic:
                 bc_string += self.__cyclic_boundary_condition()
 
             # empty boundary conditions
-            if bc_type == Parameters.EMPTY:
+            if bc_type == BoundaryConditions.empty:
                 bc_string += self.__empty_boundary_condition()
 
             bc_string += f'    }}\n'
@@ -181,11 +181,11 @@ class BoundaryConditionManager:
                 return self.__get_custom_inlet_profile(init_value, bc_name, 8, path_to_script)
         if (custom_inlet is False) or (var not in custom_inlet_setup):
             if var == 'U':
-                if bc_type == Parameters.INLET:
+                if bc_type == BoundaryConditions.inlet:
                     return self.__dirichlet(bc_freestream_conditions[var])
-                elif bc_type == Parameters.DFSEM_INLET:
+                elif bc_type == BoundaryConditions.dfsem_inlet:
                     return self.__write_dfsem_inlet(name, bc_freestream_conditions[var])
-            elif var == 'p' and self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
+            elif var == 'p' and self.properties['flow_properties']['flow_type'] == FlowType.incompressible:
                 return self.__neumann()
             elif var == 'nut' or var == 'alphat':
                 return self.__zero_calculated()
@@ -193,7 +193,7 @@ class BoundaryConditionManager:
                 return self.__dirichlet(bc_freestream_conditions[var])
 
     def __outlet_boundary_condition(self, bc_freestream_conditions, var):
-        if var == 'p' and self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
+        if var == 'p' and self.properties['flow_properties']['flow_type'] == FlowType.incompressible:
             return self.__dirichlet(bc_freestream_conditions[var])
         elif var == 'nut' or var == 'alphat':
             return self.__zero_calculated()
@@ -201,7 +201,7 @@ class BoundaryConditionManager:
             return self.__neumann()
 
     def __backflow_boundary_condition(self, bc_freestream_conditions, var):
-        if var == 'p' and self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
+        if var == 'p' and self.properties['flow_properties']['flow_type'] == FlowType.incompressible:
             return self.__dirichlet(bc_freestream_conditions[var])
         elif var == 'nut' or var == 'alphat':
             return self.__zero_calculated()
@@ -213,70 +213,70 @@ class BoundaryConditionManager:
 
     def _wall_boundary_condition(self, var, bc_freestream_conditions):
         wall_modelling = self.properties['turbulence_properties']['wall_modelling']
-        rans_model = self.properties['turbulence_properties']['RANS_model']
+        RansModel = self.properties['turbulence_properties']['RansModel']
         write_wall_function_high_re = lambda v: self.__wall_function(bc_freestream_conditions[v],
-                                                                     self.RANS_wall_functions[v][Parameters.HIGH_RE])
+                                                                     self.RANS_wall_functions[v][WallModelling.high_re.value])
         write_wall_function_low_re = lambda v: self.__wall_function(bc_freestream_conditions[v],
-                                                                    self.RANS_wall_functions[v][Parameters.LOW_RE])
+                                                                    self.RANS_wall_functions[v][WallModelling.low_re.value])
         if var == 'U':
             return self.__no_slip_wall()
 
         elif var == 'k':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return write_wall_function_high_re(var)
-            elif wall_modelling == Parameters.LOW_RE:
+            elif wall_modelling == WallModelling.low_re:
                 return write_wall_function_low_re(var)
 
         elif var == 'omega':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return write_wall_function_high_re(var)
-            elif wall_modelling == Parameters.LOW_RE:
-                if rans_model == Parameters.kkLOmega:
+            elif wall_modelling == WallModelling.low_re:
+                if RansModel == RansModel.kkLOmega:
                     return self.__neumann()
                 else:
                     return write_wall_function_low_re(var)
 
         elif var == 'epsilon':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return write_wall_function_high_re(var)
-            elif wall_modelling == Parameters.LOW_RE:
+            elif wall_modelling == WallModelling.low_re:
                 return self.__neumann()
 
         elif var == 'nuTilda':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return self.__neumann()
-            elif wall_modelling == Parameters.LOW_RE:
+            elif wall_modelling == WallModelling.low_re:
                 nuTilda = self.properties['flow_properties']['dimensional_properties']['nu'] / 2
                 return self.__dirichlet(f'uniform {nuTilda}')
 
         elif var == 'nut':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return write_wall_function_high_re(var)
-            elif wall_modelling == Parameters.LOW_RE:
+            elif wall_modelling == WallModelling.low_re:
                 return write_wall_function_low_re(var)
 
         elif var == 'alphat':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return write_wall_function_high_re(var)
-            elif wall_modelling == Parameters.LOW_RE:
+            elif wall_modelling == WallModelling.low_re:
                 return write_wall_function_low_re(var)
 
         elif var == 'kt':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return write_wall_function_high_re(var)
-            elif wall_modelling == Parameters.LOW_RE:
+            elif wall_modelling == WallModelling.low_re:
                 return self.__dirichlet(bc_freestream_conditions[var])
 
         elif var == 'kl':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return write_wall_function_high_re(var)
-            elif wall_modelling == Parameters.LOW_RE:
+            elif wall_modelling == WallModelling.low_re:
                 return self.__dirichlet(bc_freestream_conditions[var])
 
         elif var == 'R':
-            if wall_modelling == Parameters.HIGH_RE:
+            if wall_modelling == WallModelling.high_re:
                 return write_wall_function_high_re(var)
-            elif wall_modelling == Parameters.LOW_RE:
+            elif wall_modelling == WallModelling.low_re:
                 return self.__dirichlet('uniform (0 0 0 0 0 0)')
 
         else:
@@ -363,6 +363,7 @@ class BoundaryConditionManager:
             f'        freestreamValue {initial_field};\n'
         )
 
+    # TODO: remove once DFSEM is removed
     def __write_dfsem_inlet(self, bc_name, initial_field):
         pass
         # custom_DFSEM_conditions = self.properties['boundary_properties']['custom_DFSEM_conditions']

@@ -10,8 +10,8 @@ class TaylorGreenVortex(BaseCase):
         'solver': Solver.rhoPimpleFoam,
     }
 
-    def update_case(self):
-        self.create_case({
+    def create_case(self):
+        self.update_case({
             'file_properties': {
                 'case_name': 'TaylorGreenVortex',
                 'mesh_treatment': Mesh.block_mesh_dict,

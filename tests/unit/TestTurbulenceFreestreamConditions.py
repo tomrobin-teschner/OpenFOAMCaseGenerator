@@ -1,6 +1,6 @@
 import unittest
 import src.CaseGenerator.WriteZeroDirectoryFiles as ZeroDir
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 
 
 class TestTurbulenceFreestreamConditions(unittest.TestCase):
@@ -28,7 +28,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_k, 0.00015)
 
     def test_freestream_omega_internal(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.INTERNAL
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.internal
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_omega = freestream_conditions.calculate_freestream_omega()
@@ -36,7 +36,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_omega, 0.31943828)
 
     def test_freestream_omega_external(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.EXTERNAL
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.external
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_omega = freestream_conditions.calculate_freestream_omega()
@@ -44,7 +44,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_omega, 1.46253770)
 
     def test_freestream_omega_ratio(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.RATIO
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.ratio
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_omega = freestream_conditions.calculate_freestream_omega()
@@ -52,7 +52,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_omega, 3.0)
 
     def test_freestream_omega_ratio_auto(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.RATIO_AUTO
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.ratio_auto
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_omega = freestream_conditions.calculate_freestream_omega()
@@ -60,7 +60,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_omega, 150.0)
 
     def test_freestream_epsilon_internal(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.INTERNAL
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.internal
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_epsilon = freestream_conditions.calculate_freestream_epsilon()
@@ -68,7 +68,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_epsilon, 4.31241681e-06)
 
     def test_freestream_epsilon_external(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.EXTERNAL
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.external
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_epsilon = freestream_conditions.calculate_freestream_epsilon()
@@ -76,7 +76,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_epsilon, 1.97442590e-05)
 
     def test_freestream_epsilon_ratio(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.RATIO
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.ratio
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_epsilon = freestream_conditions.calculate_freestream_epsilon()
@@ -84,7 +84,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_epsilon, 4.05e-5)
 
     def test_freestream_epsilon_ratio_auto(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.RATIO_AUTO
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.ratio_auto
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_epsilon = freestream_conditions.calculate_freestream_epsilon()
@@ -92,7 +92,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_epsilon, 0.002025)
 
     def test_freestream_nuTilda_internal(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.INTERNAL
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.internal
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_nuTilda = freestream_conditions.calculate_freestream_nuTilda()
@@ -100,7 +100,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.assertAlmostEqual(freestream_nuTilda, 0.00085732)
 
     def test_freestream_nuTilda_external(self):
-        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = Parameters.EXTERNAL
+        self.properties['turbulence_properties']['turbulent_quantities_at_inlet'] = TurbulenceLengthScaleCalculation.external
         freestream_conditions = ZeroDir.TurbulenceFreestreamConditions(self.properties)
 
         freestream_nuTilda = freestream_conditions.calculate_freestream_nuTilda()

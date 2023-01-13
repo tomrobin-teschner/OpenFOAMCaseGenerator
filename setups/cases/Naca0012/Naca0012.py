@@ -12,8 +12,8 @@ class Naca0012(BaseCase):
         'RansModel': RansModel.kOmegaSST
     }
 
-    def update_case(self):
-        self.create_case({
+    def create_case(self):
+        self.update_case({
             'file_properties': {
                 'case_name': 'Naca0012',
                 'mesh_treatment': Mesh.poly_mesh,

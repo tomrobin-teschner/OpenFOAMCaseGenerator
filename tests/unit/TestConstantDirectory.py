@@ -1,16 +1,17 @@
 import unittest
 import src.CaseGenerator.WriteConstantDirectoryFiles as ConstantDir
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
+import src.CaseGenerator.Properties.CaseProperties as CaseProperties
+import src.CaseGenerator.Checker as Checker
 
 
 class TestTransportPropertiesFileCreation(unittest.TestCase):
-    def setUp(self):
-        self.properties = {}
-        self.properties['flow_properties'] = {}
-        self.properties['flow_properties']['dimensional_properties'] = {}
-        self.properties['flow_properties']['dimensional_properties']['nu'] = 1.2345
-        self.properties['file_properties'] = {}
-        self.properties['file_properties']['version'] = 'v2006'
+    @classmethod
+    def setUpClass(cls):
+        cla = Checker.CheckCommandLineArguments()
+        cla.add_option('case', 'Naca0012')
+        case_properties_handler = CaseProperties.CaseProperties(cla)
+        cls.properties = case_properties_handler.get_case_properties()
 
     def test_transport_properties_file(self):
         transport_dict = ConstantDir.TransportPropertiesFile(self.properties)
@@ -19,7 +20,7 @@ class TestTransportPropertiesFileCreation(unittest.TestCase):
         content = content.replace(' ', '').replace('\t', '')
 
         self.assertNotEqual(content.find('transportModelNewtonian;'), -1)
-        self.assertNotEqual(content.find('nu1.2345'), -1)
+        self.assertNotEqual(content.find('nu1e-06'), -1)
 
 
 class TestThermophysicalPropertiesFileCreation(unittest.TestCase):
@@ -86,7 +87,7 @@ class TestTurbulencePropertiesFileCreation(unittest.TestCase):
         self.properties['turbulence_properties']['turbulence_type'] = ''
 
     def test_laminar(self):
-        self.properties['turbulence_properties']['turbulence_type'] = Parameters.LAMINAR
+        self.properties['turbulence_properties']['turbulence_type'] = TurbulenceType.laminar
         turbulence_dict = ConstantDir.TurbulencePropertiesFile(self.properties)
 
         content = turbulence_dict.get_file_content()
@@ -95,8 +96,8 @@ class TestTurbulencePropertiesFileCreation(unittest.TestCase):
         self.assertNotEqual(content.find('simulationTypelaminar;'), -1)
 
     def test_RANS(self):
-        self.properties['turbulence_properties']['turbulence_type'] = Parameters.RANS
-        self.properties['turbulence_properties']['RANS_model'] = Parameters.kOmegaSST
+        self.properties['turbulence_properties']['turbulence_type'] = TurbulenceType.rans
+        self.properties['turbulence_properties']['RansModel'] = RansModel.kOmegaSST
         turbulence_dict = ConstantDir.TurbulencePropertiesFile(self.properties)
 
         content = turbulence_dict.get_file_content()
@@ -106,10 +107,10 @@ class TestTurbulencePropertiesFileCreation(unittest.TestCase):
         self.assertNotEqual(content.find('RASModelkOmegaSST;'), -1)
 
     def test_SAS(self):
-        self.properties['turbulence_properties']['turbulence_type'] = Parameters.RANS
-        self.properties['turbulence_properties']['RANS_model'] = Parameters.kOmegaSSTSAS
-        self.properties['turbulence_properties']['LES_model'] = Parameters.Smagorinsky
-        self.properties['turbulence_properties']['delta_model'] = Parameters.cubeRootVol
+        self.properties['turbulence_properties']['turbulence_type'] = TurbulenceType.rans
+        self.properties['turbulence_properties']['RansModel'] = RansModel.kOmegaSSTSAS
+        self.properties['turbulence_properties']['LesModel'] = LesModel.Smagorinsky
+        self.properties['turbulence_properties']['DeltaModel'] = DeltaModel.cubeRootVol
         turbulence_dict = ConstantDir.TurbulencePropertiesFile(self.properties)
 
         content = turbulence_dict.get_file_content()
@@ -124,9 +125,9 @@ class TestTurbulencePropertiesFileCreation(unittest.TestCase):
         self.assertNotEqual(content.find('smoothCoeffs'), -1)
 
     def test_DES(self):
-        self.properties['turbulence_properties']['turbulence_type'] = Parameters.LES
-        self.properties['turbulence_properties']['LES_model'] = Parameters.SpalartAllmarasDES
-        self.properties['turbulence_properties']['delta_model'] = Parameters.cubeRootVol
+        self.properties['turbulence_properties']['turbulence_type'] = TurbulenceType.les
+        self.properties['turbulence_properties']['LesModel'] = LesModel.SpalartAllmarasDES
+        self.properties['turbulence_properties']['DeltaModel'] = DeltaModel.cubeRootVol
         turbulence_dict = ConstantDir.TurbulencePropertiesFile(self.properties)
 
         content = turbulence_dict.get_file_content()
@@ -141,9 +142,9 @@ class TestTurbulencePropertiesFileCreation(unittest.TestCase):
         self.assertNotEqual(content.find('smoothCoeffs'), -1)
 
     def test_DDES(self):
-        self.properties['turbulence_properties']['turbulence_type'] = Parameters.LES
-        self.properties['turbulence_properties']['LES_model'] = Parameters.kOmegaSSTDDES
-        self.properties['turbulence_properties']['delta_model'] = Parameters.cubeRootVol
+        self.properties['turbulence_properties']['turbulence_type'] = TurbulenceType.les
+        self.properties['turbulence_properties']['LesModel'] = LesModel.kOmegaSSTDDES
+        self.properties['turbulence_properties']['DeltaModel'] = DeltaModel.cubeRootVol
         turbulence_dict = ConstantDir.TurbulencePropertiesFile(self.properties)
 
         content = turbulence_dict.get_file_content()
@@ -158,9 +159,9 @@ class TestTurbulencePropertiesFileCreation(unittest.TestCase):
         self.assertNotEqual(content.find('smoothCoeffs'), -1)
 
     def test_IDDES(self):
-        self.properties['turbulence_properties']['turbulence_type'] = Parameters.LES
-        self.properties['turbulence_properties']['LES_model'] = Parameters.kOmegaSSTIDDES
-        self.properties['turbulence_properties']['delta_model'] = Parameters.cubeRootVol
+        self.properties['turbulence_properties']['turbulence_type'] = TurbulenceType.les
+        self.properties['turbulence_properties']['LesModel'] = LesModel.kOmegaSSTIDDES
+        self.properties['turbulence_properties']['DeltaModel'] = DeltaModel.cubeRootVol
         turbulence_dict = ConstantDir.TurbulencePropertiesFile(self.properties)
 
         content = turbulence_dict.get_file_content()
@@ -175,10 +176,10 @@ class TestTurbulencePropertiesFileCreation(unittest.TestCase):
         self.assertNotEqual(content.find('smoothCoeffs'), -1)
 
     def test_LES(self):
-        self.properties['turbulence_properties']['turbulence_type'] = Parameters.LES
-        self.properties['turbulence_properties']['LES_model'] = Parameters.dynamicKEqn
-        self.properties['turbulence_properties']['delta_model'] = Parameters.cubeRootVol
-        self.properties['turbulence_properties']['LES_filter'] = Parameters.ANISOTROPIC_FILTER
+        self.properties['turbulence_properties']['turbulence_type'] = TurbulenceType.les
+        self.properties['turbulence_properties']['LesModel'] = LesModel.dynamicKEqn
+        self.properties['turbulence_properties']['DeltaModel'] = DeltaModel.cubeRootVol
+        self.properties['turbulence_properties']['LesFilter'] = LesFilter.anisotropic
         turbulence_dict = ConstantDir.TurbulencePropertiesFile(self.properties)
 
         content = turbulence_dict.get_file_content()

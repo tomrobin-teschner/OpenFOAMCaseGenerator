@@ -1,4 +1,4 @@
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 
 
 class WriteFields:
@@ -13,13 +13,13 @@ class WriteFields:
         if self.properties['additional_fields']['write_additional_fields']:
             for field in self.properties['additional_fields']['fields']:
                 name = ''
-                if field == Parameters.Q:
+                if field == Fields.q:
                     name = 'Q'
-                elif field == Parameters.LAMBDA_2:
+                elif field == Fields.lambda_2:
                     name = 'Lambda2'
-                elif field == Parameters.VORTICITY:
+                elif field == Fields.vorticity:
                     name = 'vorticity'
-                elif field == Parameters.ENSTROPHY:
+                elif field == Fields.enstrophy:
                     name = 'enstrophy'
                 self.__write_custom_fields(file_id, name)
         if self.properties['iso_surfaces']['write_iso_surfaces']:

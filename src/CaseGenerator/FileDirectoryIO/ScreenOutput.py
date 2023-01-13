@@ -1,6 +1,7 @@
 import datetime
-import fileinput
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+import importlib
+from src.CaseGenerator.Properties.GlobalVariables import *
+from enum import Enum
 
 # set current software version here. Will be printed to screen and automatically updated in README.md file
 version_major = 2
@@ -30,30 +31,30 @@ class ScreenOutput:
         file_id.close()
 
     def print_summary(self, command_line_arguments):
-        print(f'Application     : OpenFOAMCaseGenerator')
-        print(f'Source          : https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator')
-        print(f'Copyright       : Tom-Robin Teschner, {self.copyright}')
-        print(f'License         : MIT')
-        print(f'Version         : {self.version}\n')
+        print(f'Application    : OpenFOAMCaseGenerator')
+        print(f'Source         : https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator')
+        print(f'Copyright      : Tom-Robin Teschner, {self.copyright}')
+        print(f'License        : MIT')
+        print(f'Version        : {self.version}\n')
 
-        if command_line_arguments.option_exists('input'):
-            print(f'Using input     : input/{command_line_arguments["input"]}.py')
-        else:
-            print('Using input     : input/default.py')
-        print('Generated case  : ' + self.properties['file_properties']['path'])
-        reynolds = self.properties['flow_properties']['non_dimensional_properties']['Re']
-        if reynolds > 1:
-            print('Reynolds number : ' + f'{reynolds:.0f}')
-        else:
-            print('Reynolds number : ' + f'{reynolds:8.2e}')
+        case = command_line_arguments['case']
+        print(f'Generated case : {self.properties["file_properties"]["path"]}')
+        print(f'Using input    : setups/cases/{case}/{case}.py\n')
 
-        if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
-            mach = self.properties['flow_properties']['non_dimensional_properties']['Ma']
-            if mach < 0.1:
-                print('Mach number     : ' + f'{mach:8.2e}')
-            else:
-                print('Mach number     : ' + f'{mach:5.3f}')
+        properties_module = command_line_arguments['case']
+        case = getattr(importlib.import_module('setups.cases.'+properties_module+'.'+properties_module),
+            properties_module)
+        if command_line_arguments.get_number_of_parameters() + len(case.parameters) > 0:
+            max_key_length = 0
+            for key in case.parameters.keys():
+                if len(key) > max_key_length:
+                    max_key_length = len(key)
+            max_key_length += 1
 
-        if self.properties['file_properties']['mesh_treatment'] == Parameters.NO_MESH:
+            print('Case parameters')
+            for key, value in case.parameters.items():
+                print(f'  - {key:{max_key_length}s}: {value}')
+
+        if self.properties['file_properties']['mesh_treatment'] == Mesh.no_mesh:
             print('\nNo mesh was specified during the generation of case directory.'
                   '\nEnsure you copy a mesh manually before running your case')

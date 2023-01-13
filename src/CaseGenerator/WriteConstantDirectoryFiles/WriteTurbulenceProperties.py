@@ -1,4 +1,4 @@
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 from src.CaseGenerator.FileDirectoryIO.WriteHeader import WriteHeader
 
 
@@ -10,13 +10,13 @@ class TurbulencePropertiesFile:
         version = self.properties['file_properties']['version']
         turbulence_type = self.properties['turbulence_properties']['turbulence_type']
 
-        if turbulence_type == Parameters.LAMINAR:
+        if turbulence_type == TurbulenceType.laminar:
             simulation_type = f'simulationType laminar;\n'
             turbulence_setup = ''
-        if turbulence_type == Parameters.RANS:
+        if turbulence_type == TurbulenceType.rans:
             simulation_type = f'simulationType RAS;\n'
             turbulence_setup = self.__get_RANS()
-        if turbulence_type == Parameters.LES:
+        if turbulence_type == TurbulenceType.les:
             simulation_type = f'simulationType LES;\n'
             turbulence_setup = self.__get_LES()
         header = WriteHeader.get_header(version, 'dictionary', 'constant', 'turbulenceProperties')
@@ -31,45 +31,11 @@ class TurbulencePropertiesFile:
         )
     
     def __get_RANS(self):
-        rans_model = self.properties['turbulence_properties']['RANS_model']
-        if rans_model == Parameters.kEpsilon:
-            rans_string = f'    RASModel        kEpsilon;\n'
-        elif rans_model == Parameters.realizableKE:
-            rans_string = f'    RASModel        realizableKE;\n'
-        elif rans_model == Parameters.RNGkEpsilon:
-            rans_string = f'    RASModel        RNGkEpsilon;\n'
-        elif rans_model == Parameters.LienLeschziner:
-            rans_string = f'    RASModel        LienLeschziner;\n'
-        elif rans_model == Parameters.LamBremhorstKE:
-            rans_string = f'    RASModel        LamBremhorstKE;\n'
-        elif rans_model == Parameters.LaunderSharmaKE:
-            rans_string = f'    RASModel        LaunderSharmaKE;\n'
-        elif rans_model == Parameters.kOmega:
-            rans_string = f'    RASModel        kOmega;\n'
-        elif rans_model == Parameters.kOmegaSST:
-            rans_string = f'    RASModel        kOmegaSST;\n'
-        elif rans_model == Parameters.kOmegaSSTLM:
-            rans_string = f'    RASModel        kOmegaSSTLM;\n'
-        elif rans_model == Parameters.kkLOmega:
-            rans_string = f'    RASModel        kkLOmega;\n'
-        elif rans_model == Parameters.kOmegaSSTSAS:
-            rans_string = f'    RASModel        kOmegaSSTSAS;\n'
-        elif rans_model == Parameters.qZeta:
-            rans_string = f'    RASModel        qZeta;\n'
-        elif rans_model == Parameters.SpalartAllmaras:
-            rans_string = f'    RASModel        SpalartAllmaras;\n'
-        elif rans_model == Parameters.LienCubicKE:
-            rans_string = f'    RASModel        LienCubicKE;\n'
-        elif rans_model == Parameters.ShihQuadraticKE:
-            rans_string = f'    RASModel        ShihQuadraticKE;\n'
-        elif rans_model == Parameters.LRR:
-            rans_string = f'    RASModel        LRR;\n'
-        elif rans_model == Parameters.SSG:
-            rans_string = f'    RASModel        SSG;\n'
-        
+        rans_model = self.properties['turbulence_properties']['RansModel']
+        rans_string = f'    RASModel        {rans_model.name};\n'       
         delta_model = ''
-        if rans_model == Parameters.kOmegaSSTSAS:
-            delta_model = self.__get_delta_model()
+        if rans_model == RansModel.kOmegaSSTSAS:
+            delta_model = self.__get_DeltaModel()
         
         return (
             f'RAS\n{{\n'
@@ -83,39 +49,14 @@ class TurbulencePropertiesFile:
         )
 
     def __get_LES(self):
-        les_model = self.properties['turbulence_properties']['LES_model']
-
-        if les_model == Parameters.Smagorinsky:
-            les_model_string = f'    LESModel        Smagorinsky;\n'
-        elif les_model == Parameters.kEqn:
-            les_model_string = f'    LESModel        kEqn;\n'
-        elif les_model == Parameters.dynamicKEqn:
-            les_model_string = f'    LESModel        dynamicKEqn;\n'
-        elif les_model == Parameters.dynamicLagrangian:
-            les_model_string = f'    LESModel        dynamicLagrangian;\n'
-        elif les_model == Parameters.DeardorffDiffStress:
-            les_model_string = f'    LESModel        DeardorffDiffStress;\n'
-        elif les_model == Parameters.WALE:
-            les_model_string = f'    LESModel        WALE;\n'
-        elif les_model == Parameters.SpalartAllmarasDES:
-            les_model_string = f'    LESModel        SpalartAllmarasDES;\n'
-        elif les_model == Parameters.SpalartAllmarasDDES:
-            les_model_string = f'    LESModel        SpalartAllmarasDDES;\n'
-        elif les_model == Parameters.SpalartAllmarasIDDES:
-            les_model_string = f'    LESModel        SpalartAllmarasIDDES;\n'
-        elif les_model == Parameters.kOmegaSSTDES:
-            les_model_string = f'    LESModel        kOmegaSSTDES;\n'
-        elif les_model == Parameters.kOmegaSSTDDES:
-            les_model_string = f'    LESModel        kOmegaSSTDDES;\n'
-        elif les_model == Parameters.kOmegaSSTIDDES:
-            les_model_string = f'    LESModel        kOmegaSSTIDDES;\n'
+        les_model = self.properties['turbulence_properties']['LesModel']
+        les_model_string = f'    LESModel        {les_model.name};\n'
         
         filter_string = ''
-        if les_model is Parameters.dynamicKEqn:
+        if les_model is LesModel.dynamicKEqn:
             filter_string = self.__get_filter_model()
         
-        delta_string = self.__get_delta_model()
-
+        delta_string = self.__get_DeltaModel()
 
         return (
             f'LES\n{{\n'
@@ -131,36 +72,20 @@ class TurbulencePropertiesFile:
         )
 
     def __get_filter_model(self):
-        les_filter = self.properties['turbulence_properties']['LES_filter']
-        if les_filter is Parameters.SIMPLE_FILTER:
-            return '    filter          simple;\n\n'
-        elif les_filter is Parameters.ANISOTROPIC_FILTER:
-            return '    filter          anisotropic;\n\n'
-        elif les_filter is Parameters.LAPLACE_FILTER:
-            return '    filter          laplace;\n\n'
+        les_filter = self.properties['turbulence_properties']['LesFilter']
+        return f'    filter          {les_filter.name};\n\n'
 
-    def __get_delta_model(self):
+    def __get_DeltaModel(self):
         # if IDDES is used, delta model must be IDDES, silently overwrite it here in case wrong model is set
-        les_model = self.properties['turbulence_properties']['LES_model']
-        if les_model == Parameters.SpalartAllmarasIDDES or les_model is Parameters.kOmegaSSTIDDES:
-            self.properties['turbulence_properties']['delta_model'] = Parameters.IDDESDelta
+        les_model = self.properties['turbulence_properties']['LesModel']
+        if (
+                les_model == LesModel.SpalartAllmarasIDDES or
+                les_model is LesModel.kOmegaSSTIDDES
+            ):
+            self.properties['turbulence_properties']['DeltaModel'] = DeltaModel.IDDESDelta
 
-        delta_model = self.properties['turbulence_properties']['delta_model']
-
-        if delta_model == Parameters.smooth:
-            delta_string = f'    delta           smooth;\n'
-        elif delta_model == Parameters.Prandtl:
-            delta_string = f'    delta           Prandtl;\n'
-        elif delta_model == Parameters.maxDeltaxyz:
-            delta_string = f'    delta           maxDeltaxyz;\n'
-        elif delta_model == Parameters.cubeRootVol:
-            delta_string = f'    delta           cubeRootVol;\n'
-        elif delta_model == Parameters.maxDeltaxyzCubeRoot:
-            delta_string = f'    delta           maxDeltaxyzCubeRoot;\n'
-        elif delta_model == Parameters.vanDriest:
-            delta_string = f'    delta           vanDriest;\n'
-        elif delta_model == Parameters.IDDESDelta:
-            delta_string = f'    delta           IDDESDelta;\n'
+        delta_model = self.properties['turbulence_properties']['DeltaModel']
+        delta_string = f'    delta           {delta_model.name};\n'
         
         return (
             f'{delta_string}\n'

@@ -1,5 +1,5 @@
 import src.CaseGenerator.Properties.CaseProperties as CaseProperties
-import src.CaseGenerator.Properties.GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 
 import src.CaseGenerator.FileDirectoryIO as FileIO
 import src.CaseGenerator.Checker as Checker
@@ -14,7 +14,7 @@ def main():
 
     # get case specific dictionaries to set up case and write input files
     case_properties_handler = CaseProperties.CaseProperties(command_line_arguments)
-    properties = case_properties_handler.get_case_properties(command_line_arguments)
+    properties = case_properties_handler.get_case_properties()
 
     # check case (make sure that current set up will not produce any problem)
     check_case = Checker.CheckCase(properties)
@@ -31,10 +31,10 @@ def main():
         file_manager.write_content_to_file('0', variable, bc)
 
     # write transport or thermo-physical properties depending on flow type
-    if properties['flow_properties']['flow_type'] == Parameters.incompressible:
+    if properties['flow_properties']['flow_type'] == FlowType.incompressible:
         transport_dict = ConstantDir.TransportPropertiesFile(properties)
         file_manager.write_content_to_file('constant', 'transportProperties', transport_dict.get_file_content())
-    elif properties['flow_properties']['flow_type'] == Parameters.compressible:
+    elif properties['flow_properties']['flow_type'] == FlowType.compressible:
         thermo_dict = ConstantDir.ThermophysicalProperties(properties)
         file_manager.write_content_to_file('constant', 'thermophysicalProperties', thermo_dict.get_file_content())
 
@@ -43,12 +43,16 @@ def main():
     file_manager.write_content_to_file('constant', 'turbulenceProperties', turbulence_dict.get_file_content())
 
     # write control dict file out
-    control_dict = SystemDir.ControlDictFile(properties, file_manager)
-    control_dict.write_input_file()
+    control_dict = SystemDir.ControlDictFile(properties)
+    file_manager.write_content_to_file('system', 'controlDict', control_dict.get_file_content())
+    if properties['post_processing']['execute_function_object']:
+        fo_dict = properties['post_processing']['function_objects']
+        for key, value in fo_dict.items():
+            file_manager.write_content_to_file('system/include', key, control_dict.get_function_objects(key, value))
 
     # write fvSolution file out
-    fv_solution = SystemDir.fvSolutionFile(properties, file_manager)
-    fv_solution.write_input_file()
+    fv_solution = SystemDir.fvSolutionFile(properties)
+    file_manager.write_content_to_file('system', 'fvSolution', fv_solution.get_file_content())
 
     # write fvSchemes
     fv_schemes = SystemDir.fvSchemesFile(properties, file_manager)
@@ -88,8 +92,8 @@ def main():
         fields.write_field()
 
     if properties['parallel_properties']['run_in_parallel']:
-        decompose_par_dict = SystemDir.WriteDecomposeParDictionary(properties, file_manager)
-        decompose_par_dict.write_decompose_par_dict()
+        decompose_par_dict = SystemDir.WriteDecomposeParDictionary(properties)
+        file_manager.write_content_to_file('system', 'decomposeParDict', decompose_par_dict.get_decompose_par_dict())
 
     y_plus = SystemDir.WriteYPlus(properties, file_manager)
     y_plus.write_y_plus()
@@ -97,11 +101,11 @@ def main():
     residuals = SystemDir.WriteResiduals(file_manager)
     residuals.write_residuals()
 
-    if properties['flow_properties']['flow_type'] == Parameters.compressible:
+    if properties['flow_properties']['flow_type'] == FlowType.compressible:
         mach_number = SystemDir.WriteMachNumber(properties, file_manager)
         mach_number.write_mach_number()
 
-    if ((properties['file_properties']['mesh_treatment'] == Parameters.SNAPPY_HEX_MESH_DICT) and
+    if ((properties['file_properties']['mesh_treatment'] == Mesh.snappy_hex_mesh_dict) and
             (len(properties['file_properties']['snappyhexmeshdict']['geometry']) > 0)):
         surface_features = SystemDir.WriteSurfaceFeatureExtract(properties, file_manager)
         surface_features.write_surface_feature_extract()

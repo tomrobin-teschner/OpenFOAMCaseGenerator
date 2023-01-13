@@ -1,4 +1,4 @@
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 
 
 class WriteForceCoefficientConvergence:
@@ -51,9 +51,9 @@ class WriteForceCoefficientConvergence:
         self.file_manager.write(file_id, '        conditions1\n')
         self.file_manager.write(file_id, '        {\n')
         self.file_manager.write(file_id, '            type            maxDuration;\n')
-        if self.properties['time_discretisation']['time_integration'] == Parameters.STEADY_STATE:
+        if self.properties['time_discretisation']['time_integration'] == TimeTreatment.steady_state:
             self.file_manager.write(file_id, '            duration        ' + str(wait_n_time_steps) + ';\n')
-        elif self.properties['time_discretisation']['time_integration'] == Parameters.UNSTEADY:
+        elif self.properties['time_discretisation']['time_integration'] == TimeTreatment.unsteady:
             wait_until = self.properties['time_discretisation']['unsteady_properties']['deltaT'] * wait_n_time_steps
             self.file_manager.write(file_id, '            duration        ' + str(wait_until) + ';\n')
         self.file_manager.write(file_id, '        }\n')
@@ -65,15 +65,15 @@ class WriteForceCoefficientConvergence:
                                 '// ************************************************************************* //\n')
 
     def __quantity_ID_to_string(self, quantity):
-        if quantity == Parameters.C_L:
+        if quantity == IntegralQuantities.c_l:
             return 'Cl'
-        if quantity == Parameters.C_D:
+        if quantity == IntegralQuantities.c_d:
             return 'Cd'
-        if quantity == Parameters.C_S:
+        if quantity == IntegralQuantities.c_s:
             return 'Cs'
-        if quantity == Parameters.C_M_YAW:
+        if quantity == IntegralQuantities.c_m_yaw:
             return 'CmYaw'
-        if quantity == Parameters.C_M_ROLL:
+        if quantity == IntegralQuantities.c_m_roll:
             return 'CmRoll'
-        if quantity == Parameters.C_M_PITCH:
+        if quantity == IntegralQuantities.c_m_pitch:
             return 'CmPitch'

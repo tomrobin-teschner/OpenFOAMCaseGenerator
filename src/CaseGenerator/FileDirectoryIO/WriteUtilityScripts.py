@@ -1,6 +1,6 @@
 import os
 import distutils.file_util
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 
 
 class WriteUtilityScripts:
@@ -17,9 +17,9 @@ class WriteUtilityScripts:
                                 '# ------------------------------------------------------------------------------\n')
         self.file_manager.write(file_id, '\n')
 
-        if self.properties['file_properties']['mesh_treatment'] == Parameters.BLOCK_MESH_DICT:
+        if self.properties['file_properties']['mesh_treatment'] == Mesh.block_mesh_dict:
             self.file_manager.write(file_id, 'blockMesh\n')
-        elif self.properties['file_properties']['mesh_treatment'] == Parameters.SNAPPY_HEX_MESH_DICT:
+        elif self.properties['file_properties']['mesh_treatment'] == Mesh.snappy_hex_mesh_dict:
             if self.properties['file_properties']['snappyhexmeshdict']['use_blockmeshdict']:
                 self.file_manager.write(file_id, 'blockMesh\n')
             if len(self.properties['file_properties']['snappyhexmeshdict']['geometry']) > 0:
@@ -33,23 +33,7 @@ class WriteUtilityScripts:
             pre_solver_flag = 'mpirun -np ' + str(self.properties['parallel_properties']['number_of_processors']) + ' '
             post_solver_flag = ' -parallel'
 
-        if self.properties['solver_properties']['solver'] == Parameters.simpleFoam:
-            self.file_manager.write(file_id, pre_solver_flag + 'simpleFoam' + post_solver_flag + '\n')
-        elif self.properties['solver_properties']['solver'] == Parameters.icoFoam:
-            self.file_manager.write(file_id, pre_solver_flag + 'icoFoam' + post_solver_flag + '\n')
-        elif self.properties['solver_properties']['solver'] == Parameters.pisoFoam:
-            self.file_manager.write(file_id, pre_solver_flag + 'pisoFoam' + post_solver_flag + '\n')
-        elif self.properties['solver_properties']['solver'] == Parameters.pimpleFoam:
-            self.file_manager.write(file_id, pre_solver_flag + 'pimpleFoam' + post_solver_flag + '\n')
-        elif self.properties['solver_properties']['solver'] == Parameters.rhoCentralFoam:
-            self.file_manager.write(file_id, pre_solver_flag + 'rhoCentralFoam' + post_solver_flag + '\n')
-        elif self.properties['solver_properties']['solver'] == Parameters.rhoSimpleFoam:
-            self.file_manager.write(file_id, pre_solver_flag + 'rhoSimpleFoam' + post_solver_flag + '\n')
-        elif self.properties['solver_properties']['solver'] == Parameters.rhoPimpleFoam:
-            self.file_manager.write(file_id, pre_solver_flag + 'rhoPimpleFoam' + post_solver_flag + '\n')
-        elif self.properties['solver_properties']['solver'] == Parameters.sonicFoam:
-            self.file_manager.write(file_id, pre_solver_flag + 'sonicFoam' + post_solver_flag + '\n')
-
+        self.file_manager.write(file_id, pre_solver_flag + self.properties['solver_properties']['solver'].name + post_solver_flag + '\n')
         if self.properties['parallel_properties']['run_in_parallel']:
             self.file_manager.write(file_id, 'reconstructPar\n')
 
@@ -107,11 +91,11 @@ class WriteUtilityScripts:
         self.file_manager.close_file(file_id)
 
     def copy_residual_plotting_script(self):
-        src = os.path.join('examples', 'scripts', 'userDefined', 'postProcessing', 'plotResiduals.py')
+        src = os.path.join('setups', 'scripts', 'userDefined', 'postProcessing', 'plotResiduals.py')
         dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
         distutils.file_util.copy_file(src, dst)
 
     def copy_PVD_loader_script(self):
-        src = os.path.join('examples', 'scripts', 'userDefined', 'postProcessing', 'addVTPLoader.py')
+        src = os.path.join('setups', 'scripts', 'userDefined', 'postProcessing', 'addVTPLoader.py')
         dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
         distutils.file_util.copy_file(src, dst)

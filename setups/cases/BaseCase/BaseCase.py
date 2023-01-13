@@ -10,7 +10,7 @@ class BaseCase(metaclass = ABCMeta):
     This is the place where all properties are defined and all cases must
     derive from this base class to inherit default properties.
     """
-    def create_case(self, updated_properties):
+    def update_case(self, updated_properties):
         self.properties = {
             'file_properties': {
                 # name of the case to use (will be used for the folder name)
@@ -763,7 +763,7 @@ class BaseCase(metaclass = ABCMeta):
         self.update_properties(self.properties, updated_properties)
 
     @abstractmethod
-    def update_case(self):
+    def create_case(self):
         """will be defined in derived class"""
         pass
 

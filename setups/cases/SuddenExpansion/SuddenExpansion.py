@@ -9,8 +9,8 @@ class SuddenExpansion(BaseCase):
         'reynolds_number': 80,
     }
 
-    def update_case(self):
-        self.create_case({
+    def create_case(self):
+        self.update_case({
             'file_properties': {
                 'case_name': 'SuddenExpansion',
                 'mesh_treatment': Mesh.block_mesh_dict,

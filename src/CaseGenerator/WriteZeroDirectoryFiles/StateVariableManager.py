@@ -1,4 +1,4 @@
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 
 
 class StateVariableManager:
@@ -15,10 +15,10 @@ class StateVariableManager:
         # that need to be solved for, i.e. for turbulent calculations, which is managed below.
         self.variables = {}
         self.__add_variable_based_on_flow_type()
-        if self.properties['turbulence_properties']['turbulence_type'] == Parameters.RANS:
-            self.__add_variable_based_on_rans_model()
-        elif self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES:
-            self.__add_variable_based_on_les_model()
+        if self.properties['turbulence_properties']['turbulence_type'] == TurbulenceType.rans:
+            self.__add_variable_based_on_RansModel()
+        elif self.properties['turbulence_properties']['turbulence_type'] == TurbulenceType.les:
+            self.__add_variable_based_on_LesModel()
 
         # list storing all state variables that are not part of a turbulence model
         self.non_turbulence_state_variable = ['U', 'p', 'T']
@@ -48,63 +48,87 @@ class StateVariableManager:
             return True
 
     def __add_variable_based_on_flow_type(self):
-        if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
+        if self.properties['flow_properties']['flow_type'] == FlowType.incompressible:
             self.variables['U'] = ['volVectorField', '[0 1 -1 0 0 0 0]']
             self.variables['p'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
-        elif self.properties['flow_properties']['flow_type'] == Parameters.compressible:
+        elif self.properties['flow_properties']['flow_type'] == FlowType.compressible:
             self.variables['U'] = ['volVectorField', '[0 1 -1 0 0 0 0]']
             self.variables['p'] = ['volScalarField', '[1 -1 -2 0 0 0 0]']
             self.variables['T'] = ['volScalarField', '[0 0 0 1 0 0 0]']
 
-    def __add_variable_based_on_rans_model(self):
+    def __add_variable_based_on_RansModel(self):
         self.variables['nut'] = ['volScalarField', '[0 2 -1 0 0 0 0]']
-        if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
+        if self.properties['flow_properties']['flow_type'] == FlowType.compressible:
             self.variables['alphat'] = ['volScalarField', '[1 -1 -1 0 0 0 0]']
 
         # turbulence model specific variables
-        if self.properties['turbulence_properties']['turbulence_type'] == Parameters.RANS:
-            rans_model = self.properties['turbulence_properties']['RANS_model']
-            if (rans_model == Parameters.kEpsilon or rans_model == Parameters.realizableKE or
-                    rans_model == Parameters.RNGkEpsilon or rans_model == Parameters.LienLeschziner or
-                    rans_model == Parameters.LamBremhorstKE or rans_model == Parameters.LaunderSharmaKE or
-                    rans_model == Parameters.qZeta or rans_model == Parameters.LienCubicKE or
-                    rans_model == Parameters.ShihQuadraticKE):
+        if self.properties['turbulence_properties']['turbulence_type'] == TurbulenceType.rans:
+            RansModel = self.properties['turbulence_properties']['RansModel']
+            if (
+                    RansModel == RansModel.kEpsilon or
+                    RansModel == RansModel.realizableKE or
+                    RansModel == RansModel.RNGkEpsilon or
+                    RansModel == RansModel.LienLeschziner or
+                    RansModel == RansModel.LamBremhorstKE or
+                    RansModel == RansModel.LaunderSharmaKE or
+                    RansModel == RansModel.qZeta or
+                    RansModel == RansModel.LienCubicKE or
+                    RansModel == RansModel.ShihQuadraticKE
+                ):
                 self.variables['k'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
                 self.variables['epsilon'] = ['volScalarField', '[0 2 -3 0 0 0 0]']
-            elif rans_model == Parameters.kOmega or rans_model == Parameters.kOmegaSST:
+            elif (
+                    RansModel == RansModel.kOmega or
+                    RansModel == RansModel.kOmegaSST
+                ):
                 self.variables['k'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
                 self.variables['omega'] = ['volScalarField', '[0 0 -1 0 0 0 0]']
-            elif rans_model == Parameters.kOmegaSSTLM:
+            elif RansModel == RansModel.kOmegaSSTLM:
                 self.variables['k'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
                 self.variables['omega'] = ['volScalarField', '[0 0 -1 0 0 0 0]']
                 self.variables['ReThetat'] = ['volScalarField', '[0 0 0 0 0 0 0]']
                 self.variables['gammaInt'] = ['volScalarField', '[0 0 0 0 0 0 0]']
-            elif rans_model == Parameters.kOmega or rans_model == Parameters.kOmegaSSTSAS:
+            elif (
+                    RansModel == RansModel.kOmega or
+                    RansModel == RansModel.kOmegaSSTSAS
+                ):
                 self.variables['k'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
                 self.variables['omega'] = ['volScalarField', '[0 0 -1 0 0 0 0]']
-            elif rans_model == Parameters.kkLOmega:
+            elif RansModel == RansModel.kkLOmega:
                 self.variables['kt'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
                 self.variables['kl'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
                 self.variables['omega'] = ['volScalarField', '[0 0 -1 0 0 0 0]']
-            elif rans_model == Parameters.SpalartAllmaras:
+            elif RansModel == RansModel.SpalartAllmaras:
                 self.variables['nuTilda'] = ['volScalarField', '[0 2 -1 0 0 0 0]']
-            elif rans_model == Parameters.LRR or rans_model == Parameters.SSG:
+            elif (
+                    RansModel == RansModel.LRR or
+                    RansModel == RansModel.SSG
+                ):
                 self.variables['epsilon'] = ['volScalarField', '[0 2 -3 0 0 0 0]']
                 self.variables['R'] = ['volSymmTensorField', '[0 2 -2 0 0 0 0]']
 
-    def __add_variable_based_on_les_model(self):
+    def __add_variable_based_on_LesModel(self):
         self.variables['nut'] = ['volScalarField', '[0 2 -1 0 0 0 0]']
-        if self.properties['flow_properties']['flow_type'] == Parameters.compressible:
+        if self.properties['flow_properties']['flow_type'] == FlowType.compressible:
             self.variables['alphat'] = ['volScalarField', '[1 -1 -1 0 0 0 0]']
 
-        if self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES:
-            les_model = self.properties['turbulence_properties']['LES_model']
-            if les_model == Parameters.kEqn or les_model == Parameters.dynamicKEqn:
+        if self.properties['turbulence_properties']['turbulence_type'] == TurbulenceType.les:
+            LesModel = self.properties['turbulence_properties']['LesModel']
+            if (
+                    LesModel == LesModel.kEqn or
+                    LesModel == LesModel.dynamicKEqn
+                ):
                 self.variables['k'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
-            elif (les_model == Parameters.SpalartAllmarasDES or les_model == Parameters.SpalartAllmarasDDES or
-                  les_model == Parameters.SpalartAllmarasIDDES):
+            elif (
+                    LesModel == LesModel.SpalartAllmarasDES or
+                    LesModel == LesModel.SpalartAllmarasDDES or
+                    LesModel == LesModel.SpalartAllmarasIDDES
+                ):
                 self.variables['nuTilda'] = ['volScalarField', '[0 2 -1 0 0 0 0]']
-            elif (les_model == Parameters.kOmegaSSTDES or les_model == Parameters.kOmegaSSTDDES or
-                  les_model == Parameters.kOmegaSSTIDDES):
+            elif (
+                    LesModel == LesModel.kOmegaSSTDES or
+                    LesModel == LesModel.kOmegaSSTDDES or
+                    LesModel == LesModel.kOmegaSSTIDDES
+                ):
                 self.variables['k'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
                 self.variables['omega'] = ['volScalarField', '[0 0 -1 0 0 0 0]']

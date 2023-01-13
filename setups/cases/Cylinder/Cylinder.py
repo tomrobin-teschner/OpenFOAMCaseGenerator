@@ -7,8 +7,8 @@ class Cylinder(BaseCase):
     """Creates the flow setup for an unsteady flow around a cylinder"""
     parameters = {}
     
-    def update_case(self):
-        self.create_case({
+    def create_case(self):
+        self.update_case({
             'file_properties': {
                 'case_name': 'cylinder',
                 'mesh_treatment': Mesh.poly_mesh,

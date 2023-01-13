@@ -23,34 +23,30 @@ class CheckCommandLineArguments:
         
         --help                      prints this help menu
 
-        --input=name                (required) Specify here the name of the case setup to be processed. The case setup
+        --case=name                 (required) Specify here the name of the case setup to be processed. The case setup
                                     is expected in the input/ directory. Use the name of the folder (case sensitive).
                                     Note that there is a python file inside each case directory which implements a
                                     class. The case directory folder, the python name and the name of the class must all
                                     be the same, otherwise an error is thrown.
 
-        --replace=key:value         Replace a key value pair in the settings. This helps to change local parameters
-                                    without having to change the actual module file, e.g. changing the angle of attack
-                                    or Reynolds number as part of a parametric study. Ensure the key is provided with
-                                    the full path to the parameter. For example, to change the Reynolds number, use
-                                    --replace=flow_properties/non_dimensional_properties/Re:1000
-                                    Note that properties are case sensitive. You can also use several replace statements
-                                    to change more than one parameter. All changed parameters are appended to the case
-                                    name, so with the above example, if we have the case name NACA, using the replace
-                                    statement would change that to NACA_Re_1000.
+        --parameter:key=value       Sets the parameter with the name of key to a specific value. Parameters are
+                                    case-specific and can be viewed either directly in the defining module (*.py file)
+                                    or by running the case generator, if a case has parameters defined, these will be
+                                    listed at the bottom.
         '''
 
-        self.__options['replace'] = []
+        self.__options['parameter'] = {}
         for i in range(1, len(self.__args)):
-            if '--input=' in self.__args[i]:
-                self.__options['input'] = self.__args[i].replace('--input=', '')
-            elif '--replace' in self.__args[i]:
-                self.__options['replace'].append(self.__args[i].replace('--replace=', ''))
+            if '--case=' in self.__args[i]:
+                self.__options['case'] = self.__args[i].replace('--case=', '')
+            elif '--parameter' in self.__args[i]:
+                key_value = self.__args[i].replace('--parameter:', '').split('=')
+                self.__options['parameter'][key_value[0]] = key_value[1]
             elif '--help' in self.__args[i]:
                 print(help)
                 exit(0)
-            else:
-                raise Exception(help)
+            # else:
+            #     raise Exception(help)
 
     def __getitem__(self, item):
         if item in self.__options:
@@ -63,3 +59,10 @@ class CheckCommandLineArguments:
             return True
         else:
             return False
+
+    def get_number_of_parameters(self):
+        return len(self.__options['parameter'])
+
+    def add_option(self, key, value):
+        '''required for unit testing'''
+        self.__options[key] = value

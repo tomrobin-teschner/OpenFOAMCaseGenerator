@@ -9,8 +9,8 @@ class WingAndWinglet(BaseCase):
         'angle_of_attack': 5,
     }
 
-    def update_case(self):
-        self.create_case({
+    def create_case(self):
+        self.update_case({
             'file_properties': {
                 'case_name': 'WingAndWinglet',
                 'mesh_treatment': Mesh.snappy_hex_mesh_dict,

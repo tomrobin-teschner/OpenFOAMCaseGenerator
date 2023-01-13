@@ -1,4 +1,4 @@
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 from math import pow, sqrt
 
 
@@ -20,13 +20,13 @@ class TurbulenceFreestreamConditions:
         nu = self.properties['flow_properties']['dimensional_properties']['nu']
         k = self.calculate_freestream_k()
 
-        if turbulence_at_inlet == Parameters.INTERNAL:
-            return pow(Parameters.C_MU, -0.25) * pow(k, 0.5) / turbulent_length_scale_internal
-        elif turbulence_at_inlet == Parameters.EXTERNAL:
-            return pow(Parameters.C_MU, -0.25) * pow(k, 0.5) / turbulent_length_scale_external
-        elif turbulence_at_inlet == Parameters.RATIO:
+        if turbulence_at_inlet == TurbulenceLengthScaleCalculation.internal:
+            return pow(ClosureCoefficients.c_mu.value, -0.25) * pow(k, 0.5) / turbulent_length_scale_internal
+        elif turbulence_at_inlet == TurbulenceLengthScaleCalculation.external:
+            return pow(ClosureCoefficients.c_mu.value, -0.25) * pow(k, 0.5) / turbulent_length_scale_external
+        elif turbulence_at_inlet == TurbulenceLengthScaleCalculation.ratio:
             return (k / nu) / turbulent_to_laminar_viscosity_ratio
-        elif turbulence_at_inlet == Parameters.RATIO_AUTO:
+        elif turbulence_at_inlet == TurbulenceLengthScaleCalculation.ratio_auto:
             return (k / nu) / turbulent_to_laminar_viscosity_ratio_calculated
 
     def calculate_freestream_epsilon(self):
@@ -38,14 +38,14 @@ class TurbulenceFreestreamConditions:
         nu = self.properties['flow_properties']['dimensional_properties']['nu']
         k = self.calculate_freestream_k()
 
-        if turbulence_at_inlet == Parameters.INTERNAL:
-            return pow(Parameters.C_MU, 0.75) * pow(k, 1.5) / turbulent_length_scale_internal
-        elif turbulence_at_inlet == Parameters.EXTERNAL:
-            return pow(Parameters.C_MU, 0.75) * pow(k, 1.5) / turbulent_length_scale_external
-        elif turbulence_at_inlet == Parameters.RATIO:
-            return (Parameters.C_MU * pow(k, 2) / nu) / turbulent_to_laminar_viscosity_ratio
-        elif turbulence_at_inlet == Parameters.RATIO_AUTO:
-            return (Parameters.C_MU * pow(k, 2) / nu) / turbulent_to_laminar_viscosity_ratio_calculated
+        if turbulence_at_inlet == TurbulenceLengthScaleCalculation.internal:
+            return pow(ClosureCoefficients.c_mu.value, 0.75) * pow(k, 1.5) / turbulent_length_scale_internal
+        elif turbulence_at_inlet == TurbulenceLengthScaleCalculation.external:
+            return pow(ClosureCoefficients.c_mu.value, 0.75) * pow(k, 1.5) / turbulent_length_scale_external
+        elif turbulence_at_inlet == TurbulenceLengthScaleCalculation.ratio:
+            return (ClosureCoefficients.c_mu.value * pow(k, 2) / nu) / turbulent_to_laminar_viscosity_ratio
+        elif turbulence_at_inlet == TurbulenceLengthScaleCalculation.ratio_auto:
+            return (ClosureCoefficients.c_mu.value * pow(k, 2) / nu) / turbulent_to_laminar_viscosity_ratio_calculated
 
     def calculate_freestream_nuTilda(self):
         turbulence_at_inlet = self.properties['turbulence_properties']['turbulent_quantities_at_inlet']
@@ -55,9 +55,9 @@ class TurbulenceFreestreamConditions:
         turbulence_intensity = self.properties['turbulence_properties']['freestream_turbulent_intensity']
         velocity_magnitude = self.properties['flow_properties']['dimensional_properties']['velocity_magnitude']
 
-        if turbulence_at_inlet == Parameters.INTERNAL:
+        if turbulence_at_inlet == TurbulenceLengthScaleCalculation.internal:
             return sqrt(1.5) * velocity_magnitude * turbulence_intensity * turbulent_length_scale_internal
-        elif turbulence_at_inlet == Parameters.EXTERNAL:
+        elif turbulence_at_inlet == TurbulenceLengthScaleCalculation.external:
             return sqrt(1.5) * velocity_magnitude * turbulence_intensity * turbulent_length_scale_external
         else:
             return 5 * nu

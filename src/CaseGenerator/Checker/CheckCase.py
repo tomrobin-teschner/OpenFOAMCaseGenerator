@@ -1,6 +1,6 @@
 import sys
 import warnings
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 
 
 class CheckCase:
@@ -19,17 +19,18 @@ class CheckCase:
         self.check_force_coefficients()
 
     def check_correct_turbulence_model_setup(self):
-        if (self.properties['turbulence_properties']['RANS_model'] == Parameters.kOmegaSSTLM or
-                self.properties['turbulence_properties']['RANS_model'] == Parameters.kkLOmega):
-            if self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
+        RansModel = self.properties['turbulence_properties']['RansModel']
+        if (RansModel == RansModel.kOmegaSSTLM or
+                RansModel == RansModel.kkLOmega):
+            if self.properties['turbulence_properties']['wall_modelling'] == WallModelling.high_re:
                 sys.exit('\n===================================== ERROR =====================================\n' +
                          '\nTransition models can not be run with wall functions and require a mesh\n' +
                          'resolution of y+<1. Ensure that the mesh\'s resolution is fine enough and select\n' +
                          'a low-Re wall modelling approach here.\n' +
                          '\n=================================== END ERROR ===================================\n')
 
-        if self.properties['turbulence_properties']['RANS_model'] == Parameters.SpalartAllmaras:
-            if self.properties['turbulence_properties']['wall_modelling'] == Parameters.HIGH_RE:
+        if RansModel == RansModel.SpalartAllmaras:
+            if self.properties['turbulence_properties']['wall_modelling'] == WallModelling.high_re:
                 warnings.showwarning(
                     '\n==================================== WARNING ====================================\n' +
                     '\nStandard Spalart-Allmaras RANS model should be run with y+<1. Using y+>30 may\n' +
@@ -38,16 +39,16 @@ class CheckCase:
                     '\n================================== END WARNING ==================================\n',
                     UserWarning, '', 0)
 
-        if (self.properties['solver_properties']['solver'] == Parameters.simpleFoam and
-                self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES):
+        if (self.properties['solver_properties']['solver'] == Solver.simpleFoam and
+                self.properties['turbulence_properties']['turbulence_type'] == TurbulenceType.les):
             sys.exit('\n===================================== ERROR =====================================\n' +
                      '\nsimpleFoam may only be used for steady state calculations but LES is selected\n' +
                      'which requires an unsteady solver instead. It is recommended switching to the\n' +
                      'pimpleFoam solver here.\n' +
                      '\n=================================== END ERROR ===================================\n')
 
-        if (self.properties['solver_properties']['solver'] == Parameters.rhoSimpleFoam and
-                self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES):
+        if (self.properties['solver_properties']['solver'] == Solver.rhoSimpleFoam and
+                self.properties['turbulence_properties']['turbulence_type'] == TurbulenceType.les):
             sys.exit('\n===================================== ERROR =====================================\n' +
                      '\nrhoSimpleFoam may only be used for steady state calculations but LES is selected\n' +
                      'which requires an unsteady solver instead. It is recommended switching to the\n' +
@@ -55,10 +56,10 @@ class CheckCase:
                      '\n=================================== END ERROR ===================================\n')
 
     def check_correct_time_stepping_setup(self):
-        if ((self.properties['solver_properties']['solver'] == Parameters.simpleFoam and
-                self.properties['time_discretisation']['time_integration'] == Parameters.UNSTEADY) or
-            (self.properties['solver_properties']['solver'] == Parameters.rhoSimpleFoam and
-                self.properties['time_discretisation']['time_integration'] == Parameters.UNSTEADY)):
+        if ((self.properties['solver_properties']['solver'] == Solver.simpleFoam and
+                self.properties['time_discretisation']['time_integration'] == TimeTreatment.unsteady) or
+            (self.properties['solver_properties']['solver'] == Solver.rhoSimpleFoam and
+                self.properties['time_discretisation']['time_integration'] == TimeTreatment.unsteady)):
             warnings.showwarning(
                 '\n==================================== WARNING ====================================\n' +
                 '\nYou have selected an unsteady discretisation but are using a steady state solver.\n' +
@@ -68,10 +69,10 @@ class CheckCase:
                 UserWarning, '', 0)
 
     def check_correct_boundary_condition_setup(self):
-        if self.properties['solver_properties']['solver'] == Parameters.simpleFoam:
+        if self.properties['solver_properties']['solver'] == Solver.simpleFoam:
             contains_advective_outlet = False
             for boundary in self.properties['boundary_properties']:
-                if self.properties['boundary_properties'][boundary] == Parameters.ADVECTIVE_OUTLET:
+                if self.properties['boundary_properties'][boundary] == BoundaryConditions.advective_outlet:
                     contains_advective_outlet = True
             if contains_advective_outlet:
                 sys.exit('\n===================================== ERROR =====================================\n' +
@@ -81,8 +82,8 @@ class CheckCase:
                          '\n=================================== END ERROR ===================================\n')
 
     def check_appropriate_numerical_scheme_combination(self):
-        if (self.properties['spatial_discretisation']['numerical_schemes_correction'] != Parameters.ACCURACY and
-                self.properties['turbulence_properties']['turbulence_type'] == Parameters.LES):
+        if (self.properties['spatial_discretisation']['numerical_schemes_correction'] != DiscretisationPolicy.accuracy
+                and self.properties['turbulence_properties']['turbulence_type'] == TurbulenceType.les):
             warnings.showwarning(
                 '\n==================================== WARNING ====================================\n' +
                 '\nRunning LES simulations should be done with accurate solver and discretisation\n' +
@@ -95,23 +96,23 @@ class CheckCase:
 
     def check_appropriate_pressure_solver(self):
         if (self.properties['parallel_properties']['run_in_parallel'] == True and
-                self.properties['solver_properties']['pressure_solver'] == Parameters.MULTI_GRID):
+                self.properties['solver_properties']['pressure_solver'] == PressureSolver.multi_grid):
             warnings.showwarning(
                 '\n==================================== WARNING ====================================\n' +
                 '\nYou have selected to solve the pressure field with a multigrid solver and at the\n' +
                 'same time you have selected to run the case in parallel. Parallel efficiency may be \n' +
                 'reduced in this case and a (preconditioned) conjugate gradient method is recommened.\n' +
-                'You can set the pressure solver to KRYLOV to select a conjugate gradient approach.\n' +
+                'You can set the pressure solver to krylov to select a conjugate gradient approach.\n' +
                 '\n================================== END WARNING ==================================\n',
                 UserWarning, '', 0)
 
     def check_correct_incompressible_solver_setup(self):
         solver = self.properties['solver_properties']['solver']
         flow_type = self.properties['flow_properties']['flow_type']
-        if (flow_type == Parameters.incompressible) and (solver == Parameters.rhoCentralFoam or
-                                                         solver == Parameters.rhoSimpleFoam or
-                                                         solver == Parameters.rhoPimpleFoam or
-                                                         solver == Parameters.sonicFoam):
+        if (flow_type == FlowType.incompressible) and (solver == Solver.rhoCentralFoam or
+                                                       solver == Solver.rhoSimpleFoam or
+                                                       solver == Solver.rhoPimpleFoam or
+                                                       solver == Solver.sonicFoam):
             warnings.showwarning(
                 '\n==================================== WARNING ====================================\n' +
                 '\nYou have selected the fluid to be incompressible but have selected a compressible\n' +
@@ -123,10 +124,10 @@ class CheckCase:
     def check_correct_compressible_solver_setup(self):
         solver = self.properties['solver_properties']['solver']
         flow_type = self.properties['flow_properties']['flow_type']
-        if (flow_type == Parameters.compressible) and (solver == Parameters.simpleFoam or
-                                                       solver == Parameters.pimpleFoam or
-                                                       solver == Parameters.icoFoam or
-                                                       solver == Parameters.pisoFoam):
+        if (flow_type == FlowType.compressible) and (solver == Solver.simpleFoam or
+                                                     solver == Solver.pimpleFoam or
+                                                     solver == Solver.icoFoam or
+                                                     solver == Solver.pisoFoam):
             warnings.showwarning(
                 '\n==================================== WARNING ====================================\n' +
                 '\nYou have selected the fluid to be compressible but have selected an incompressible\n' +
@@ -183,7 +184,7 @@ class CheckCase:
                              'calculate the force coefficients again.\n' +
                              '\n=================================== END ERROR ===================================\n')
 
-                if boundary_conditions[patch] is not Parameters.WALL:
+                if boundary_conditions[patch] is not BoundaryConditions.wall:
                     sys.exit('\n===================================== ERROR =====================================\n' +
                              '\nThe boundary condition \'' + patch + '\' was found in the\n' +
                              'boundary conditions but is not of wall type. Check your boundary conditions and \n' +

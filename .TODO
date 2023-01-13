@@ -13,12 +13,13 @@
   ☐ Rethink system tests, find a way to test automatically, without manually adding cases. Should also test all turbulence models!
   ☐ Set up CI/CD server
 
-☐ File properties
-  ☐ Implement cascading file properties, deriving from a base case and then overwriting only specific quantities. This can be any test case from which properties will be derived
-  ☐ Establish a way to set private variables per class in constructor which will be used when setting the file properties dictionary
+✔ File properties @done(23-01-12 08:27)
+  ✔ Implement cascading file properties, deriving from a base case and then overwriting only specific quantities. This can be any test case from which properties will be derived @done(23-01-12 08:26)
+  ✔ Establish a way to set private variables per class in constructor which will be used when setting the file properties dictionary @done(23-01-12 08:26)
 
 ☐ Refactoring
-  ☐ Rething global parameter handling, instead of globals use Enums? Should still be int based in input to avoid typos.
+  ✔ Rething global parameter handling, instead of globals use Enums? Should still be int based in input to avoid typos. @done(23-01-09 08:04)
+  ☐ Take isoSurface include out of additional fields and put in controlDict file, ensure correct order there
 
 ☐ Features
   ☐ Retire DFSEM inlet boundary condition, replace by offset BC instead
@@ -26,7 +27,9 @@
 
 ☐ Cases
   ☐ Provide an internal and external LES example case setup
-  ☐ Redo case file directory structure, currently input and example folders are missleading and should be combined
+  ✔ Redo case file directory structure, currently input and example folders are missleading and should be combined @done(23-01-12 08:04)
+  ☐ Provide FFT calculation to cylinder case setup so that Strouhal number can be executed
+  ☐ Provide plotting script to Sudden Expansion
 
 ☐ Scripts
   ☐ Provide custom function object for residuals (L0 and L2 norm) with python script to extract and plot data

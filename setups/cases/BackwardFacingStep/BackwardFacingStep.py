@@ -13,8 +13,8 @@ class BackwardFacingStep(BaseCase):
         'LesModel': LesModel.kEqn
     }
 
-    def update_case(self):
-        self.create_case({
+    def create_case(self):
+        self.update_case({
             'file_properties': {
                 'case_name': 'BackwardFacingStep',
                 'mesh_treatment': Mesh.poly_mesh,

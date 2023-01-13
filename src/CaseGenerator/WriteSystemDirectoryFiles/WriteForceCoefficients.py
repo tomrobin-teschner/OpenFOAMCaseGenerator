@@ -8,8 +8,8 @@ class WriteForceCoefficients:
 
     def write_force_coefficients(self):
         RAD_TO_DEG = pi / 180
-        tangential = self.properties['flow_properties']['axis_aligned_flow_direction']['tangential']
-        normal = self.properties['flow_properties']['axis_aligned_flow_direction']['normal']
+        tangential = self.properties['flow_properties']['axis_aligned_flow_direction']['tangential'].value
+        normal = self.properties['flow_properties']['axis_aligned_flow_direction']['normal'].value
         aoa = self.properties['flow_properties']['axis_aligned_flow_direction']['angle_of_attack']
         cofr = self.properties['dimensionless_coefficients']['center_of_rotation']
         lift_dir = [0, 0, 0]

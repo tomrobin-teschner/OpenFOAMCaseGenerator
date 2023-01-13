@@ -1,7 +1,7 @@
 import os
 import distutils.dir_util
 import distutils.file_util
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 
 
 class FileManager:
@@ -9,12 +9,12 @@ class FileManager:
         self.properties = properties
 
     def copy_mesh_to_destination(self):
-        if self.properties['file_properties']['mesh_treatment'] == Parameters.BLOCK_MESH_DICT:
+        if self.properties['file_properties']['mesh_treatment'] == Mesh.block_mesh_dict:
             src = os.path.join(self.properties['file_properties']['blockmeshdict_directory'], 'blockMeshDict')
             dst = os.path.join(self.properties['file_properties']['path'], 'system', 'blockMeshDict')
             self.copy_file(src, dst)
 
-        elif self.properties['file_properties']['mesh_treatment'] == Parameters.SNAPPY_HEX_MESH_DICT:
+        elif self.properties['file_properties']['mesh_treatment'] == Mesh.snappy_hex_mesh_dict:
             snappy_properties = self.properties['file_properties']['snappyhexmeshdict']
             system_dst = os.path.join(self.properties['file_properties']['path'], 'system')
 
@@ -46,7 +46,7 @@ class FileManager:
                 if self.file_exists(geometry):
                     self.copy_file(geometry, geometry_dst)
 
-        elif self.properties['file_properties']['mesh_treatment'] == Parameters.POLY_MESH:
+        elif self.properties['file_properties']['mesh_treatment'] == Mesh.poly_mesh:
             src = os.path.join(self.properties['file_properties']['polymesh_directory'], 'polyMesh')
             dst = os.path.join(self.properties['file_properties']['path'], 'constant', 'polyMesh')
             self.copy_directory(src, dst)

@@ -1,4 +1,4 @@
-from src.CaseGenerator.Properties import GlobalVariables as Parameters
+from src.CaseGenerator.Properties.GlobalVariables import *
 import src.CaseGenerator.WriteZeroDirectoryFiles as ZeroDir
 
 
@@ -31,16 +31,16 @@ class fvSchemesFile:
     def __write_ddt_schemes(self, file_id):
         self.file_manager.write(file_id, 'ddtSchemes\n')
         self.file_manager.write(file_id, '{\n')
-        if self.properties['time_discretisation']['time_integration'] == Parameters.STEADY_STATE:
+        if self.properties['time_discretisation']['time_integration'] == TimeTreatment.steady_state:
             self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + 'steadyState;\n')
         else:
-            if self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.DEFAULT:
+            if self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.default:
                 self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + 'CrankNicolson 0.5;\n')
-            elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.TVD:
+            elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.tvd:
                 self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + 'CrankNicolson 0.5;\n')
-            elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+            elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.robustness:
                 self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + 'Euler;\n')
-            elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.ACCURACY:
+            elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.accuracy:
                 self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + 'backward;\n')
         self.file_manager.write(file_id, '}\n')
         self.file_manager.write(file_id, '\n')
@@ -48,16 +48,16 @@ class fvSchemesFile:
     def __write_grad_schemes(self, file_id):
         grad_type_U = ''
         grad_type_rest = ''
-        if self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.DEFAULT:
+        if self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.default:
             grad_type_U += 'cellLimited Gauss linear 0.33;\n'
             grad_type_rest = 'Gauss linear;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.TVD:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.tvd:
             grad_type_U += 'cellLimited Gauss linear 1;\n'
             grad_type_rest = 'cellLimited Gauss linear 1;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.robustness:
             grad_type_U += 'cellLimited Gauss linear 1;\n'
             grad_type_rest = 'cellLimited Gauss linear 1;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.ACCURACY:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.accuracy:
             grad_type_U += 'Gauss linear;\n'
             grad_type_rest = 'Gauss linear;\n'
 
@@ -74,7 +74,7 @@ class fvSchemesFile:
         self.file_manager.write(file_id, '\n')
 
     def __write_div_schemes(self, file_id):
-        is_rans = self.properties['turbulence_properties']['RANS_model']
+        is_rans = self.properties['turbulence_properties']['RansModel']
         use_first_order = self.properties['spatial_discretisation']['use_first_order_for_turbulence']
         discretisation_policy = self.properties['spatial_discretisation']['numerical_schemes_correction']
 
@@ -85,16 +85,16 @@ class fvSchemesFile:
         self.file_manager.write(file_id, 'divSchemes\n')
         self.file_manager.write(file_id, '{\n')
 
-        if discretisation_policy == Parameters.DEFAULT:
+        if discretisation_policy == DiscretisationPolicy.default:
             div_type = 'Gauss linearUpwind ' + pre_default_test + 'default;\n'
             self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + div_type)
-        elif discretisation_policy == Parameters.TVD:
+        elif discretisation_policy == DiscretisationPolicy.tvd:
             div_type = 'Gauss Minmod ' + pre_default_test + 'default;\n'
             self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + div_type)
-        elif discretisation_policy == Parameters.ROBUSTNESS:
+        elif discretisation_policy == DiscretisationPolicy.robustness:
             div_type = 'Gauss upwind ' + pre_default_test + 'default;\n'
             self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + div_type)
-        elif discretisation_policy == Parameters.ACCURACY:
+        elif discretisation_policy == DiscretisationPolicy.accuracy:
             div_type = 'Gauss limitedLinear ' + pre_default_test + '1;\n'
             self.file_manager.write(file_id, '    default' + (self.indentation - 12) * ' ' + div_type)
 
@@ -105,7 +105,7 @@ class fvSchemesFile:
         self.file_manager.write(file_id, '    div(U)' + spacing + div_type)
 
         for var in self.variable_names:
-            if discretisation_policy == Parameters.DEFAULT:
+            if discretisation_policy == DiscretisationPolicy.default:
                 spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                 if var == 'U':
                     div_type = 'Gauss linearUpwindV grad(U);\n'
@@ -123,7 +123,7 @@ class fvSchemesFile:
                         spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                         self.file_manager.write(file_id, '    div(phi,' + var + ')' + spacing + div_type)
 
-            elif discretisation_policy == Parameters.TVD:
+            elif discretisation_policy == DiscretisationPolicy.tvd:
                 spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                 if var == 'U':
                     div_type = 'bounded Gauss MinmodV grad(U);\n'
@@ -141,12 +141,12 @@ class fvSchemesFile:
                         spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                         self.file_manager.write(file_id, '    div(phi,' + var + ')' + spacing + div_type)
 
-            elif discretisation_policy == Parameters.ROBUSTNESS:
+            elif discretisation_policy == DiscretisationPolicy.robustness:
                 spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                 div_type = 'bounded Gauss upwind;\n'
                 self.file_manager.write(file_id, '    div(phi,' + var + ')' + spacing + div_type)
 
-            elif discretisation_policy == Parameters.ACCURACY:
+            elif discretisation_policy == DiscretisationPolicy.accuracy:
                 spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                 if var == 'U':
                     div_type = 'bounded Gauss MUSCLV grad(U);\n'
@@ -164,10 +164,10 @@ class fvSchemesFile:
                         spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                         self.file_manager.write(file_id, '    div(phi,' + var + ')' + spacing + div_type)
 
-        if self.properties['flow_properties']['flow_type'] == Parameters.incompressible:
+        if self.properties['flow_properties']['flow_type'] == FlowType.incompressible:
             spacing = (self.indentation - len('    div((nuEff*dev2(T(grad(U)))))') - 1) * ' '
             self.file_manager.write(file_id, '    div((nuEff*dev2(T(grad(U)))))' + spacing + 'Gauss linear;\n')
-        elif self.properties['flow_properties']['flow_type'] == Parameters.compressible:
+        elif self.properties['flow_properties']['flow_type'] == FlowType.compressible:
             spacing = (self.indentation - len('    div(((rho*nuEff)*dev2(T(grad(U)))))') - 1) * ' '
             self.file_manager.write(file_id, '    div(((rho*nuEff)*dev2(T(grad(U)))))' + spacing + 'Gauss linear;\n')
         self.file_manager.write(file_id, '}\n')
@@ -175,13 +175,13 @@ class fvSchemesFile:
 
     def __write_laplacian_schemes(self, file_id):
         laplacian_type = ''
-        if self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.DEFAULT:
+        if self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.default:
             laplacian_type += 'Gauss linear limited 1;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.TVD:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.tvd:
             laplacian_type += 'Gauss linear limited 0;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.robustness:
             laplacian_type += 'Gauss linear limited 0.33;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.ACCURACY:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.accuracy:
             laplacian_type += 'Gauss linear limited 1;\n'
 
         self.file_manager.write(file_id, 'laplacianSchemes\n')
@@ -210,13 +210,13 @@ class fvSchemesFile:
 
     def __write_sn_grad_schemes(self, file_id):
         surface_type = ''
-        if self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.DEFAULT:
+        if self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.default:
             surface_type += 'limited 1;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.TVD:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.tvd:
             surface_type += 'limited 0;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.ROBUSTNESS:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.robustness:
             surface_type += 'limited 0.33;\n'
-        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == Parameters.ACCURACY:
+        elif self.properties['spatial_discretisation']['numerical_schemes_correction'] == DiscretisationPolicy.accuracy:
             surface_type += 'limited 1;\n'
 
         self.file_manager.write(file_id, 'snGradSchemes\n')
