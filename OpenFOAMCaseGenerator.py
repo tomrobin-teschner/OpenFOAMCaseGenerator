@@ -55,8 +55,8 @@ def main():
     file_manager.write_content_to_file('system', 'fvSolution', fv_solution.get_file_content())
 
     # write fvSchemes
-    fv_schemes = SystemDir.fvSchemesFile(properties, file_manager)
-    fv_schemes.write_input_file()
+    fv_schemes = SystemDir.fvSchemesFile(properties)
+    file_manager.write_content_to_file('system', 'fvSchemes', fv_schemes.get_file_content())
 
     # write additional files if required for on-the-fly post-processing
     if properties['dimensionless_coefficients']['write_force_coefficients']:
