@@ -1,91 +1,17 @@
 from src.CaseGenerator.Properties.GlobalVariables import *
+from src.CaseGenerator.Properties.CaseFactory import CaseFactory
 from math import sqrt, pow, log10, floor, sin, cos, pi
 import os
-import sys
-import importlib
 
 
 class CaseProperties:
     def __init__(self, command_line_arguments):
-        properties_module = ''
-        if command_line_arguments.option_exists('case'):
-            properties_module = command_line_arguments['case']
-        else:
-            sys.exit('\n===================================== ERROR =====================================\n' +
-                     '\nNo input file specify. Rerun the case generator with the --case flag\n' +
-                     '\n=================================== END ERROR ===================================\n')
+        factory = CaseFactory(command_line_arguments['case'], command_line_arguments['parameter'])
+        self.properties = factory.get_case_properties()
 
-        try:
-            case = getattr(importlib.import_module('setups.cases.'+properties_module+'.'+properties_module),
-                                      properties_module)
-        except:
-            sys.exit('Could not process the input: setups/cases/' + properties_module + '/' + properties_module +'.py\n' +
-                     'Please ensure the file exists in the input directory and is spelled correctly. If it does\n' +
-                     'exist, ensure that the class name within ' + properties_module + '.py contains a class of the\n'
-                     'same name and derives from the base class, e.g.:\n\nclass ' + properties_module +
-                     '(BaseCase):\n\nThe program will terminate now.')
-        test_case = case()
-        self.__update_parametere_from_command_line(command_line_arguments, test_case)
-        test_case.create_case()
-        self.properties = test_case.get_properties()
-
-    def __update_parametere_from_command_line(self, command_line_arguments, test_case):
-        if command_line_arguments['parameter']:
-            test_case.parameters.update(command_line_arguments['parameter'])
-        return test_case
-
-    def get_case_properties(self):
-        # self.__overwrite_file_properties(command_line_arguments)
+    def get_case(self):
         self.__add_default_properties()
         return self.properties
-
-    #TODO: remove once done with refactoring and rewading parameters from command line
-    # def __overwrite_file_properties(self, command_line_arguments):
-    #     if len(command_line_arguments['replace']) > 0:
-    #         for arg in command_line_arguments['replace']:
-    #             keys = arg.strip().split(':')[0].split('/')
-    #             value = arg.strip().split(':')[1]
-    #             self.__change_nested_properties(keys, value)
-
-    # def __change_nested_properties(self, keys, value):
-    #     """This is a dirty but working solution. We need to recursively update key value pairs of arbitrary
-    #     depth but in reality we don't have more than 5 nested levels, so this solution may suffice for now. Should be
-    #     replaced if a more recursive way can be implemented for an arbitrary depth level of the dictionary."""
-    #     try:
-    #         if len(keys) == 1:
-    #             vartype = type()
-    #             self.properties[keys[0]] = vartype(value)
-    #         elif len(keys) == 2:
-    #             vartype = type(self.properties[keys[0]][keys[1]])
-    #             self.properties[keys[0]][keys[1]] = vartype(value)
-    #         elif len(keys) == 3:
-    #             vartype = type(self.properties[keys[0]][keys[1]][keys[2]])
-    #             self.properties[keys[0]][keys[1]][keys[2]] = vartype(value)
-    #         elif len(keys) == 4:
-    #             vartype = type(self.properties[keys[0]][keys[1]][keys[2]][keys[3]])
-    #             self.properties[keys[0]][keys[1]][keys[2]][keys[3]] = vartype(value)
-    #         elif len(keys) == 5:
-    #             vartype = type(self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]])
-    #             self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]] = vartype(value)
-    #         elif len(keys) == 6:
-    #             vartype = type(self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]])
-    #             self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]] = vartype(value)
-    #         elif len(keys) == 7:
-    #             vartype = type(self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]][keys[6]])
-    #             self.properties[keys[0]][keys[1]][keys[2]][keys[3]][keys[4]][keys[5]][keys[6]] = vartype(value)
-    #     except:
-    #         sys.exit('Trying to replace the entry ' + str(keys) + ' which does not exist in the properties dictionary.'
-    #                  '\nEnsure that it is correctly spelled and try again')
-
-        # # only append parameters to case name if it does not contain forward / backward slashes which may be seen as
-        # # directory separators
-        # if (value.find('\\') == -1) and (value.find('/') == -1):
-        #     self.__append_replaced_parameters_to_case_name(keys[-1], value)
-
-    # def __append_replaced_parameters_to_case_name(self, key, value):
-    #     print(self.properties['file_properties']['case_name'])
-    #     self.properties['file_properties']['case_name'] += '_' + str(key) + '_' + str(value)
-    #     print(self.properties['file_properties']['case_name'])
 
     def __add_default_properties(self):
         # absolute path of text case location
