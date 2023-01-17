@@ -17,7 +17,7 @@ class TaylorGreenVortex(BaseCase):
                 'mesh_treatment': Mesh.block_mesh_dict,
                 'blockmeshdict_directory': os.path.join('setups', 'mesh', 'TaylorGreenVortex'),
                 'run_directory': os.path.join(''),
-                'version': 'v2006',
+                'version': 'v2212',
             },
             'parallel_properties': {
                 'run_in_parallel': True,

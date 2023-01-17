@@ -14,7 +14,7 @@ class Cylinder(BaseCase):
                 'mesh_treatment': Mesh.poly_mesh,
                 'polymesh_directory': os.path.join('setups', 'mesh', 'cylinder'),
                 'run_directory': os.path.join(''),
-                'version': 'v2006',
+                'version': 'v2212',
             },
             'boundary_properties': {
                 'boundary_conditions': {

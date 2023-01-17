@@ -16,7 +16,7 @@ class SuddenExpansion(BaseCase):
                 'mesh_treatment': Mesh.block_mesh_dict,
                 'blockmeshdict_directory': os.path.join('setups', 'mesh', 'suddenExpansion'),
                 'run_directory': os.path.join(''),
-                'version': 'v2006',
+                'version': 'v2212',
             },
             'boundary_properties': {
                 'boundary_conditions': {

@@ -23,7 +23,7 @@ class WingAndWinglet(BaseCase):
                     ]
                 },
                 'run_directory': os.path.join(''),
-                'version': 'v2006',
+                'version': 'v2212',
             },
             'boundary_properties': {
                 'boundary_conditions': {
@@ -86,7 +86,7 @@ class WingAndWinglet(BaseCase):
                 'convergence_threshold': 1e-6,
                 'absolute_convergence_criterion': 1e-14,
                 'relative_convergence_criterion': 1e-4,
-                'integral_convergence_criterion': [IntegralQuantities.c_d, IntegralQuantities.c_l],
+                'integral_convergence_criterion': [IntegralQuantities.Cd, IntegralQuantities.Cl],
                 'averaging_time_steps': 20,
                 'integral_quantities_convergence_threshold': 1e-5,
                 'time_steps_to_wait_before_checking_convergence': 10,

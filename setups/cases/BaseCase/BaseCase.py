@@ -59,7 +59,7 @@ class BaseCase(metaclass = ABCMeta):
                 'run_directory': os.path.join(''),
 
                 # version of openfoam to use (does not have an influence on the case setup, but will be used in headers)
-                'version': 'v2006',
+                'version': 'v2212',
             },
 
             # setting up simulation for parallel processing
@@ -549,7 +549,7 @@ class BaseCase(metaclass = ABCMeta):
                 #   c_m_roll:             Convergence criterion based on the roll momentum coefficient
                 #   c_m_pitch:            Convergence criterion based on the pitch momentum coefficient
                 #   
-                #   Syntax: 'integral_convergence_criterion': [IntegralQuantities.c_d, IntegralQuantities.c_l],
+                #   Syntax: 'integral_convergence_criterion': [IntegralQuantities.Cd, IntegralQuantities.Cl],
                 'integral_convergence_criterion': [],
 
                 # if integral quantities are checked for convergence, specify for how many timesteps their average
@@ -633,7 +633,7 @@ class BaseCase(metaclass = ABCMeta):
             'line_probes': {
                 # flag indicating if point probes should be active (written to file). If set to false, ignore the
                 # rest of this dictionary.
-                'write_line_probes': False,
+                'write_line_probes': True,
 
                 # specify the start and end point where line should be placed, can be more than 1
                 #
@@ -669,7 +669,7 @@ class BaseCase(metaclass = ABCMeta):
             'cutting_planes': {
                 # flag indicating if point probes should be active (written to file). If set to false, ignore the
                 # rest of this dictionary.
-                'write_cutting_planes': False,
+                'write_cutting_planes': True,
 
                 # specify the origin and normal vector of cutting plane, can be more than 1
                 #
@@ -707,7 +707,7 @@ class BaseCase(metaclass = ABCMeta):
             'iso_surfaces': {
                 # flag indicating if iso-surfaces should be active (written to file). If set to false, ignore the
                 # rest of this dictionary.
-                'write_iso_surfaces': False,
+                'write_iso_surfaces': True,
 
                 # variables of which to write iso surfaces
                 'flow_variable': [],
