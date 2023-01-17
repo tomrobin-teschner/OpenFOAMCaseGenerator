@@ -8,7 +8,7 @@ class fvSchemesFile:
         self.properties = properties
         self.state_variable_manager = ZeroDir.StateVariableManager(properties)
         self.variable_names = self.state_variable_manager.get_active_variable_names()
-        self.indentation = 38
+        self.indentation = 42
 
     def get_file_content(self):
         version = self.properties['file_properties']['version']

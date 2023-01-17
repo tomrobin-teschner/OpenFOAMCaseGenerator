@@ -55,6 +55,8 @@ class ControlDictFile:
         control_dict += f'{{\n'
         if self.properties['additional_fields']['write_additional_fields']:
             control_dict += f'    #include "include/fields"\n'
+        if self.properties['iso_surfaces']['write_iso_surfaces']:
+            control_dict += f'    #include "include/isoSurfaces"\n'
         if self.properties['dimensionless_coefficients']['write_force_coefficients']:
             control_dict += f'    #include "include/forceCoefficients"\n'
         if len(self.properties['convergence_control']['integral_convergence_criterion']) > 0:

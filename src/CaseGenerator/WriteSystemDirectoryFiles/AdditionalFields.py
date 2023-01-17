@@ -22,12 +22,6 @@ class AdditionalFields:
                 elif field == Fields.enstrophy:
                     name = 'enstrophy'
                 self.__write_custom_fields(file_id, name)
-        if self.properties['iso_surfaces']['write_iso_surfaces']:
-            self.file_manager.write(file_id, '// include iso-surface writing here (instead of in the controlDict)\n')
-            self.file_manager.write(file_id, '// in case any of the additional computed fields above (if any)\n')
-            self.file_manager.write(file_id, '// are used to generate iso-surfaces\n')
-            self.file_manager.write(file_id, '#include "isoSurfaces"\n')
-            self.file_manager.write(file_id, '\n')
         self.file_manager.write(file_id,
                                 '// ************************************************************************* //\n')
 
