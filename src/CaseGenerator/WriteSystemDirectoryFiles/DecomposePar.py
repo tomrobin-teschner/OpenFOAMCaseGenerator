@@ -1,6 +1,6 @@
 from src.CaseGenerator.FileDirectoryIO import WriteHeader
 
-class WriteDecomposeParDictionary:
+class DecomposeParDictionary:
     def __init__(self, properties):
         self.properties = properties
 

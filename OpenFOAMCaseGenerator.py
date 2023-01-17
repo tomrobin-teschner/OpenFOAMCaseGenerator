@@ -60,64 +60,65 @@ def main():
 
     # write additional files if required for on-the-fly post-processing
     if properties['dimensionless_coefficients']['write_force_coefficients']:
-        force_coefficients = SystemDir.WriteForceCoefficients(properties, file_manager)
-        force_coefficients.write_force_coefficients()
+        force_coefficients = SystemDir.ForceCoefficients(properties)
+        file_manager.write_content_to_file('system/include', 'forceCoefficients', force_coefficients.get_file_content())
 
     if len(properties['convergence_control']['integral_convergence_criterion']) > 0:
-        force_coefficient_trigger = SystemDir.WriteForceCoefficientConvergence(properties, file_manager)
-        force_coefficient_trigger.write_triggers()
+        triggers = SystemDir.ForceCoefficientConvergence(properties)
+        file_manager.write_content_to_file('system/include', 'forceCoefficientTrigger', triggers.get_file_content())
 
     if properties['dimensionless_coefficients']['write_pressure_coefficient']:
-        pressure_coefficient = SystemDir.WritePressureCoefficient(properties, file_manager)
-        pressure_coefficient.write_force_coefficients()
+        cp_coefficients = SystemDir.PressureCoefficient(properties)
+        file_manager.write_content_to_file('system/include', 'pressureCoefficient', cp_coefficients.get_file_content())
 
     if properties['point_probes']['write_point_probes']:
-        point_probes = SystemDir.WritePointProbes(properties, file_manager)
-        point_probes.write_point_probes()
+        point_probes = SystemDir.PointProbes(properties)
+        file_manager.write_content_to_file('system/include', 'pointProbes', point_probes.get_file_content())
 
     if properties['line_probes']['write_line_probes']:
-        line_probes = SystemDir.WriteLineProbes(properties, file_manager)
-        line_probes.write_line_probes()
+        line_probes = SystemDir.LineProbes(properties)
+        file_manager.write_content_to_file('system/include', 'lineProbes', line_probes.get_file_content())
 
     if properties['cutting_planes']['write_cutting_planes']:
-        cutting_planes = SystemDir.WriteCuttingPlanes(properties, file_manager)
-        cutting_planes.write_cutting_planes()
+        cutting_planes = SystemDir.CuttingPlanes(properties)
+        file_manager.write_content_to_file('system/include', 'cuttingPlanes', cutting_planes.get_file_content())
 
     if properties['iso_surfaces']['write_iso_surfaces']:
-        iso_surfaces = SystemDir.WriteIsoSurfaces(properties, file_manager)
-        iso_surfaces.write_iso_surfaces()
+        iso_surfaces = SystemDir.IsoSurfaces(properties)
+        file_manager.write_content_to_file('system/include', 'isoSurfaces', iso_surfaces.get_file_content())
 
     if properties['additional_fields']['write_additional_fields'] or properties['iso_surfaces']['write_iso_surfaces']:
-        fields = SystemDir.WriteFields(properties, file_manager)
+        fields = SystemDir.AdditionalFields(properties, file_manager)
         fields.write_field()
 
     if properties['parallel_properties']['run_in_parallel']:
-        decompose_par_dict = SystemDir.WriteDecomposeParDictionary(properties)
+        decompose_par_dict = SystemDir.DecomposeParDictionary(properties)
         file_manager.write_content_to_file('system', 'decomposeParDict', decompose_par_dict.get_decompose_par_dict())
 
-    y_plus = SystemDir.WriteYPlus(properties, file_manager)
-    y_plus.write_y_plus()
+    if properties['turbulence_properties']['turbulence_type'] is not TurbulenceType.laminar:
+        y_plus = SystemDir.YPlus(properties)
+        file_manager.write_content_to_file('system/include', 'yPlus', y_plus.get_file_content())
 
-    residuals = SystemDir.WriteResiduals(file_manager)
-    residuals.write_residuals()
+    residuals = SystemDir.Residuals(properties)
+    file_manager.write_content_to_file('system/include', 'residuals', residuals.get_file_content())
 
     if properties['flow_properties']['flow_type'] == FlowType.compressible:
-        mach_number = SystemDir.WriteMachNumber(properties, file_manager)
-        mach_number.write_mach_number()
+        mach_number = SystemDir.MachNumber(properties)
+        file_manager.write_content_to_file('system/include', 'MachNo', mach_number.get_file_content())
 
     if ((properties['file_properties']['mesh_treatment'] == Mesh.snappy_hex_mesh_dict) and
             (len(properties['file_properties']['snappyhexmeshdict']['geometry']) > 0)):
-        surface_features = SystemDir.WriteSurfaceFeatureExtract(properties, file_manager)
-        surface_features.write_surface_feature_extract()
+        surface_features = SystemDir.SurfaceFeatureExtract(properties)
+        file_manager.write_content_to_file('system', 'surfaceFeatureExtractDict', surface_features.get_file_content())
 
     # generate utility script class that produces useful scripts to run the simulation
-    utility_scripts = FileIO.WriteUtilityScripts(properties, file_manager)
+    utility_scripts = FileIO.UtilityScripts(properties)
 
     # write Allrun file to execute case automatically
-    utility_scripts.write_all_run_file()
+    file_manager.write_content_to_file('', 'Allrun', utility_scripts.get_all_run_content())
 
     # write Allclean file to clean up case directory
-    utility_scripts.write_all_clean_file()
+    file_manager.write_content_to_file('', 'Allclean', utility_scripts.get_all_clean_content())
 
     # copy residual plotting script over to case directory
     utility_scripts.copy_residual_plotting_script()

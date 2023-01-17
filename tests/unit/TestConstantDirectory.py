@@ -30,7 +30,7 @@ class TestThermophysicalPropertiesFileCreation(unittest.TestCase):
         self.properties['flow_properties']['dimensional_properties'] = {}
         self.properties['flow_properties']['dimensional_properties']['mu'] = 1.2345
         self.properties['file_properties'] = {}
-        self.properties['file_properties']['version'] = 'v2006'
+        self.properties['file_properties']['version'] = 'v2212'
 
     def test_const_viscosity(self):
         self.properties['flow_properties']['const_viscosity'] = True
@@ -82,7 +82,7 @@ class TestTurbulencePropertiesFileCreation(unittest.TestCase):
     def setUp(self):
         self.properties = {}
         self.properties['file_properties'] = {}
-        self.properties['file_properties']['version'] = 'v2006'
+        self.properties['file_properties']['version'] = 'v2212'
         self.properties['turbulence_properties'] = {}
         self.properties['turbulence_properties']['turbulence_type'] = ''
 

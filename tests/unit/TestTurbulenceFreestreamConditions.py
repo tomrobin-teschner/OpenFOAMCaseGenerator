@@ -12,7 +12,7 @@ class TestTurbulenceFreestreamConditions(unittest.TestCase):
         self.properties['dimensionless_coefficients'] = {}
         self.properties['flow_properties']['dimensional_properties'] = {}
         self.properties['flow_properties']['non_dimensional_properties'] = {}
-        self.properties['file_properties']['version'] = 'v2006'
+        self.properties['file_properties']['version'] = 'v2212'
         self.properties['flow_properties']['dimensional_properties']['velocity_magnitude'] = 1.0
         self.properties['flow_properties']['dimensional_properties']['nu'] = 1e-6
         self.properties['turbulence_properties']['freestream_turbulent_intensity'] = 0.01

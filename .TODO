@@ -3,13 +3,13 @@
 # --------------------------- #
 
 ☐ Testing
-  ☐ Refactor code so that classes emit text / strings but do not write, delegate that to the file_manager class
+  ✔ Refactor code so that classes emit text / strings but do not write, delegate that to the file_manager class @done(23-01-17 07:10)
     ✔ 0 directory @done(23-01-05 08:18)
     ✔ constant directory @done(23-01-03 07:41)
-    ☐ system directory
+    ✔ system directory @done(23-01-17 07:10)
   ✔ Provide unit-tests for 0 directory @done(23-01-05 08:18)
   ✔ Provide unit-tests for constant directory @done(23-01-03 07:41)
-  ☐ Provide unit-tests for system directory
+  ✔ Provide unit-tests for system directory @done(23-01-17 07:10)
   ☐ Rethink system tests, find a way to test automatically, without manually adding cases. Should also test all turbulence models!
   ☐ Set up CI/CD server
 

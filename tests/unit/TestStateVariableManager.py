@@ -6,7 +6,7 @@ class TestStateVariableManager(unittest.TestCase):
     def setUp(self):
         self.properties = {}
         self.properties['file_properties'] = {}
-        self.properties['file_properties']['version'] = 'v2006'
+        self.properties['file_properties']['version'] = 'v2212'
         self.properties['flow_properties'] = {}
         self.properties['flow_properties']['flow_type'] = FlowType.incompressible 
         self.properties['turbulence_properties'] = {}

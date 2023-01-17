@@ -1,7 +1,7 @@
 from src.CaseGenerator.Properties.GlobalVariables import *
 
 
-class WriteFields:
+class AdditionalFields:
     def __init__(self, properties, file_manager):
         self.file_manager = file_manager
         self.properties = properties

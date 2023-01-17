@@ -66,12 +66,12 @@ class PressureSolver(Enum):
 
 # integral quantities used for convergence checking
 class IntegralQuantities(Enum):
-    c_d = auto()
-    c_l = auto()
-    c_s = auto()
-    c_m_yaw = auto()
-    c_m_roll = auto()
-    c_m_pitch = auto()
+    Cd = auto()
+    Cl = auto()
+    Cs = auto()
+    CmYaw = auto()
+    CmRoll = auto()
+    CmPitch = auto()
     coefficients_all = auto()
     coefficients_all_any = auto()
 
