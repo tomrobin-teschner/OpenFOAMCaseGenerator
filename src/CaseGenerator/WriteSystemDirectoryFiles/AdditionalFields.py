@@ -1,39 +1,26 @@
 from src.CaseGenerator.Properties.GlobalVariables import *
+from src.CaseGenerator.FileDirectoryIO import WriteHeader
 
 
 class AdditionalFields:
-    def __init__(self, properties, file_manager):
-        self.file_manager = file_manager
+    def __init__(self, properties):
         self.properties = properties
 
-    def write_field(self):
-        file_id = self.file_manager.create_file('system/include', 'fields')
-        self.file_manager.write_header(file_id, 'dictionary', 'system', 'fields')
-        self.file_manager.write(file_id, '\n')
+    def get_file_content(self):
+        version = self.properties['file_properties']['version']
+        fields = WriteHeader.get_header(version, 'dictionary', 'system', 'fields')
+
         if self.properties['additional_fields']['write_additional_fields']:
             for field in self.properties['additional_fields']['fields']:
-                name = ''
-                if field == Fields.q:
-                    name = 'Q'
-                elif field == Fields.lambda_2:
-                    name = 'Lambda2'
-                elif field == Fields.vorticity:
-                    name = 'vorticity'
-                elif field == Fields.enstrophy:
-                    name = 'enstrophy'
-                self.__write_custom_fields(file_id, name)
-        self.file_manager.write(file_id,
-                                '// ************************************************************************* //\n')
-
-    def __write_custom_fields(self, file_id, field_name):
-
-        self.file_manager.write(file_id, field_name + '\n')
-        self.file_manager.write(file_id, '{\n')
-        self.file_manager.write(file_id, '    type            ' + field_name + ';\n')
-        self.file_manager.write(file_id, '    libs            (fieldFunctionObjects);\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    writeControl    writeTime;\n')
-        self.file_manager.write(file_id, '\n')
-        self.file_manager.write(file_id, '    log             no;\n')
-        self.file_manager.write(file_id, '}\n')
-        self.file_manager.write(file_id, '\n')
+                fields += f'{field.name}\n'
+                fields += f'{{\n'
+                fields += f'    type            {field.name};\n'
+                fields += f'    libs            (fieldFunctionObjects);\n'
+                fields += f'\n'
+                fields += f'    writeControl    writeTime;\n'
+                fields += f'\n'
+                fields += f'    log             no;\n'
+                fields += f'}}\n'
+                fields += f'\n'
+        fields += f'// ************************************************************************* //\n'
+        return fields

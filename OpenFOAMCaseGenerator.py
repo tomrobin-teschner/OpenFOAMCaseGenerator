@@ -88,8 +88,8 @@ def main():
         file_manager.write_content_to_file('system/include', 'isoSurfaces', iso_surfaces.get_file_content())
 
     if properties['additional_fields']['write_additional_fields'] or properties['iso_surfaces']['write_iso_surfaces']:
-        fields = SystemDir.AdditionalFields(properties, file_manager)
-        fields.write_field()
+        fields = SystemDir.AdditionalFields(properties)
+        file_manager.write_content_to_file('system/include', 'fields', fields.get_file_content())
 
     if properties['parallel_properties']['run_in_parallel']:
         decompose_par_dict = SystemDir.DecomposeParDictionary(properties)

@@ -5,13 +5,13 @@ import src.CaseGenerator.Properties.CaseProperties as CaseProperties
 import src.CaseGenerator.Checker as Checker
 
 
-class TestTransportPropertiesFileCreation(unittest.TestCase):
+class TestSystemDirectoryFilesCreation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cla = Checker.CheckCommandLineArguments()
         cla.add_option('case', 'Naca0012')
         case_properties_handler = CaseProperties.CaseProperties(cla)
-        cls.properties = case_properties_handler.get_case_properties()
+        cls.properties = case_properties_handler.get_case()
 
         cls.properties['point_probes']['write_point_probes'] = True
         cls.properties['point_probes']['location'] = [[0.0, 0.0, 0.0]]
@@ -37,12 +37,13 @@ class TestTransportPropertiesFileCreation(unittest.TestCase):
         cls.properties['iso_surfaces']['flow_variable'] = ['U']
         cls.properties['iso_surfaces']['iso_value'] = [0.1]
 
-        cls.properties_decompose_par = {}
-        cls.properties_decompose_par['file_properties'] = {}
-        cls.properties_decompose_par['parallel_properties'] = {}
-        cls.properties_decompose_par['file_properties']['version'] = 'v2212'
-        cls.properties_decompose_par['parallel_properties']['run_in_parallel'] = True
-        cls.properties_decompose_par['parallel_properties']['number_of_processors'] = 16
+        cls.properties['parallel_properties']['run_in_parallel'] = True
+        cls.properties['parallel_properties']['number_of_processors'] = 16
+
+        cls.properties['additional_fields']['write_additional_fields'] = True
+        cls.properties['additional_fields']['fields'] = [Fields.Q, Fields.vorticity, Fields.Lambda2, Fields.enstrophy]
+
+
 
     def test_control_dict(self):
         control_dict = SystemDir.ControlDictFile(self.properties)
@@ -109,7 +110,7 @@ class TestTransportPropertiesFileCreation(unittest.TestCase):
         self.assertIn('methodmeshWave', content)
 
     def test_decompose_par_dict(self):
-        decompose_par_dict = SystemDir.DecomposeParDictionary(self.properties_decompose_par)
+        decompose_par_dict = SystemDir.DecomposeParDictionary(self.properties)
 
         content = decompose_par_dict.get_decompose_par_dict()
         content = content.replace(' ', '').replace('\t', '').replace('\n', '')
@@ -285,3 +286,17 @@ class TestTransportPropertiesFileCreation(unittest.TestCase):
         self.assertIn('nonManifoldEdges', content)
         self.assertIn('openEdges', content)
         self.assertIn('writeObj', content)
+
+    def test_additional_fields(self):
+        fields = SystemDir.AdditionalFields(self.properties)
+
+        content = fields.get_file_content()
+        content = content.replace(' ', '').replace('\t', '').replace('\n', '')
+
+        self.assertIn(Fields.Q.name, content)
+        self.assertIn(Fields.enstrophy.name, content)
+        self.assertIn(Fields.Lambda2.name, content)
+        self.assertIn(Fields.vorticity.name, content)
+        self.assertIn('libs(fieldFunctionObjects);', content)
+        self.assertIn('writeControlwriteTime;', content)
+        self.assertIn('logno;', content)

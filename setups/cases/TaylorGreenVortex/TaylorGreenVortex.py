@@ -90,7 +90,7 @@ class TaylorGreenVortex(BaseCase):
             },
             'additional_fields': {
                 'write_additional_fields': True,
-                'fields': [Fields.q, Fields.vorticity],
+                'fields': [Fields.Q, Fields.vorticity],
             },
             'cutting_planes': {
                 'write_cutting_planes': True,

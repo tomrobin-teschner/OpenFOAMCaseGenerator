@@ -599,7 +599,7 @@ class BaseCase(metaclass = ABCMeta):
                 #   lambda_2:  Write out the Lambda-2 criterion, useful for vortex core detection
                 #   enstrophy: Write out enstrophy field
                 #
-                # Syntax: 'fields': [Fields.q, Fields.vorticity],
+                # Syntax: 'fields': [Fields.Q, Fields.vorticity],
                 'fields': [],
             },
 

@@ -172,9 +172,9 @@ class DeltaModel(Enum):
 
 # additional fields to write out during post-processing
 class Fields(Enum):
-    q = auto()
+    Q = auto()
     vorticity = auto()
-    lambda_2 = auto()
+    Lambda2 = auto()
     enstrophy = auto()
 
 # initial conditions
