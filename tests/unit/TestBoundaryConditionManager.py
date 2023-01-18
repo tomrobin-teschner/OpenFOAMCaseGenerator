@@ -3,15 +3,14 @@ import importlib
 import src.CaseGenerator.WriteZeroDirectoryFiles as ZeroDir
 from src.CaseGenerator.Properties.GlobalVariables import *
 import src.CaseGenerator.Properties.CaseProperties as CaseProperties
-import src.CaseGenerator.Checker as Checker
+import src.CaseGenerator.Properties.CaseFactory as CaseFactory
 
 class TestBoundaryConditionManager(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cla = Checker.CheckCommandLineArguments()
-        cla.add_option('case', 'Naca0012')
-        case_properties_handler = CaseProperties.CaseProperties(cla)
-        cls.properties = case_properties_handler.get_case_properties()
+        factory = CaseFactory.CaseFactory('Naca0012', {})
+        case_handler = CaseProperties.CaseProperties()
+        cls.properties = case_handler.add_default_properties(factory.get_case_properties())
 
     def test_laminar_boundary_conditions(self):
         self.properties['turbulence_properties']['turbulence_type'] = TurbulenceType.laminar

@@ -2,16 +2,15 @@ import unittest
 import src.CaseGenerator.WriteSystemDirectoryFiles as SystemDir
 from src.CaseGenerator.Properties.GlobalVariables import *
 import src.CaseGenerator.Properties.CaseProperties as CaseProperties
-import src.CaseGenerator.Checker as Checker
+import src.CaseGenerator.Properties.CaseFactory as CaseFactory
 
 
 class TestSystemDirectoryFilesCreation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cla = Checker.CheckCommandLineArguments()
-        cla.add_option('case', 'Naca0012')
-        case_properties_handler = CaseProperties.CaseProperties(cla)
-        cls.properties = case_properties_handler.get_case()
+        factory = CaseFactory.CaseFactory('Naca0012', {})
+        case_handler = CaseProperties.CaseProperties()
+        cls.properties = case_handler.add_default_properties(factory.get_case_properties())
 
         cls.properties['point_probes']['write_point_probes'] = True
         cls.properties['point_probes']['location'] = [[0.0, 0.0, 0.0]]
