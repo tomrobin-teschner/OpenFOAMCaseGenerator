@@ -1,4 +1,4 @@
-from setups.cases.BaseCase.BaseCase import *
+from input.cases.BaseCase.BaseCase import *
 from src.CaseGenerator.Properties.GlobalVariables import *
 import os
 
@@ -16,7 +16,7 @@ class Naca0012(BaseCase):
             'file_properties': {
                 'case_name': 'Naca0012',
                 'mesh_treatment': Mesh.poly_mesh,
-                'polymesh_directory': os.path.join('setups', 'mesh', 'airfoilNASA', 'coarse'),
+                'polymesh_directory': os.path.join('input', 'mesh', 'airfoilNASA', 'coarse'),
                 'run_directory': os.path.join(''),
                 'version': 'v2212',
             },

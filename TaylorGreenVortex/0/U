@@ -1,0 +1,95 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+|                                                                             |
+| This file was automatically generated using the OpenFOAMCaseGenerator       |
+| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    location    "0";
+    object      U;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   #codeStream
+{
+    codeInclude
+    #{
+        #include "fvCFD.H"
+    #};
+
+    codeOptions
+    #{
+        -I$(LIB_SRC)/finiteVolume/lnInclude \
+        -I$(LIB_SRC)/meshTools/lnInclude
+    #};
+
+    codeLibs
+    #{
+        -lmeshTools \
+        -lfiniteVolume
+    #};
+
+    code
+    #{
+        const IOdictionary& d = static_cast<const IOdictionary&>(dict);
+        const fvMesh& mesh = refCast<const fvMesh>(d.db());
+        vectorField U(mesh.nCells());
+        
+        auto U_0 = 1.0;
+        
+        forAll(U, cellI)
+        {
+            auto x = mesh.C()[cellI].x();
+            auto y = mesh.C()[cellI].y();
+            auto z = mesh.C()[cellI].z();
+        
+            U[cellI].x() =   U_0 * Foam::sin(x) * Foam::cos(y) * Foam::cos(z);
+            U[cellI].y() = - U_0 * Foam::cos(x) * Foam::sin(y) * Foam::cos(z);
+            U[cellI].z() =   0.0;
+        }
+        U.writeEntry("", os);
+    #};
+};
+
+boundaryField
+{
+    top
+    {
+        type            cyclic;
+    }
+    bottom
+    {
+        type            cyclic;
+    }
+    left
+    {
+        type            cyclic;
+    }
+    right
+    {
+        type            cyclic;
+    }
+    front
+    {
+        type            cyclic;
+    }
+    back
+    {
+        type            cyclic;
+    }
+}
+
+// ************************************************************************* //

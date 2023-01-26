@@ -1,4 +1,4 @@
-from setups.cases.BaseCase.BaseCase import *
+from input.cases.BaseCase.BaseCase import *
 from src.CaseGenerator.Properties.GlobalVariables import *
 import os
 
@@ -20,7 +20,7 @@ class TaylorGreenVortex(BaseCase):
             'file_properties': {
                 'case_name': 'TaylorGreenVortex',
                 'mesh_treatment': Mesh.block_mesh_dict,
-                'blockmeshdict_directory': os.path.join('setups', 'mesh', 'TaylorGreenVortex'),
+                'blockmeshdict_directory': os.path.join('input', 'mesh', 'TaylorGreenVortex'),
                 'run_directory': os.path.join(''),
                 'version': 'v2212',
             },
@@ -41,9 +41,9 @@ class TaylorGreenVortex(BaseCase):
             'flow_properties': {
                 'custom_initial_conditions': True,
                 'custom_initial_conditions_setup': {
-                    'p': os.path.join('setups', 'scripts', 'initialConditions', 'TaylorGreenVortex', 'compressible',
+                    'p': os.path.join('input', 'scripts', 'initialConditions', 'TaylorGreenVortex', 'compressible',
                                       'p'),
-                    'U': os.path.join('setups', 'scripts', 'initialConditions', 'TaylorGreenVortex', 'compressible',
+                    'U': os.path.join('input', 'scripts', 'initialConditions', 'TaylorGreenVortex', 'compressible',
                                       'U'),
                 },
                 'flow_type': self.to_python_expression(BaseCase.parameters['flow_type']),
@@ -129,17 +129,17 @@ class TaylorGreenVortex(BaseCase):
             'post_processing': {
                 'execute_function_object': True,
                 'function_objects': {
-                    'turbulenceStatistics': os.path.join('setups', 'scripts', 'userDefined', 'functionObjects',
+                    'turbulenceStatistics': os.path.join('input', 'scripts', 'userDefined', 'functionObjects',
                                                             'TaylorGreenVortex')
                 },
                 'execute_python_script': True,
                 'python_script': [
                     {
-                        'script': os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                        'script': os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                                'TaylorGreenVortex', 'plotTaylorGreenVortex.py'),
                         'arguments': [''],
                         'requires': [
-                            os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                            os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                          'TaylorGreenVortex', 'taylor_green_vortex_512_ref.dat'),
                         ],
                     },

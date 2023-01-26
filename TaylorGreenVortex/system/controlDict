@@ -1,0 +1,71 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+|                                                                             |
+| This file was automatically generated using the OpenFOAMCaseGenerator       |
+| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application       pimpleFoam;
+
+startFrom         startTime;
+
+startTime         0;
+
+stopAt            endTime;
+
+endTime           20;
+
+deltaT            0.01;
+
+maxDeltaT         1;
+
+adjustTimeStep    no;
+
+maxCo             1.0;
+
+writeControl      timeStep;
+
+writeInterval     50;
+
+purgeWrite        0;
+
+writeFormat       ascii;
+
+writePrecision    6;
+
+writeCompression  off;
+
+timeFormat        general;
+
+timePrecision     6;
+
+runTimeModifiable true;
+
+functions
+{
+    #include "include/fields"
+    #include "include/isoSurfaces"
+    #include "include/lineProbes"
+    #include "include/cuttingPlanes"
+    #include "include/yPlus"
+    #include "include/residuals"
+    #include "include/turbulenceStatistics"
+}
+
+// ************************************************************************* //

@@ -1,4 +1,4 @@
-from setups.cases.BaseCase.BaseCase import *
+from input.cases.BaseCase.BaseCase import *
 from src.CaseGenerator.Properties.GlobalVariables import *
 import os
 
@@ -15,11 +15,11 @@ class WingAndWinglet(BaseCase):
                 'case_name': 'WingAndWinglet',
                 'mesh_treatment': Mesh.snappy_hex_mesh_dict,
                 'snappyhexmeshdict': {
-                    'snappyhexmesh_directory': os.path.join('setups', 'mesh', 'wing_and_winglet'),
-                    'blockmeshdict_directory': os.path.join('setups', 'mesh', 'wing_and_winglet'),
+                    'snappyhexmesh_directory': os.path.join('input', 'mesh', 'wing_and_winglet'),
+                    'blockmeshdict_directory': os.path.join('input', 'mesh', 'wing_and_winglet'),
                     'polymesh_directory': os.path.join(''),
                     'geometry': [
-                        os.path.join('setups', 'geometry', 'wing_and_winglet', 'wing_and_winglet.stl'),
+                        os.path.join('input', 'geometry', 'wing_and_winglet', 'wing_and_winglet.stl'),
                     ]
                 },
                 'run_directory': os.path.join(''),

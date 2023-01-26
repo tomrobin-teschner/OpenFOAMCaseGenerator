@@ -1,0 +1,133 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+|                                                                             |
+| This file was automatically generated using the OpenFOAMCaseGenerator       |
+| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      sampling;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+plane_x=0
+{
+    type                  surfaces;
+    libs                  (sampling);
+
+    interpolationScheme   cellPoint;
+
+    surfaceFormat         vtk;
+
+    writeControl    writeTime;
+
+    log                   no;
+
+    surfaces
+    {
+        plane_x=0
+        {
+            type          cuttingPlane;
+            planeType     pointAndNormal;
+            pointAndNormalDict
+            {
+                point     (0 0 0);
+                normal    (1 0 0);
+            }
+            interpolate   true;
+        }
+    }
+
+    fields
+    (
+        U
+        p
+        vorticity
+    );
+}
+
+plane_y=0
+{
+    type                  surfaces;
+    libs                  (sampling);
+
+    interpolationScheme   cellPoint;
+
+    surfaceFormat         vtk;
+
+    writeControl    writeTime;
+
+    log                   no;
+
+    surfaces
+    {
+        plane_y=0
+        {
+            type          cuttingPlane;
+            planeType     pointAndNormal;
+            pointAndNormalDict
+            {
+                point     (0 0 0);
+                normal    (0 1 0);
+            }
+            interpolate   true;
+        }
+    }
+
+    fields
+    (
+        U
+        p
+        vorticity
+    );
+}
+
+plane_z=0
+{
+    type                  surfaces;
+    libs                  (sampling);
+
+    interpolationScheme   cellPoint;
+
+    surfaceFormat         vtk;
+
+    writeControl    writeTime;
+
+    log                   no;
+
+    surfaces
+    {
+        plane_z=0
+        {
+            type          cuttingPlane;
+            planeType     pointAndNormal;
+            pointAndNormalDict
+            {
+                point     (0 0 0);
+                normal    (0 0 1);
+            }
+            interpolate   true;
+        }
+    }
+
+    fields
+    (
+        U
+        p
+        vorticity
+    );
+}
+
+// ************************************************************************* //

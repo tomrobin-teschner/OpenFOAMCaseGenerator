@@ -1,0 +1,99 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+|                                                                             |
+| This file was automatically generated using the OpenFOAMCaseGenerator       |
+| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      p;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   #codeStream
+{
+    codeInclude
+    #{
+        #include "fvCFD.H"
+    #};
+
+    codeOptions
+    #{
+        -I$(LIB_SRC)/finiteVolume/lnInclude \
+        -I$(LIB_SRC)/meshTools/lnInclude
+    #};
+
+    codeLibs
+    #{
+        -lmeshTools \
+        -lfiniteVolume
+    #};
+
+    code
+    #{
+        const IOdictionary& d = static_cast<const IOdictionary&>(dict);
+        const fvMesh& mesh = refCast<const fvMesh>(d.db());
+        scalarField p(mesh.nCells(), 0.0);
+        
+        auto p_0 = 100.0;
+        auto U_0 = 1.0;
+        auto r_0 = 1.0;
+        
+        forAll(p, cellI)
+        {
+            auto x = mesh.C()[cellI].x();
+            auto y = mesh.C()[cellI].y();
+            auto z = mesh.C()[cellI].z();
+        
+            auto cos2x = Foam::cos(2.0 * x);
+            auto cos2y = Foam::cos(2.0 * y);
+            auto cos2z = Foam::cos(2.0 * z);
+        
+            p[cellI] = p_0 + ((r_0 * Foam::pow(U_0, 2)) / 16.0) * (cos2x + cos2y) * (cos2z + 2.0);
+        }
+        p.writeEntry("", os);
+    #};
+};
+
+boundaryField
+{
+    top
+    {
+        type            cyclic;
+    }
+    bottom
+    {
+        type            cyclic;
+    }
+    left
+    {
+        type            cyclic;
+    }
+    right
+    {
+        type            cyclic;
+    }
+    front
+    {
+        type            cyclic;
+    }
+    back
+    {
+        type            cyclic;
+    }
+}
+
+// ************************************************************************* //

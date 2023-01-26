@@ -1,0 +1,13 @@
+# !/bin/sh
+cd "${0%/*}" || exit  # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions  # Tutorial run functions
+# ------------------------------------------------------------------------------
+
+blockMesh
+pimpleFoam 
+python3 postProcessing/plotResiduals.py
+python3 postProcessing/addVTPLoader.py plane_x=0 plane_y=0 plane_z=0 
+python3 postProcessing/addVTPLoader.py isoSurface_Q 
+python3 postProcessing/plotTaylorGreenVortex.py  
+
+# ------------------------------------------------------------------------------

@@ -1,0 +1,32 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+|                                                                             |
+| This file was automatically generated using the OpenFOAMCaseGenerator       |
+| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      residuals;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+residuals
+{
+    type            solverInfo;
+    libs            (utilityFunctionObjects);
+    fields          (".*");
+}
+
+// ************************************************************************* //

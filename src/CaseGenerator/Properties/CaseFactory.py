@@ -9,10 +9,10 @@ class CaseFactory:
 
     def get_case_properties(self):
         try:
-            case = getattr(importlib.import_module(f'setups.cases.{self.case_name}.{self.case_name}'), self.case_name)
+            case = getattr(importlib.import_module(f'input.cases.{self.case_name}.{self.case_name}'), self.case_name)
         except:
             sys.exit(
-                f'Could not process the input: setups/cases/{self.case_name}/{self.case_name}.py\n' +
+                f'Could not process the input: input/cases/{self.case_name}/{self.case_name}.py\n' +
                 f'Please ensure the file exists in the input directory and is spelled correctly. If it does\n' +
                 f'exist, ensure that the class name within {self.case_name}.py contains a class of the\n'
                 f'same name and derives from the base class, e.g.:\n\nclass {self.case_name}'

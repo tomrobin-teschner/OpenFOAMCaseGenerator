@@ -1,0 +1,86 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+|                                                                             |
+| This file was automatically generated using the OpenFOAMCaseGenerator       |
+| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default                              backward;
+}
+
+gradSchemes
+{
+    default                              Gauss linear;
+    grad(U)                              Gauss linear;
+    grad(p)                              Gauss linear;
+    grad(nut)                            Gauss linear;
+    grad(flm)                            Gauss linear;
+    grad(fmm)                            Gauss linear;
+}
+
+divSchemes
+{
+    default                              Gauss linear    div(U)                               Gauss linear;
+    div(phi,U)                           bounded Gauss MUSCLV grad(U);
+    div(phi,p)                           Gauss limitedLinear 1;
+    div(phi,nut)                         Gauss upwind;
+    div(phi,flm)                         Gauss upwind;
+    div(phi,fmm)                         Gauss upwind;
+    div((nuEff*dev2(T(grad(U)))))        Gauss linear;
+}
+
+laplacianSchemes
+{
+    default                              Gauss linear limited 1;
+    laplacian(p)                         Gauss linear limited 1;
+    laplacian(nuEff,U)                   Gauss linear limited 1;
+    laplacian(nuEff,p)                   Gauss linear limited 1;
+    laplacian(nuEff,nut)                 Gauss linear limited 1;
+    laplacian(nuEff,flm)                 Gauss linear limited 1;
+    laplacian(nuEff,fmm)                 Gauss linear limited 1;
+}
+
+interpolationSchemes
+{
+    default                              linear;
+    flux(U)                              linear;
+    flux(p)                              linear;
+    flux(nut)                            linear;
+    flux(flm)                            linear;
+    flux(fmm)                            linear;
+}
+
+snGradSchemes
+{
+    default                              limited 1;
+    snGrad(U)                            limited 1;
+    snGrad(p)                            limited 1;
+    snGrad(nut)                          limited 1;
+    snGrad(flm)                          limited 1;
+    snGrad(fmm)                          limited 1;
+}
+
+wallDist
+{
+    method                               meshWave;
+}
+
+// ************************************************************************* //

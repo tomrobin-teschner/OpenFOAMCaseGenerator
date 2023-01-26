@@ -1,4 +1,4 @@
-from setups.cases.BaseCase.BaseCase import *
+from input.cases.BaseCase.BaseCase import *
 from src.CaseGenerator.Properties.GlobalVariables import *
 import os
 
@@ -18,7 +18,7 @@ class BackwardFacingStep(BaseCase):
             'file_properties': {
                 'case_name': 'BackwardFacingStep',
                 'mesh_treatment': Mesh.poly_mesh,
-                'polymesh_directory': os.path.join('setups', 'mesh', 'backwardFacingStep', 'coarse'),
+                'polymesh_directory': os.path.join('input', 'mesh', 'backwardFacingStep', 'coarse'),
                 'run_directory': os.path.join(''),
                 'version': 'v2212',
             },
@@ -37,7 +37,7 @@ class BackwardFacingStep(BaseCase):
                 },
                 'custom_inlet_boundary_conditions': self.to_bool(BaseCase.parameters['custom_inlet_profile']),
                 'custom_inlet_boundary_conditions_setup': {
-                    'U': os.path.join('setups', 'scripts', 'boundaryConditions', 'backwardFacingStep',
+                    'U': os.path.join('input', 'scripts', 'boundaryConditions', 'backwardFacingStep',
                                       'velocityInletProfile'),
                 },
             },
@@ -159,21 +159,21 @@ class BackwardFacingStep(BaseCase):
                 'execute_python_script': True,
                 'python_script': [
                     {
-                        'script': os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                        'script': os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                                'backwardFacingStep', 'plotBackwardFacingStep.py'),
                         'arguments': [''],
                         'requires': [
-                            os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                            os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                          'backwardFacingStep', 'experimental_cf_data.csv'),
-                            os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                            os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                          'backwardFacingStep', 'x_by_H=-4.csv'),
-                            os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                            os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                          'backwardFacingStep', 'x_by_H=1.csv'),
-                            os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                            os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                          'backwardFacingStep', 'x_by_H=4.csv'),
-                            os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                            os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                          'backwardFacingStep', 'x_by_H=6.csv'),
-                            os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
+                            os.path.join('input', 'scripts', 'userDefined', 'postProcessing',
                                          'backwardFacingStep', 'x_by_H=10.csv'),
                         ],
                     },

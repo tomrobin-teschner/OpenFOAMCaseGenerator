@@ -39,10 +39,10 @@ class ScreenOutput:
 
         case = command_line_arguments['case']
         print(f'Generated case : {self.properties["file_properties"]["path"]}')
-        print(f'Using input    : setups/cases/{case}/{case}.py\n')
+        print(f'Using input    : input/cases/{case}/{case}.py\n')
 
         properties_module = command_line_arguments['case']
-        case = getattr(importlib.import_module('setups.cases.'+properties_module+'.'+properties_module),
+        case = getattr(importlib.import_module('input.cases.'+properties_module+'.'+properties_module),
             properties_module)
         if command_line_arguments.get_number_of_parameters() + len(case.parameters) > 0:
             max_key_length = 0

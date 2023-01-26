@@ -1,4 +1,4 @@
-from setups.cases.BaseCase.BaseCase import *
+from input.cases.BaseCase.BaseCase import *
 from src.CaseGenerator.Properties.GlobalVariables import *
 import os
 
@@ -14,7 +14,7 @@ class Cylinder(BaseCase):
             'file_properties': {
                 'case_name': 'cylinder',
                 'mesh_treatment': Mesh.poly_mesh,
-                'polymesh_directory': os.path.join('setups', 'mesh', 'cylinder'),
+                'polymesh_directory': os.path.join('input', 'mesh', 'cylinder'),
                 'run_directory': os.path.join(''),
                 'version': 'v2212',
             },
@@ -29,7 +29,7 @@ class Cylinder(BaseCase):
             'flow_properties': {
                 'custom_initial_conditions': True,
                 'custom_initial_conditions_setup': {
-                    'variable': os.path.join('setups', 'scripts', 'initialConditions', 'cylinder', 'U'),
+                    'variable': os.path.join('input', 'scripts', 'initialConditions', 'cylinder', 'U'),
                 },
                 'flow_type': FlowType.incompressible,
                 'const_viscosity': True,

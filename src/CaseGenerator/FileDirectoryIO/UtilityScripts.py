@@ -86,11 +86,11 @@ class UtilityScripts:
         return all_clean
 
     def copy_residual_plotting_script(self):
-        src = os.path.join('setups', 'scripts', 'userDefined', 'postProcessing', 'plotResiduals.py')
+        src = os.path.join('input', 'scripts', 'userDefined', 'postProcessing', 'plotResiduals.py')
         dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
         distutils.file_util.copy_file(src, dst)
 
     def copy_PVD_loader_script(self):
-        src = os.path.join('setups', 'scripts', 'userDefined', 'postProcessing', 'addVTPLoader.py')
+        src = os.path.join('input', 'scripts', 'userDefined', 'postProcessing', 'addVTPLoader.py')
         dst = os.path.join(self.properties['file_properties']['path'], 'postProcessing')
         distutils.file_util.copy_file(src, dst)

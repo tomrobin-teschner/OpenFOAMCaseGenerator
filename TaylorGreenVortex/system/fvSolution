@@ -1,0 +1,126 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+|                                                                             |
+| This file was automatically generated using the OpenFOAMCaseGenerator       |
+| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+solvers
+{
+    U
+    {
+        solver           PBiCGStab;
+        preconditioner   DILU;
+        tolerance        1e-14;
+        relTol           1e-06;
+    }
+
+    UFinal
+    {
+        $U;
+    }
+
+    p
+    {
+        solver           PCG;
+        preconditioner   FDIC;
+        tolerance        1e-14;
+        relTol           1e-06;
+    }
+
+    pFinal
+    {
+        $p;
+    }
+
+    nut
+    {
+        solver           PBiCGStab;
+        preconditioner   DILU;
+        tolerance        1e-14;
+        relTol           1e-06;
+    }
+
+    nutFinal
+    {
+        $nut;
+    }
+
+    flm
+    {
+        solver           PBiCGStab;
+        preconditioner   DILU;
+        tolerance        1e-14;
+        relTol           1e-06;
+    }
+
+    flmFinal
+    {
+        $flm;
+    }
+
+    fmm
+    {
+        solver           PBiCGStab;
+        preconditioner   DILU;
+        tolerance        1e-14;
+        relTol           1e-06;
+    }
+
+    fmmFinal
+    {
+        $fmm;
+    }
+
+}
+
+"(SIMPLE|PISO|PIMPLE)"
+{
+    consistent                 yes;
+    nCorrectors                2;
+    nOuterCorrectors           1;
+    nNonOrthogonalCorrectors   0;
+    pRefCell                   0;
+    pRefValue                  0;
+
+    residualControl
+    {
+        "(.*)"
+        {
+            relTol             0;
+            tolerance          0;
+        }
+    }
+}
+
+relaxationFactors
+{
+    fields
+    {
+        "(.*)"		0.7;
+    }
+
+    equations
+    {
+        "(.*)"		0.7;
+    }
+}
+
+// ************************************************************************* //
