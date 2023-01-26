@@ -25,7 +25,7 @@ class StateVariableManager:
 
     def get_active_variable_names(self):
         names = []
-        for key, value in self.variables.items():
+        for key in self.variables.keys():
             names.append(key)
         return names
 
@@ -113,22 +113,27 @@ class StateVariableManager:
             self.variables['alphat'] = ['volScalarField', '[1 -1 -1 0 0 0 0]']
 
         if self.properties['turbulence_properties']['turbulence_type'] == TurbulenceType.les:
-            LesModel = self.properties['turbulence_properties']['LesModel']
+            les_model = self.properties['turbulence_properties']['LesModel']
             if (
-                    LesModel == LesModel.kEqn or
-                    LesModel == LesModel.dynamicKEqn
+                    les_model == LesModel.kEqn or
+                    les_model == LesModel.dynamicKEqn
                 ):
                 self.variables['k'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
             elif (
-                    LesModel == LesModel.SpalartAllmarasDES or
-                    LesModel == LesModel.SpalartAllmarasDDES or
-                    LesModel == LesModel.SpalartAllmarasIDDES
+                    les_model == LesModel.SpalartAllmarasDES or
+                    les_model == LesModel.SpalartAllmarasDDES or
+                    les_model == LesModel.SpalartAllmarasIDDES
                 ):
                 self.variables['nuTilda'] = ['volScalarField', '[0 2 -1 0 0 0 0]']
             elif (
-                    LesModel == LesModel.kOmegaSSTDES or
-                    LesModel == LesModel.kOmegaSSTDDES or
-                    LesModel == LesModel.kOmegaSSTIDDES
+                    les_model == LesModel.kOmegaSSTDES or
+                    les_model == LesModel.kOmegaSSTDDES or
+                    les_model == LesModel.kOmegaSSTIDDES
                 ):
                 self.variables['k'] = ['volScalarField', '[0 2 -2 0 0 0 0]']
                 self.variables['omega'] = ['volScalarField', '[0 0 -1 0 0 0 0]']
+            elif les_model == LesModel.dynamicLagrangian:
+                self.variables['flm'] = ['volScalarField', '[0 4 -4 0 0 0 0]']
+                self.variables['fmm'] = ['volScalarField', '[0 4 -4 0 0 0 0]']
+            elif les_model == LesModel.DeardorffDiffStress:
+                self.variables['R'] = ['volSymmTensorField', '[0 2 -2 0 0 0 0]']

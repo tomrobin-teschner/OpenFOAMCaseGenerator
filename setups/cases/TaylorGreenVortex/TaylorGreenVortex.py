@@ -5,10 +5,15 @@ import os
 
 class TaylorGreenVortex(BaseCase):
     """Creates the case setup for the Taylor-Green Vortex problem"""
-    parameters = {
-        'flow_type': FlowType.compressible,
-        'solver': Solver.rhoPimpleFoam,
-    }
+
+    def __init__(self):
+        self.add_parameters('run_in_parallel', True)
+        self.add_parameters('number_of_processors', 4)
+        self.add_parameters('flow_type', FlowType.compressible)
+        self.add_parameters('solver', Solver.rhoPimpleFoam)
+        self.add_parameters('les_model', LesModel.kEqn)
+        self.add_parameters('les_delta', DeltaModel.cubeRootVol)
+        self.add_parameters('les_filter', LesFilter.simple)
 
     def create_case(self):
         self.update_case({
@@ -20,8 +25,8 @@ class TaylorGreenVortex(BaseCase):
                 'version': 'v2212',
             },
             'parallel_properties': {
-                'run_in_parallel': True,
-                'number_of_processors': 4,
+                'run_in_parallel': self.to_bool(BaseCase.parameters['run_in_parallel']),
+                'number_of_processors': self.to_int(BaseCase.parameters['number_of_processors']),
             },
             'boundary_properties': {
                 'boundary_conditions': {
@@ -41,7 +46,7 @@ class TaylorGreenVortex(BaseCase):
                     'U': os.path.join('setups', 'scripts', 'initialConditions', 'TaylorGreenVortex', 'compressible',
                                       'U'),
                 },
-                'flow_type': self.to_python_expression(TaylorGreenVortex.parameters['flow_type']),
+                'flow_type': self.to_python_expression(BaseCase.parameters['flow_type']),
                 'const_viscosity': True,
                 'input_parameters_specification_mode': Dimensionality.dimensional,
                 'dimensional_properties': {
@@ -53,7 +58,7 @@ class TaylorGreenVortex(BaseCase):
                 },
             },
             'solver_properties': {
-                'solver': self.to_python_expression(TaylorGreenVortex.parameters['solver']),
+                'solver': self.to_python_expression(BaseCase.parameters['solver']),
                 'number_of_non_orthogonal_corrector_steps': 0,
                 'number_of_corrector_steps': 2,
                 'number_of_outer_corrector_steps': 1,
@@ -79,9 +84,9 @@ class TaylorGreenVortex(BaseCase):
             },
             'turbulence_properties': {
                 'turbulence_type': TurbulenceType.les,
-                'LesModel': LesModel.kEqn,
-                'LesFilter': LesFilter.simple,
-                'DeltaModel': DeltaModel.cubeRootVol,
+                'LesModel': self.to_python_expression(BaseCase.parameters['les_model']),
+                'LesFilter': self.to_python_expression(BaseCase.parameters['les_filter']),
+                'DeltaModel': self.to_python_expression(BaseCase.parameters['les_delta']),
             },
             'convergence_control': {
                 'convergence_threshold': 0,

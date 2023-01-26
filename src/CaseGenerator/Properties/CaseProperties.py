@@ -7,12 +7,6 @@ import os
 class CaseProperties:
     def __init__(self):
         pass
-        # factory = CaseFactory(command_line_arguments['case'], command_line_arguments['parameter'])
-        # properties = factory.get_case_properties()
-
-    # def get_case(self):
-    #     self.__add_default_properties()
-    #     return properties
 
     def add_default_properties(self, properties):
         # absolute path of text case location

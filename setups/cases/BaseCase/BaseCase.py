@@ -10,6 +10,13 @@ class BaseCase(metaclass = ABCMeta):
     This is the place where all properties are defined and all cases must
     derive from this base class to inherit default properties.
     """
+
+    # class parameters, used in derived class to expose parameters as command line arguments
+    parameters = {
+        'run_in_parallel': False,
+        'number_of_processors': 1
+    }
+
     def update_case(self, updated_properties):
         self.properties = {
             'file_properties': {
@@ -66,10 +73,10 @@ class BaseCase(metaclass = ABCMeta):
             'parallel_properties': {
                 # flag indicating if simulation will be run in parallel. If true, additional information for domain
                 # decomposition will be written (and Allrun script modified, accordingly)
-                'run_in_parallel': False,
+                'run_in_parallel': self.to_bool(BaseCase.parameters['run_in_parallel']),
 
                 # number of processors that will be used to run case in parallel
-                'number_of_processors': 1,
+                'number_of_processors': self.to_int(BaseCase.parameters['number_of_processors']),
             },
 
             # properties imposed at boundaries / freestream
@@ -778,6 +785,9 @@ class BaseCase(metaclass = ABCMeta):
                 old_dict[k] = v
         return old_dict
 
+    def add_parameters(self, key, value):
+        BaseCase.parameters[key] = value
+
     def to_int(self, parameter):
         return int(parameter)
 
@@ -785,7 +795,10 @@ class BaseCase(metaclass = ABCMeta):
         return float(parameter)
 
     def to_bool(self, parameter):
-        return bool(parameter)
+        if type(parameter) is str:
+            return eval(parameter)
+        else:
+            return bool(parameter)
 
     def to_python_expression(self, parameter):
         if type(parameter) is str:

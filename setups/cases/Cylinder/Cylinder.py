@@ -5,7 +5,9 @@ import os
 
 class Cylinder(BaseCase):
     """Creates the flow setup for an unsteady flow around a cylinder"""
-    parameters = {}
+    
+    def __init__(self):
+        pass
     
     def create_case(self):
         self.update_case({

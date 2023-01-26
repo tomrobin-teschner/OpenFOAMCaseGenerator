@@ -53,7 +53,10 @@ class ScreenOutput:
 
             print('Case parameters')
             for key, value in case.parameters.items():
-                print(f'  - {key:{max_key_length}s}: {value}')
+                if str(case.parameters['run_in_parallel']) is False and key == 'number_of_processors':
+                    pass
+                else:
+                    print(f'  - {key:{max_key_length}s}: {value}')
 
         if self.properties['file_properties']['mesh_treatment'] == Mesh.no_mesh:
             print('\nNo mesh was specified during the generation of case directory.'

@@ -76,25 +76,6 @@ class FileManager:
     def write(self, file_id, message):
         file_id.write(message)
 
-    # TODO: deprecated, remove once refactored
-    def write_header(self, file_id, class_type, location, object_type):
-        file_id.write('/*--------------------------------*- C++ -*----------------------------------*\\\n')
-        file_id.write('| =========                 |                                                 |\n')
-        file_id.write('| \\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n')
-        file_id.write('|  \\\    /   O peration     | Version:  ' + self.properties['file_properties']['version'] + '                                 |\n')
-        file_id.write('|   \\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n')
-        file_id.write('|    \\\/     M anipulation  |                                                 |\n')
-        file_id.write('\*---------------------------------------------------------------------------*/\n')
-        file_id.write('FoamFile\n')
-        file_id.write('{\n')
-        file_id.write('    version     2.0;\n')
-        file_id.write('    format      ascii;\n')
-        file_id.write('    class       ' + class_type + ';\n')
-        file_id.write('    location    "' + location + '";\n')
-        file_id.write('    object      ' + object_type + ';\n')
-        file_id.write('}\n')
-        file_id.write('// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n')
-
     def get_version(self):
         return self.properties['file_properties']['version']
 

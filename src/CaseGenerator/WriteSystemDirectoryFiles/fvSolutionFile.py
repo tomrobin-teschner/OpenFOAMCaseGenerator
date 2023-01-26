@@ -12,8 +12,10 @@ class fvSolutionFile:
         version = self.properties['file_properties']['version']
         fv_solution = WriteHeader.get_header(version, 'dictionary', 'system', 'fvSolution')
 
-        abs_tol = str(self.properties['convergence_control']['absolute_convergence_criterion'])
-        rel_tol = str(self.properties['convergence_control']['relative_convergence_criterion'])
+        abs_tol = self.properties['convergence_control']['absolute_convergence_criterion']
+        rel_tol = self.properties['convergence_control']['relative_convergence_criterion']
+        turbulence_type = self.properties['turbulence_properties']['turbulence_type']
+        rans_model = self.properties['turbulence_properties']['RansModel']
 
         fv_solution += f'\n'
         fv_solution += f'solvers\n{{\n'
@@ -28,8 +30,8 @@ class fvSolutionFile:
                 elif self.properties['solver_properties']['pressure_solver'] == PressureSolver.krylov:
                     fv_solution += f'        solver           PCG;\n'
                     fv_solution += f'        preconditioner   FDIC;\n'
-                fv_solution += f'        tolerance        ' + abs_tol + ';\n'
-                fv_solution += f'        relTol           ' + rel_tol + ';\n'
+                fv_solution += f'        tolerance        {abs_tol};\n'
+                fv_solution += f'        relTol           {rel_tol};\n'
                 fv_solution += f'    }}\n'
                 fv_solution += f'\n'
                 fv_solution += f'    pFinal\n'
@@ -46,8 +48,8 @@ class fvSolutionFile:
                     elif self.properties['solver_properties']['pressure_solver'] == PressureSolver.krylov:
                         fv_solution += f'        solver           PCG;\n'
                         fv_solution += f'        preconditioner   FDIC;\n'
-                    fv_solution += f'        tolerance        ' + abs_tol + ';\n'
-                    fv_solution += f'        relTol           ' + rel_tol + ';\n'
+                    fv_solution += f'        tolerance        {abs_tol};\n'
+                    fv_solution += f'        relTol           {rel_tol};\n'
                     fv_solution += f'    }}\n'
                     fv_solution += f'\n'
                     fv_solution += f'    rhoFinal\n'
@@ -82,6 +84,17 @@ class fvSolutionFile:
                 fv_solution += f'        ${var};\n'
                 fv_solution += f'    }}\n'
                 fv_solution += f'\n'
+                if turbulence_type == TurbulenceType.rans and rans_model == RansModel.qZeta:
+                    fv_solution += f'    zetaFinal\n'
+                    fv_solution += f'    {{\n'
+                    fv_solution += f'        $k;\n'
+                    fv_solution += f'    }}\n'
+                    fv_solution += f'\n'
+                    fv_solution += f'    qFinal\n'
+                    fv_solution += f'    {{\n'
+                    fv_solution += f'        $k;\n'
+                    fv_solution += f'    }}\n'
+                    fv_solution += f'\n'
         fv_solution += f'}}\n'
         fv_solution += f'\n'
         fv_solution += f'"(SIMPLE|PISO|PIMPLE)"\n'

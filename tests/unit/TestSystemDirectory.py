@@ -8,8 +8,8 @@ import src.CaseGenerator.Properties.CaseFactory as CaseFactory
 class TestSystemDirectoryFilesCreation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        factory = CaseFactory.CaseFactory('Naca0012', {})
-        case_handler = CaseProperties.CaseProperties()
+        factory = CaseFactory('Naca0012', {})
+        case_handler = CaseProperties()
         cls.properties = case_handler.add_default_properties(factory.get_case_properties())
 
         cls.properties['point_probes']['write_point_probes'] = True

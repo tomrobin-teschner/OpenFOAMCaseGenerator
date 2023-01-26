@@ -5,11 +5,11 @@ import os
 
 class LidDrivenCavity(BaseCase):
     """Creates the flow setup for the lid driven cavity example"""
-    parameters = {
-        'reynolds_number': 1000,
-        'turbulence_type': TurbulenceType.laminar,
-        'RansModel': RansModel.kOmegaSST
-    }
+
+    def __init__(self):
+        self.add_parameters('reynolds_number', 1000)
+        self.add_parameters('turbulence_type', TurbulenceType.laminar)
+        self.add_parameters('RansModel', RansModel.kOmegaSST)
 
     def create_case(self):
         self.update_case({
@@ -31,7 +31,7 @@ class LidDrivenCavity(BaseCase):
                 'flow_type': FlowType.incompressible,
                 'input_parameters_specification_mode': Dimensionality.non_dimensional,
                 'non_dimensional_properties': {
-                    'Re': self.to_float(LidDrivenCavity.parameters['reynolds_number']),
+                    'Re': self.to_float(BaseCase.parameters['reynolds_number']),
                 },
                 'axis_aligned_flow_direction': {
                     'tangential': Coordinates.x,
@@ -68,10 +68,10 @@ class LidDrivenCavity(BaseCase):
                 'use_first_order_for_turbulence': True,
             },
             'turbulence_properties': {
-                'turbulence_type': self.to_python_expression(LidDrivenCavity.parameters['turbulence_type']),
+                'turbulence_type': self.to_python_expression(BaseCase.parameters['turbulence_type']),
                 'turbulent_quantities_at_inlet': TurbulenceLengthScaleCalculation.internal,
                 'freestream_turbulent_intensity': 0.05,
-                'RansModel': self.to_python_expression(LidDrivenCavity.parameters['RansModel']),
+                'RansModel': self.to_python_expression(BaseCase.parameters['RansModel']),
             },
             'convergence_control': {
                 'convergence_threshold': 1e-6,
@@ -111,7 +111,7 @@ class LidDrivenCavity(BaseCase):
                     {
                         'script': os.path.join('setups', 'scripts', 'userDefined', 'postProcessing',
                                                'lidDrivenCavity', 'plotLidDrivenCavity.py'),
-                        'arguments': [self.to_float(LidDrivenCavity.parameters['reynolds_number'])],
+                        'arguments': [self.to_float(BaseCase.parameters['reynolds_number'])],
                         'requires': [
                             os.path.join('setups', 'scripts', 'userDefined', 'postProcessing', 'lidDrivenCavity',
                                          'Uy.dat'),

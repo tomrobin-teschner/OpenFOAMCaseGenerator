@@ -5,13 +5,13 @@ import os
 
 class BackwardFacingStep(BaseCase):
     """Creates the flow setup for aBackward Facing step simulation for incompressible, turbulent flows"""
-    parameters = {
-        'custom_inlet_profile': False,
-        'spatial_discretisation': DiscretisationPolicy.default,
-        'turbulence_type': TurbulenceType.rans,
-        'RansModel': RansModel.kOmegaSST,
-        'LesModel': LesModel.kEqn
-    }
+
+    def __init__(self):
+        self.add_parameters('custom_inlet_profile', False)
+        self.add_parameters('spatial_discretisation', DiscretisationPolicy.default)
+        self.add_parameters('turbulence_type', TurbulenceType.rans)
+        self.add_parameters('RansModel', RansModel.kOmegaSST)
+        self.add_parameters('LesModel', LesModel.kEqn)
 
     def create_case(self):
         self.update_case({
@@ -35,7 +35,7 @@ class BackwardFacingStep(BaseCase):
                     'bottom_wall': BoundaryConditions.wall,
                     'step': BoundaryConditions.wall,
                 },
-                'custom_inlet_boundary_conditions': self.to_bool(BackwardFacingStep.parameters['custom_inlet_profile']),
+                'custom_inlet_boundary_conditions': self.to_bool(BaseCase.parameters['custom_inlet_profile']),
                 'custom_inlet_boundary_conditions_setup': {
                     'U': os.path.join('setups', 'scripts', 'boundaryConditions', 'backwardFacingStep',
                                       'velocityInletProfile'),
@@ -79,16 +79,16 @@ class BackwardFacingStep(BaseCase):
                 },
             },
             'spatial_discretisation': {
-                'numerical_schemes_correction': self.to_python_expression(BackwardFacingStep.parameters['spatial_discretisation']),
+                'numerical_schemes_correction': self.to_python_expression(BaseCase.parameters['spatial_discretisation']),
                 'use_first_order_for_turbulence': True,
             },
             'turbulence_properties': {
-                'turbulence_type': self.to_python_expression(BackwardFacingStep.parameters['turbulence_type']),
+                'turbulence_type': self.to_python_expression(BaseCase.parameters['turbulence_type']),
                 'wall_modelling': WallModelling.low_re,
                 'turbulent_quantities_at_inlet': TurbulenceLengthScaleCalculation.internal,
                 'freestream_turbulent_intensity': 0.05,
-                'RansModel': self.to_python_expression(BackwardFacingStep.parameters['RansModel']),
-                'LesModel': self.to_python_expression(BackwardFacingStep.parameters['LesModel']),
+                'RansModel': self.to_python_expression(BaseCase.parameters['RansModel']),
+                'LesModel': self.to_python_expression(BaseCase.parameters['LesModel']),
                 'LesFilter': LesFilter.simple,
                 'DeltaModel': DeltaModel.cubeRootVol,
             },

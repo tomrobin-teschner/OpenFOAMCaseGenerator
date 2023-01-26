@@ -5,9 +5,9 @@ import os
 
 class WingAndWinglet(BaseCase):
     """Creates the input for a wing with winglet simulation"""
-    parameters = {
-        'angle_of_attack': 5,
-    }
+
+    def __init__(self):
+        self.add_parameters('angle_of_attack', 5)
 
     def create_case(self):
         self.update_case({
@@ -47,7 +47,7 @@ class WingAndWinglet(BaseCase):
                 'axis_aligned_flow_direction': {
                     'tangential': Coordinates.x,
                     'normal': Coordinates.y,
-                    'angle_of_attack': self.to_float(WingAndWinglet.parameters['angle_of_attack']),
+                    'angle_of_attack': self.to_float(BaseCase.parameters['angle_of_attack']),
                 },
             },
             'solver_properties': {

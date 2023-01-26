@@ -113,7 +113,9 @@ class BoundaryConditionManager:
             'nuTilda': 'uniform ' + str(self.freestream_nuTilda),
             'ReThetat': 'uniform ' + str(self.freestream_ReThetat),
             'gammaInt': 'uniform 1',
-            'R': 'uniform (' + str(uiui) + ' 0 0 ' + str(uiui) + ' 0 ' + str(uiui) + ')'
+            'R': 'uniform (' + str(uiui) + ' 0 0 ' + str(uiui) + ' 0 ' + str(uiui) + ')',
+            'flm': 'uniform 1e-4',
+            'fmm': 'uniform 1',
         }
 
         bc_zero_initial_conditions = copy.deepcopy(bc_freestream_conditions)

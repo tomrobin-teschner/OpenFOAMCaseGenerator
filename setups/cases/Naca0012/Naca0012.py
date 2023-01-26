@@ -5,12 +5,11 @@ import os
 
 class Naca0012(BaseCase):
     """Creates the flow setup for a NACA 0012 aerofoil simulation"""
-    # class parameters
-    parameters = {
-        'reynolds_number': 6000000,
-        'angle_of_attack': 0,
-        'RansModel': RansModel.kOmegaSST
-    }
+
+    def __init__(self):
+        self.add_parameters('reynolds_number', 6000000)
+        self.add_parameters('angle_of_attack', 0)
+        self.add_parameters('rans_model', RansModel.kOmegaSST)
 
     def create_case(self):
         self.update_case({
@@ -33,12 +32,12 @@ class Naca0012(BaseCase):
                 'const_viscosity': True,
                 'input_parameters_specification_mode': Dimensionality.non_dimensional,
                 'non_dimensional_properties': {
-                    'Re': self.to_float(Naca0012.parameters['reynolds_number']),
+                    'Re': self.to_float(BaseCase.parameters['reynolds_number']),
                 },
                 'axis_aligned_flow_direction': {
                     'tangential': Coordinates.x,
                     'normal': Coordinates.y,
-                    'angle_of_attack': self.to_float(Naca0012.parameters['angle_of_attack']),
+                    'angle_of_attack': self.to_float(BaseCase.parameters['angle_of_attack']),
                 },
             },
             'solver_properties': {
@@ -73,7 +72,7 @@ class Naca0012(BaseCase):
                 'wall_modelling': WallModelling.low_re,
                 'turbulent_quantities_at_inlet': TurbulenceLengthScaleCalculation.external,
                 'freestream_turbulent_intensity': 0.00052,
-                'RansModel': self.to_python_expression(Naca0012.parameters['RansModel']),
+                'RansModel': self.to_python_expression(BaseCase.parameters['rans_model']),
             },
             'convergence_control': {
                 'convergence_threshold': 1e-6,

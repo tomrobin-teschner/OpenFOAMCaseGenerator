@@ -97,7 +97,7 @@ class fvSchemesFile:
             div_type = 'Gauss upwind ' + pre_default_test + 'default;\n'
         elif discretisation_policy == DiscretisationPolicy.accuracy:
             div_type = 'Gauss limitedLinear ' + pre_default_test + '1;\n'
-        temp += f'    default{spacing}{div_type}'
+        temp += f'    default{spacing}Gauss linear'
 
         # allow for explicit solvers as well (which may have a div(U) term instead of the linearised
         # div(phi, U) term only)

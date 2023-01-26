@@ -53,7 +53,10 @@ class TurbulencePropertiesFile:
         les_model_string = f'    LESModel        {les_model.name};\n'
         
         filter_string = ''
-        if les_model is LesModel.dynamicKEqn:
+        if (
+                les_model is LesModel.dynamicKEqn or
+                les_model is LesModel.dynamicLagrangian
+            ):
             filter_string = self.__get_filter_model()
         
         delta_string = self.__get_DeltaModel()

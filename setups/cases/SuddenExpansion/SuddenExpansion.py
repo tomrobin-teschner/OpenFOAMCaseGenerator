@@ -5,9 +5,9 @@ import os
 
 class SuddenExpansion(BaseCase):
     """Creates the flow setup for a suddenly expanding channel to test flow bifurcation"""
-    parameters = {
-        'reynolds_number': 80,
-    }
+
+    def __init__(self):
+        self.add_parameters('reynolds_number', 80)
 
     def create_case(self):
         self.update_case({
@@ -36,7 +36,7 @@ class SuddenExpansion(BaseCase):
                 'flow_type': FlowType.incompressible,
                 'input_parameters_specification_mode': Dimensionality.non_dimensional,
                 'non_dimensional_properties': {
-                    'Re': self.to_float(SuddenExpansion.parameters['reynolds_number']),
+                    'Re': self.to_float(BaseCase.parameters['reynolds_number']),
                 },
                 'axis_aligned_flow_direction': {
                     'tangential': Coordinates.x,

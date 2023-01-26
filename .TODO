@@ -10,7 +10,7 @@
   ✔ Provide unit-tests for 0 directory @done(23-01-05 08:18)
   ✔ Provide unit-tests for constant directory @done(23-01-03 07:41)
   ✔ Provide unit-tests for system directory @done(23-01-17 07:10)
-  ☐ Rethink system tests, find a way to test automatically, without manually adding cases. Should also test all turbulence models!
+  ✔ Rethink system tests, find a way to test automatically, without manually adding cases. Should also test all turbulence models! @done(23-01-23 08:39)
   ☐ Set up CI/CD server
 
 ✔ File properties @done(23-01-12 08:27)
@@ -26,6 +26,7 @@
 ☐ Features
   ☐ Retire DFSEM inlet boundary condition, replace by offset BC instead
   ☐ Add a material properties database (as json implementation), implement air and use that in thermophysical properties instead
+  ☐ Select compressible model based on enthalpy or energy (check which one is available in OF)
 
 ☐ Cases
   ☐ Provide an internal and external LES example case setup
