@@ -19,9 +19,9 @@ class CheckCase:
         self.check_force_coefficients()
 
     def check_correct_turbulence_model_setup(self):
-        RansModel = self.properties['turbulence_properties']['RansModel']
-        if (RansModel == RansModel.kOmegaSSTLM or
-                RansModel == RansModel.kkLOmega):
+        rans_model = self.properties['turbulence_properties']['RansModel']
+        if (rans_model == RansModel.kOmegaSSTLM or
+                rans_model == RansModel.kkLOmega):
             if self.properties['turbulence_properties']['wall_modelling'] == WallModelling.high_re:
                 sys.exit('\n===================================== ERROR =====================================\n' +
                          '\nTransition models can not be run with wall functions and require a mesh\n' +
@@ -29,7 +29,7 @@ class CheckCase:
                          'a low-Re wall modelling approach here.\n' +
                          '\n=================================== END ERROR ===================================\n')
 
-        if RansModel == RansModel.SpalartAllmaras:
+        if rans_model == RansModel.SpalartAllmaras:
             if self.properties['turbulence_properties']['wall_modelling'] == WallModelling.high_re:
                 warnings.showwarning(
                     '\n==================================== WARNING ====================================\n' +
@@ -124,6 +124,8 @@ class CheckCase:
     def check_correct_compressible_solver_setup(self):
         solver = self.properties['solver_properties']['solver']
         flow_type = self.properties['flow_properties']['flow_type']
+        turbulence_type = self.properties['turbulence_properties']['turbulence_type']
+        les_model = self.properties['turbulence_properties']['LesModel']
         if (flow_type == FlowType.compressible) and (solver == Solver.simpleFoam or
                                                      solver == Solver.pimpleFoam or
                                                      solver == Solver.icoFoam or
@@ -135,6 +137,19 @@ class CheckCase:
                 'know what you are doing and are sure your setup is correct.\n' +
                 '\n================================== END WARNING ==================================\n',
                 UserWarning, '', 0)
+        if (flow_type == FlowType.compressible) and (turbulence_type == TurbulenceType.les):
+            if les_model == LesModel.DeardorffDiffStress:
+                sys.exit('\n===================================== ERROR =====================================\n' +
+                         '\nRunning Compressible flow with DeardorffDiffStress as the LES sub-grid scale model\n' +
+                         'will result in a strange error (it seems the equations expect the Reynolds stresses\n' +
+                         'to have different dimensions in different equations). This should work, but there\n' +
+                         'does not seem to be any documentation, nor tutorials, nor other resources available\n' +
+                         'that could show how to deal with this sub-grid scale mode. If you know what you are\n' +
+                         'doing and want to continue, run the case generator with the --no-checks option\n' +
+                         'to generate a case. Should you be able to get the compressible version of the\n' +
+                         'DeardorffDiffStress model to work, I\'d be grateful for you to leave a comment at:\n' +
+                         'https://www.cfd-online.com/Forums/openfoam-solving/247285-les-deardorffdiffstress.html\n' +
+                         '\n=================================== END ERROR ===================================\n')
 
     def check_sensible_convergence_criterion(self):
         unsteady = self.properties['time_discretisation']['time_integration']

@@ -57,7 +57,7 @@ class SystemTestManager():
         # overwrite properties for testing
         case_properties = self.__overwrite_test_specific_settings(case_properties, case_name)
 
-        case = CaseGenerator(case_properties)
+        case = CaseGenerator(case_properties, True)
         case.generate_case()
         self.tests.append(case_name)
 

@@ -33,20 +33,24 @@ class CheckCommandLineArguments:
                                     case-specific and can be viewed either directly in the defining module (*.py file)
                                     or by running the case generator, if a case has parameters defined, these will be
                                     listed at the bottom.
+
+        --no-checks                 Run the case generator again but suppress any warnings and/or error messages 
         '''
 
         self.__options['parameter'] = {}
+        self.__options['no-checks'] = False
         for i in range(1, len(self.__args)):
             if '--case=' in self.__args[i]:
                 self.__options['case'] = self.__args[i].replace('--case=', '')
+            if '--no-checks' in self.__args[i]:
+                self.__options['no-checks'] = True
             elif '--parameter' in self.__args[i]:
                 key_value = self.__args[i].replace('--parameter:', '').split('=')
                 self.__options['parameter'][key_value[0]] = key_value[1]
             elif '--help' in self.__args[i]:
                 print(help)
                 exit(0)
-            # else:
-            #     raise Exception(help)
+
 
     def __getitem__(self, item):
         if item in self.__options:

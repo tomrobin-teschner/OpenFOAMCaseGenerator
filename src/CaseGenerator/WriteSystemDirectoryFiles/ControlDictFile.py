@@ -69,7 +69,8 @@ class ControlDictFile:
             control_dict += f'    #include "include/lineProbes"\n'
         if self.properties['cutting_planes']['write_cutting_planes']:
             control_dict += f'    #include "include/cuttingPlanes"\n'
-        control_dict += f'    #include "include/yPlus"\n'
+        if self.properties['turbulence_properties']['turbulence_type'] != TurbulenceType.laminar:
+            control_dict += f'    #include "include/yPlus"\n'
         control_dict += f'    #include "include/residuals"\n'
         if self.properties['flow_properties']['flow_type'] == FlowType.compressible:
             control_dict += f'    #include "include/MachNo"\n'
@@ -77,7 +78,7 @@ class ControlDictFile:
             control_dict += f'    #includeFunc "wallShearStress"\n'
         if self.properties['post_processing']['execute_function_object']:
             fo_dict = self.properties['post_processing']['function_objects']
-            for key, value in fo_dict.items():
+            for key in fo_dict.keys():
                 control_dict += f'    #include "include/{key}"\n'
         control_dict += f'}}\n\n'
         control_dict += f'// ************************************************************************* //\n'

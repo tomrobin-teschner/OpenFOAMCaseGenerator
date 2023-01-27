@@ -9,7 +9,8 @@ class TaylorGreenVortex(TestCaseBase):
         for les_model in LesModel:
             case_name = f'{module}_{flow_type.name}_{les_model.name}'
             parameters = {'les_model': les_model, 'flow_type': flow_type}
-            yield module, case_name, parameters
+            if (flow_type == FlowType.compressible) and (les_model != LesModel.DeardorffDiffStress):
+                yield module, case_name, parameters
 
         for delta_model in DeltaModel:
             case_name = f'{module}_{flow_type.name}_{les_model.name}'

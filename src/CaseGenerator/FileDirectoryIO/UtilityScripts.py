@@ -31,7 +31,14 @@ class UtilityScripts:
             pre_solver_flag = f'mpirun -np {self.properties["parallel_properties"]["number_of_processors"]} '
             post_solver_flag = f' -parallel'
 
-        all_run += f'{pre_solver_flag}{self.properties["solver_properties"]["solver"].name} {post_solver_flag}\n'
+        all_run += f'# allow to run with different solver if specified as command line argument, otherwise use specified one\n'
+        all_run += f'if [ "$#" -eq 1 ]\n'
+        all_run += f'then\n'
+        all_run += f'    {pre_solver_flag}$1{post_solver_flag}\n'
+        all_run += f'else\n'
+        all_run += f'    {pre_solver_flag}{self.properties["solver_properties"]["solver"].name}{post_solver_flag}\n'
+        all_run += f'fi\n'
+        # all_run += f'{pre_solver_flag}{self.properties["solver_properties"]["solver"].name} {post_solver_flag}\n'
         if self.properties['parallel_properties']['run_in_parallel']:
             all_run += f'reconstructPar\n'
 

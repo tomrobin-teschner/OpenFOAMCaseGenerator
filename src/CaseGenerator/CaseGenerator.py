@@ -7,13 +7,15 @@ import src.CaseGenerator.WriteZeroDirectoryFiles as ZeroDir
 
 
 class CaseGenerator:
-    def __init__(self, properties):
+    def __init__(self, properties, run_checks):
         self.properties = properties
+        self.run_checks = run_checks
 
     def generate_case(self):
         # check case (make sure that current set up will not produce any problem)
-        check_case = Checker.CheckCase(self.properties)
-        check_case.run_all_checks()
+        if self.run_checks:
+            check_case = Checker.CheckCase(self.properties)
+            check_case.run_all_checks()
 
         # create the initial data structure for the case set-up
         file_manager = FileIO.FileManager(self.properties)

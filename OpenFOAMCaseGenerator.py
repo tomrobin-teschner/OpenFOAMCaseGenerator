@@ -13,6 +13,7 @@ def main():
     # create case
     case_name  = command_line_arguments['case']
     parameters = command_line_arguments['parameter']
+    run_checks = not command_line_arguments['no-checks']
     factory = CaseFactory(case_name, parameters)
 
     # add additional, default parameters to properties
@@ -21,7 +22,7 @@ def main():
     case_properties = case_handler.add_default_properties(case_properties)
 
     # hand-off case generation to dedicated class
-    case = CaseGenerator(case_properties)
+    case = CaseGenerator(case_properties, run_checks)
     case.generate_case()
 
     # output diagnostics
