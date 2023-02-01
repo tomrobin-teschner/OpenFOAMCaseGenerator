@@ -57,7 +57,7 @@ class fvSolutionFile:
                     fv_solution += f'        $rho;\n'
                     fv_solution += f'    }}\n'
                     fv_solution += f'\n'
-                    fv_solution += f'    e\n'
+                    fv_solution += f'    "(h|e)"\n'
                     fv_solution += f'    {{\n'
                     fv_solution += f'        solver           PBiCGStab;\n'
                     fv_solution += f'        preconditioner   DILU;\n'
@@ -65,7 +65,7 @@ class fvSolutionFile:
                     fv_solution += f'        relTol           {rel_tol};\n'
                     fv_solution += f'    }}\n'
                     fv_solution += f'\n'
-                    fv_solution += f'    eFinal\n'
+                    fv_solution += f'    "(hFinal|eFinal)"\n'
                     fv_solution += f'    {{\n'
                     fv_solution += f'        $e;\n'
                     fv_solution += f'    }}\n'
@@ -104,16 +104,16 @@ class fvSolutionFile:
         n_orthogonal_correctors = self.properties['solver_properties']['number_of_non_orthogonal_corrector_steps']
         if self.properties['flow_properties']['flow_type'] == FlowType.incompressible:
             fv_solution += f'    consistent                 yes;\n'
-            fv_solution += f'    nCorrectors                ' + str(n_correctors) + ';\n'
-            fv_solution += f'    nOuterCorrectors           ' + str(n_outer_correctors) + ';\n'
-            fv_solution += f'    nNonOrthogonalCorrectors   ' + str(n_orthogonal_correctors) + ';\n'
+            fv_solution += f'    nCorrectors                {n_correctors};\n'
+            fv_solution += f'    nOuterCorrectors           {n_outer_correctors};\n'
+            fv_solution += f'    nNonOrthogonalCorrectors   {n_orthogonal_correctors};\n'
             fv_solution += f'    pRefCell                   0;\n'
             fv_solution += f'    pRefValue                  0;\n'
         elif self.properties['flow_properties']['flow_type'] == FlowType.compressible:
             fv_solution += f'    consistent                 no;\n'
-            fv_solution += f'    nCorrectors                ' + str(n_correctors) + ';\n'
-            fv_solution += f'    nOuterCorrectors           ' + str(n_outer_correctors) + ';\n'
-            fv_solution += f'    nNonOrthogonalCorrectors   ' + str(n_orthogonal_correctors) + ';\n'
+            fv_solution += f'    nCorrectors                {n_correctors};\n'
+            fv_solution += f'    nOuterCorrectors           {n_outer_correctors};\n'
+            fv_solution += f'    nNonOrthogonalCorrectors   {n_orthogonal_correctors};\n'
             boundaries = self.properties['boundary_properties']['boundary_conditions']
             use_pressure_min_max_factors = False
             for key, value in boundaries.items():
@@ -150,16 +150,34 @@ class fvSolutionFile:
         fv_solution += f'    {{\n'
         fv_solution += f'        "(.*)"\t\t{self.properties["solver_properties"]["under_relaxation_default"]};\n'
         for key, value in self.properties['solver_properties']['under_relaxation_fields'].items():
-            fv_solution += f'        ' + key + '\t\t\t' + str(value) + ';\n'
+            fv_solution += f'        {key}\t\t\t{value};\n'
         fv_solution += f'    }}\n'
         fv_solution += f'\n'
         fv_solution += f'    equations\n'
         fv_solution += f'    {{\n'
         fv_solution += f'        "(.*)"\t\t{self.properties["solver_properties"]["under_relaxation_default"]};\n'
         for key, value in self.properties['solver_properties']['under_relaxation_equations'].items():
-            fv_solution += f'        ' + key + '\t\t\t' + str(value) + ';\n'
+            fv_solution += f'        {key}\t\t\t{value};\n'
         fv_solution += f'    }}\n'
         fv_solution += f'}}\n'
-        fv_solution += f'\n'
+        fv_solution += f'\n'        
+
+        # check if residual function object should be executed, if so, additional residual dictionary is needed here
+        fo_is_residual = False
+        if self.properties['post_processing']['execute_function_object']:
+            for key, value in self.properties['post_processing']['function_objects'].items():
+                if value.find('residuals') != -1:
+                    fo_is_residual = True
+        if fo_is_residual:
+            fv_solution += f'residuals\n'
+            fv_solution += f'{{\n'
+            fv_solution += f'    type   L2;\n'
+            fv_solution += f'    Ux     1e-3;\n'
+            fv_solution += f'    Uy     1e-3;\n'
+            fv_solution += f'    Uz     1e-3;\n'
+            fv_solution += f'    p      1e-3;\n'
+            fv_solution += f'}}\n'
+            fv_solution += f'\n'
+        
         fv_solution += f'// ************************************************************************* //\n'
         return fv_solution

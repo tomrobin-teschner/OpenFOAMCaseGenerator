@@ -1,0 +1,255 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+|                                                                             |
+| This file was automatically generated using the OpenFOAMCaseGenerator       |
+| see https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator              |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      residuals;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+residuals
+{
+    type coded;
+    libs (utilityFunctionObjects);
+    name residuals;
+    codeWrite
+    #{
+        // runTime object
+        const Time& runTime = mesh().time();
+
+        // lookup field variables
+        const volVectorField& U = mesh().lookupObject<volVectorField>("U");
+        const volScalarField& p = mesh().lookupObject<volScalarField>("p");
+
+        // residual norms for each variable
+        static word   normType = "L2";
+        static scalar normUx = 1.0;
+        static scalar normUy = 1.0;
+        static scalar normUz = 1.0;
+        static scalar normP  = 1.0;
+
+        // convergence threshold
+        static scalar epsUx = 0.0;
+        static scalar epsUy = 0.0;
+        static scalar epsUz = 0.0;
+        static scalar epsP  = 0.0;
+
+        // set field norms and convergence threshold if at first iteration
+        if (runTime.timeIndex() == 1) {
+            
+            Info << "Reading residuals dictionary from fvSolution" << nl << endl;
+            
+            // get residual dictionary, located in fvSolution file
+            const word dictName("fvSolution");
+            IOdictionary solutionDict
+            (
+                IOobject
+                (
+                dictName,
+                runTime.system(),
+                runTime,
+                IOobject::MUST_READ
+                )
+            );
+            dictionary& residuals = solutionDict.subDict("residuals");
+
+            // read convergence thresholds or set defaults
+            epsUx = residuals.lookupOrDefault<scalar>("Ux", 1e-3);
+            epsUy = residuals.lookupOrDefault<scalar>("Uy", 1e-3);
+            epsUz = residuals.lookupOrDefault<scalar>("Uz", 1e-3);
+            epsP  = residuals.lookupOrDefault<scalar>("p",  1e-3);
+
+            // type of residual calculation, either L0 or L2 norm-based
+            normType = residuals.lookupOrDefault<word>("type", "L2");
+
+            // calculate initial residual
+            scalar tempNormUx = 0.0;
+            scalar tempNormUy = 0.0;
+            scalar tempNormUz = 0.0;
+            scalar tempNormP  = 0.0;
+
+            if (normType == "L0")
+            {
+                forAll(mesh().C(), cellI)
+                {
+                    scalar tempRes = mag(U[cellI].x() - U.oldTime()[cellI].x());
+                    if (tempNormUx < tempRes) tempNormUx = tempRes;
+
+                    tempRes = mag(U[cellI].y() - U.oldTime()[cellI].y());
+                    if (tempNormUy < tempRes) tempNormUy = tempRes;
+
+                    tempRes = mag(U[cellI].z() - U.oldTime()[cellI].z());
+                    if (tempNormUz < tempRes) tempNormUz = tempRes;
+
+                    tempRes = mag(p[cellI] - p.oldTime()[cellI]);
+                    if (tempNormP < tempRes) tempNormP = tempRes;
+                }
+
+                // for parallel runs, reduce onto all processors
+                reduce(tempNormUx, sumOp<scalar>());
+                reduce(tempNormUy, sumOp<scalar>());
+                reduce(tempNormUz, sumOp<scalar>());
+                reduce(tempNormP,  sumOp<scalar>());
+            }
+            else if (normType == "L2")
+            {
+                forAll(mesh().C(), cellI)
+                {
+                    tempNormUx += mag(U[cellI].x() - U.oldTime()[cellI].x());
+                    tempNormUy += mag(U[cellI].y() - U.oldTime()[cellI].y());
+                    tempNormUz += mag(U[cellI].z() - U.oldTime()[cellI].z());
+                    tempNormP  += mag(p[cellI]     - p.oldTime()[cellI]);
+                }
+
+                // for parallel runs, reduce onto all processors
+                reduce(tempNormUx, maxOp<scalar>());
+                reduce(tempNormUy, maxOp<scalar>());
+                reduce(tempNormUz, maxOp<scalar>());
+                reduce(tempNormP,  maxOp<scalar>());
+            }
+            else {
+                Info << normType << " norm not recognised, L0 and L2 are the only supported norms. Exiting!" << endl;
+                std::exit(-1);
+            }
+
+            // set residual norms
+            normUx = tempNormUx;
+            normUy = tempNormUy;
+            normUz = tempNormUz;
+            normP  = tempNormP;
+
+            // ensure we do not have division by zero
+            if (normUx < SMALL) normUx = 1.0;
+            if (normUy < SMALL) normUy = 1.0;
+            if (normUz < SMALL) normUz = 1.0;
+            if (normP < SMALL)  normP  = 1.0;
+
+            Info << "Calculating residuals based on " << normType << " norm" << endl;
+            Info << "Ux residual threshold: " << epsUx << endl;
+            Info << "Uy residual threshold: " << epsUy << endl;
+            Info << "Uz residual threshold: " << epsUz << endl;
+            Info << "p  residual threshold: " << epsP  << endl;
+
+            Info << endl;
+
+            // create residual file to which residuals will be written
+            OFstream os
+            (
+                "residuals",
+                Foam::IOstreamOption::streamFormat::ASCII,
+                Foam::IOstreamOption::compressionType::UNCOMPRESSED,
+                Foam::IOstreamOption::appendType::NON_APPEND
+            );
+            os << "  Ux           Uy           Uz           p" << endl;
+        }
+
+        // // calculate L2-norm residuals
+        scalar resUx = 0.0;
+        scalar resUy = 0.0;
+        scalar resUz = 0.0;
+        scalar resP  = 0.0;
+
+        if (normType == "L0")
+        {
+            forAll(mesh().C(), cellI)
+            {
+                scalar tempRes = mag(U[cellI].x() - U.oldTime()[cellI].x());
+                if (resUx < tempRes) resUx = tempRes;
+
+                tempRes = mag(U[cellI].y() - U.oldTime()[cellI].y());
+                if (resUy < tempRes) resUy = tempRes;
+
+                tempRes = mag(U[cellI].z() - U.oldTime()[cellI].z());
+                if (resUz < tempRes) resUz = tempRes;
+
+                tempRes = mag(p[cellI] - p.oldTime()[cellI]);
+                if (resP < tempRes) resP = tempRes;
+            }
+
+            // for parallel runs, reduce onto all processors
+            reduce(resUx, sumOp<scalar>());
+            reduce(resUy, sumOp<scalar>());
+            reduce(resUz, sumOp<scalar>());
+            reduce(resP,  sumOp<scalar>());
+        }
+        else if (normType == "L2")
+        {
+            forAll(mesh().C(), cellI)
+            {
+                resUx += mag(U[cellI].x() - U.oldTime()[cellI].x());
+                resUy += mag(U[cellI].y() - U.oldTime()[cellI].y());
+                resUz += mag(U[cellI].z() - U.oldTime()[cellI].z());
+                resP  += mag(p[cellI]     - p.oldTime()[cellI]);
+            }
+
+            // for parallel runs, reduce onto all processors
+            reduce(resUx, maxOp<scalar>());
+            reduce(resUy, maxOp<scalar>());
+            reduce(resUz, maxOp<scalar>());
+            reduce(resP,  maxOp<scalar>());
+        }
+
+        // ensure residuals can't increase during first 5 iterations
+        if (runTime.timeIndex() <= 5) {
+            if (resUx > normUx) normUx = resUx; 
+            if (resUy > normUy) normUy = resUy; 
+            if (resUz > normUz) normUz = resUz; 
+            if (resP  > normP)  normP  = resP; 
+        }
+        
+        // normalise residuals
+        resUx /= normUx;  
+        resUy /= normUy;  
+        resUz /= normUz;  
+        resP  /= normP;
+
+        // check convergence
+        bool UxConverged = resUx < epsUx;
+        bool UyConverged = resUy < epsUy;
+        bool UzConverged = resUz < epsUz;
+        bool PConverged  = resP < epsP;
+        
+        Info << "Current iteration: " << runTime.timeIndex() << endl;
+        Info << "Ux residual: " << scientific << resUx << ", of " << epsUx << ", converged: " << (UxConverged ? "True" : "False") << endl;
+        Info << "Uy residual: " << scientific << resUy << ", of " << epsUy << ", converged: " << (UyConverged ? "True" : "False") << endl;
+        Info << "Uz residual: " << scientific << resUz << ", of " << epsUz << ", converged: " << (UzConverged ? "True" : "False") << endl;
+        Info << "p  residual: " << scientific << resP  << ", of " << epsP <<  ", converged: " << (PConverged  ? "True" : "False") << endl;
+
+        Info << endl;
+
+        OFstream os
+        (
+            "residuals",
+            Foam::IOstreamOption::streamFormat::ASCII,
+            Foam::IOstreamOption::compressionType::UNCOMPRESSED,
+            Foam::IOstreamOption::appendType::APPEND
+        );
+        os << runTime.timeIndex() << " ";
+        os << scientific << resUx << " ";
+        os << scientific << resUy << " ";
+        os << scientific << resUz << " ";
+        os << scientific << resP << endl;
+
+        if (UxConverged && UyConverged && UzConverged && PConverged) {
+            Info << "Solution converged in " << runTime.timeIndex() << " iterations." << endl;
+            const_cast<Time&>(runTime).writeAndEnd();
+        }        
+    #};
+}
+
+// ************************************************************************* //
