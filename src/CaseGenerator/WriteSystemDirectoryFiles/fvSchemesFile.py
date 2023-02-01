@@ -89,15 +89,15 @@ class fvSchemesFile:
         temp += f'{{\n'
 
         spacing = (self.indentation - 12) * ' '
-        if discretisation_policy == DiscretisationPolicy.default:
-            div_type = 'Gauss linearUpwind ' + pre_default_test + 'default;\n'
-        elif discretisation_policy == DiscretisationPolicy.tvd:
-            div_type = 'Gauss Minmod ' + pre_default_test + 'default;\n'
-        elif discretisation_policy == DiscretisationPolicy.robustness:
-            div_type = 'Gauss upwind ' + pre_default_test + 'default;\n'
-        elif discretisation_policy == DiscretisationPolicy.accuracy:
-            div_type = 'Gauss limitedLinear ' + pre_default_test + '1;\n'
-        temp += f'    default{spacing}Gauss linear'
+        # if discretisation_policy == DiscretisationPolicy.default:
+        #     div_type = 'Gauss linearUpwind ' + pre_default_test + 'default;\n'
+        # elif discretisation_policy == DiscretisationPolicy.tvd:
+        #     div_type = 'Gauss Minmod ' + pre_default_test + 'default;\n'
+        # elif discretisation_policy == DiscretisationPolicy.robustness:
+        #     div_type = 'Gauss upwind ' + pre_default_test + 'default;\n'
+        # elif discretisation_policy == DiscretisationPolicy.accuracy:
+        #     div_type = 'Gauss LUST ' + pre_default_test + 'default;\n'
+        temp += f'    default{spacing}Gauss linear;\n'
 
         # allow for explicit solvers as well (which may have a div(U) term instead of the linearised
         # div(phi, U) term only)
@@ -141,9 +141,9 @@ class fvSchemesFile:
             elif discretisation_policy == DiscretisationPolicy.accuracy:
                 spacing = (self.indentation - len('    div(phi,' + var + ')') - 1) * ' '
                 if var == 'U':
-                    div_type = 'bounded Gauss MUSCLV grad(U);\n'
+                    div_type = 'Gauss LUST grad(U);\n'
                 elif not self.state_variable_manager.var_is_from_rans_turbulence_model(var):
-                    div_type = 'Gauss limitedLinear 1;\n'
+                    div_type = 'Gauss LUST default;\n'
                 elif self.state_variable_manager.var_is_from_rans_turbulence_model(var):
                     if is_rans and use_first_order:
                         div_type = 'Gauss upwind;\n'

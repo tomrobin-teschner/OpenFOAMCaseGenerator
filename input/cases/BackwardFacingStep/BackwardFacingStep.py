@@ -45,9 +45,12 @@ class BackwardFacingStep(BaseCase):
                 'flow_type': FlowType.incompressible,
                 'input_parameters_specification_mode': Dimensionality.dimensional,
                 'dimensional_properties': {
+                    'material': MaterialProperty.Air,
+                    'material_properties': {
+                        'rho': 1.0,
+                        'nu': 1.0e-4,
+                    },
                     'velocity_magnitude': 3.410896,
-                    'rho': 1.0,
-                    'nu': 1.0e-4,
                 },
                 'axis_aligned_flow_direction': {
                     'tangential': Coordinates.x,

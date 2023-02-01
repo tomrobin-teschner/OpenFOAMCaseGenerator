@@ -12,7 +12,7 @@ class ForceCoefficients:
         normal = self.properties['flow_properties']['axis_aligned_flow_direction']['normal'].value
         aoa = self.properties['flow_properties']['axis_aligned_flow_direction']['angle_of_attack']
         cofr = self.properties['dimensionless_coefficients']['center_of_rotation']
-        rho = self.properties['flow_properties']['dimensional_properties']['rho']
+        rho = self.properties['flow_properties']['dimensional_properties']['material_properties']['rho']
         vel_mag = self.properties['flow_properties']['dimensional_properties']['velocity_magnitude']
         l_ref = self.properties['dimensionless_coefficients']['reference_length']
         a_ref = self.properties['dimensionless_coefficients']['reference_area']

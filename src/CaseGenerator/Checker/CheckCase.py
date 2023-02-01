@@ -109,6 +109,7 @@ class CheckCase:
     def check_correct_incompressible_solver_setup(self):
         solver = self.properties['solver_properties']['solver']
         flow_type = self.properties['flow_properties']['flow_type']
+        equation = self.properties['flow_properties']['equations']
         if (flow_type == FlowType.incompressible) and (solver == Solver.rhoCentralFoam or
                                                        solver == Solver.rhoSimpleFoam or
                                                        solver == Solver.rhoPimpleFoam or
@@ -118,6 +119,15 @@ class CheckCase:
                 '\nYou have selected the fluid to be incompressible but have selected a compressible\n' +
                 'solver. You should either change the flow type or the solver. Only continue if you \n' +
                 'know what you are doing and are sure your setup is correct.\n' +
+                '\n================================== END WARNING ==================================\n',
+                UserWarning, '', 0)
+        
+        if flow_type == FlowType.incompressible and equation == Equations.euler:
+            warnings.showwarning(
+                '\n==================================== WARNING ====================================\n' +
+                '\nYou are solving the inviscid and incompressible Navier-Stokes equations which have\n' +
+                'no practical application. Unless you know what you are doing, you probably want to\n' +
+                'change the equation to Equations.navier_stokes instead of Equations.euler!\n' +
                 '\n================================== END WARNING ==================================\n',
                 UserWarning, '', 0)
 

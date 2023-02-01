@@ -50,11 +50,14 @@ class TaylorGreenVortex(BaseCase):
                 'const_viscosity': True,
                 'input_parameters_specification_mode': Dimensionality.dimensional,
                 'dimensional_properties': {
+                    'material': MaterialProperty.Air,
+                    'material_properties': {
+                        'rho': 1.0,
+                        'nu': 6.25e-4,
+                        'p': 100,
+                        'T': 300,
+                    },
                     'velocity_magnitude': 1.0,
-                    'rho': 1.0,
-                    'nu': 6.25e-4,
-                    'p': 100,
-                    'T': 300,
                 },
             },
             'solver_properties': {

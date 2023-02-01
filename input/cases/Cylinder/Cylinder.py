@@ -35,8 +35,11 @@ class Cylinder(BaseCase):
                 'const_viscosity': True,
                 'input_parameters_specification_mode': Dimensionality.dimensional,
                 'dimensional_properties': {
+                    'material': MaterialProperty.Air,
+                    'material_properties': {
+                        'nu': 0.01,
+                    },
                     'velocity_magnitude': 1,
-                    'nu': 0.01,
                 },
                 'axis_aligned_flow_direction': {
                     'tangential': Coordinates.x,

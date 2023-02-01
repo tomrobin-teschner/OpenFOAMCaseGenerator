@@ -31,7 +31,7 @@ class BoundaryConditionManager:
         # calculate freestream conditions
         # see https://www.cfd-online.com/Wiki/Turbulence_free-stream_boundary_conditions as a reference
         self.velocity_magnitude = self.properties['flow_properties']['dimensional_properties']['velocity_magnitude']
-        self.temperature = self.properties['flow_properties']['dimensional_properties']['T']
+        self.temperature = self.properties['flow_properties']['dimensional_properties']['material_properties']['T']
         self.turbulence_intensity = self.properties['turbulence_properties']['freestream_turbulent_intensity']
 
         self.freestream_k = turbulence_freestream_conditions.calculate_freestream_k()
@@ -98,7 +98,7 @@ class BoundaryConditionManager:
         if self.properties['flow_properties']['flow_type'] == FlowType.incompressible:
             p_initial = '0'
         elif self.properties['flow_properties']['flow_type'] == FlowType.compressible:
-            p_initial = str(self.properties['flow_properties']['dimensional_properties']['p'])
+            p_initial = str(self.properties['flow_properties']['dimensional_properties']['material_properties']['p'])
         bc_freestream_conditions = {
             'U': 'uniform (' + str(U[0]) + ' ' + str(U[1]) + ' ' + str(U[2]) + ')',
             'p': 'uniform ' + p_initial,
@@ -248,7 +248,7 @@ class BoundaryConditionManager:
             if wall_modelling == WallModelling.high_re:
                 return self.__neumann()
             elif wall_modelling == WallModelling.low_re:
-                nuTilda = self.properties['flow_properties']['dimensional_properties']['nu'] / 2
+                nuTilda = self.properties['flow_properties']['dimensional_properties']['material_properties']['nu'] / 2
                 return self.__dirichlet(f'uniform {nuTilda}')
 
         elif var == 'nut':
