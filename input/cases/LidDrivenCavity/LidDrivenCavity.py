@@ -106,6 +106,10 @@ class LidDrivenCavity(BaseCase):
                 'output_probe_at_every_timestep': False,
             },
             'post_processing': {
+                'execute_function_object': True,
+                'function_objects': {
+                    'calcResiduals': os.path.join('input', 'scripts', 'userDefined', 'functionObjects', 'residuals'),
+                },
                 'execute_python_script': True,
                 'python_script': [
                     {
