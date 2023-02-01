@@ -7,7 +7,7 @@ class TransportPropertiesFile:
     
     def get_file_content(self):
         version = self.properties['file_properties']['version']
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
+        nu = self.properties['flow_properties']['dimensional_properties']['material_properties']['nu']
         header = WriteHeader.get_header(version, 'dictionary', 'constant', 'transportProperties')
 
         return (

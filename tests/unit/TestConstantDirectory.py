@@ -26,8 +26,17 @@ class TestThermophysicalPropertiesFileCreation(unittest.TestCase):
     def setUp(self):
         self.properties = {}
         self.properties['flow_properties'] = {}
+        self.properties['flow_properties']['equation_of_state'] = EquationOfState.perfectGas
+        self.properties['flow_properties']['energy_equation'] = EnergyEquation.sensibleInternalEnergy
         self.properties['flow_properties']['dimensional_properties'] = {}
-        self.properties['flow_properties']['dimensional_properties']['mu'] = 1.2345
+        self.properties['flow_properties']['dimensional_properties']['material_properties'] = {}
+        self.properties['flow_properties']['dimensional_properties']['material_properties']['mu'] = 1.2345
+        self.properties['flow_properties']['dimensional_properties']['material_properties']['Pr'] = 0.71
+        self.properties['flow_properties']['dimensional_properties']['material_properties']['Hf'] = 0
+        self.properties['flow_properties']['dimensional_properties']['material_properties']['Cp'] = 1005
+        self.properties['flow_properties']['dimensional_properties']['material_properties']['molWeight'] = 28.9
+        self.properties['flow_properties']['dimensional_properties']['material_properties']['As'] = 1.4792e-06
+        self.properties['flow_properties']['dimensional_properties']['material_properties']['Ts'] = 116
         self.properties['file_properties'] = {}
         self.properties['file_properties']['version'] = 'v2212'
 

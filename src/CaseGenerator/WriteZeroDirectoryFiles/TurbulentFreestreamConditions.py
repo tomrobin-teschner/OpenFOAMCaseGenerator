@@ -17,7 +17,7 @@ class TurbulenceFreestreamConditions:
         turbulent_length_scale_external = self.__calculate_turbulent_length_scale_for_external_flows()
         turbulent_to_laminar_viscosity_ratio = self.properties['turbulence_properties']['turbulent_to_laminar_ratio']
         turbulent_to_laminar_viscosity_ratio_calculated = self.__calculate_turbulent_to_laminar_viscosity_ratio()
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
+        nu = self.properties['flow_properties']['dimensional_properties']['material_properties']['nu']
         k = self.calculate_freestream_k()
 
         if turbulence_at_inlet == TurbulenceLengthScaleCalculation.internal:
@@ -35,7 +35,7 @@ class TurbulenceFreestreamConditions:
         turbulent_length_scale_external = self.__calculate_turbulent_length_scale_for_external_flows()
         turbulent_to_laminar_viscosity_ratio = self.properties['turbulence_properties']['turbulent_to_laminar_ratio']
         turbulent_to_laminar_viscosity_ratio_calculated = self.__calculate_turbulent_to_laminar_viscosity_ratio()
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
+        nu = self.properties['flow_properties']['dimensional_properties']['material_properties']['nu']
         k = self.calculate_freestream_k()
 
         if turbulence_at_inlet == TurbulenceLengthScaleCalculation.internal:
@@ -49,7 +49,7 @@ class TurbulenceFreestreamConditions:
 
     def calculate_freestream_nuTilda(self):
         turbulence_at_inlet = self.properties['turbulence_properties']['turbulent_quantities_at_inlet']
-        nu = self.properties['flow_properties']['dimensional_properties']['nu']
+        nu = self.properties['flow_properties']['dimensional_properties']['material_properties']['nu']
         turbulent_length_scale_internal = self.__calculate_turbulent_length_scale_for_internal_flows()
         turbulent_length_scale_external = self.__calculate_turbulent_length_scale_for_external_flows()
         turbulence_intensity = self.properties['turbulence_properties']['freestream_turbulent_intensity']

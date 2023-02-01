@@ -7,8 +7,8 @@ class PressureCoefficient:
 
     def get_file_content(self):
         velocity_vector = self.properties['flow_properties']['dimensional_properties']['velocity_vector']
-        rho = self.properties['flow_properties']['dimensional_properties']['rho']
-        pressure = self.properties['flow_properties']['dimensional_properties']['p']
+        rho = self.properties['flow_properties']['dimensional_properties']['material_properties']['rho']
+        pressure = self.properties['flow_properties']['dimensional_properties']['material_properties']['p']
         velocity = ('(' + str(velocity_vector[0]) + ' ' + str(velocity_vector[1]) + ' ' + str(velocity_vector[2]) + ')')
         
         version = self.properties['file_properties']['version']

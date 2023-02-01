@@ -17,7 +17,7 @@
   ✔ Implement cascading file properties, deriving from a base case and then overwriting only specific quantities. This can be any test case from which properties will be derived @done(23-01-12 08:26)
   ✔ Establish a way to set private variables per class in constructor which will be used when setting the file properties dictionary @done(23-01-12 08:26)
 
-☐ Refactoring
+✔ Refactoring @done(23-01-28 23:52)
   ✔ Rething global parameter handling, instead of globals use Enums? Should still be int based in input to avoid typos. @done(23-01-09 08:04)
   ✔ Take isoSurface include out of additional fields and put in controlDict file, ensure correct order there @done(23-01-17 08:05)
   ✔ Provide case factory class that generates cases based on command line arguments @done(23-01-17 07:31)
@@ -25,10 +25,10 @@
 
 ☐ Features
   ☐ Retire DFSEM inlet boundary condition, replace by offset BC instead
-  ☐ Add a material properties database (as json implementation), implement air and use that in thermophysical properties instead
-  ☐ Select compressible model based on enthalpy or energy (check which one is available in OF)
+  ✔ Add a material properties database (as json implementation), implement air and use that in thermophysical properties instead @done(23-01-28 23:10)
+  ✔ Select compressible model based on enthalpy or energy (check which one is available in OF) @done(23-01-27 07:47)
   ☐ Allow for parameter overwriting in script if required by the user
-  ☐ Use LUST instead of linearUpwind for LES discretisation of convective terms
+  ✔ Use LUST instead of linearUpwind for LES discretisation of convective terms @done(23-01-28 23:19)
 
 ☐ Cases
   ☐ Provide an internal and external LES example case setup
@@ -37,11 +37,11 @@
   ☐ Provide plotting script to Sudden Expansion
 
 ☐ Scripts
-  ☐ Provide custom function object for residuals (L0 and L2 norm) with python script to extract and plot data
+  ✔ Provide custom function object for residuals (L0 and L2 norm) with python script to extract and plot data @done(23-02-01 06:33)
   ☐ Provide script for LES (calculate percentage of domain that resolves scales (should be 80% or above))
 
-☐ Solver extensions
-  ☐ Allow for custom solvers / postProcessing functions to be compiled as part of the case setup
+✘ Solver extensions @cancelled(23-02-01 06:33)
+  ✘ Allow for custom solvers / postProcessing functions to be compiled as part of the case setup @cancelled(23-02-01 06:33)
 
 ☐ Documentation
   ☐ Provide readthedocs page

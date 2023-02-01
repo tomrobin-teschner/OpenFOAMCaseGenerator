@@ -184,6 +184,20 @@ class BaseCase(metaclass = ABCMeta):
                 # flows, in which case sutherland's law will be used to compute it)
                 'const_viscosity': True,
 
+                # Equation to use to solve the Navier-Stokes equations
+                #   navier_stokes:   Use the full set of the Navier-Stokes equations (including viscous forces)
+                #   euler:          No viscosity, only useful for compressible flows
+                'equations': Equations.navier_stokes,
+
+                # Energy equation formulation to use for compressible flows
+                #   sensibleEnthalpy:       enthalpy formulation-based
+                #   sensibleInternalEnergy: internal energy formulation-based
+                'energy_equation': EnergyEquation.sensibleEnthalpy,
+
+                # equation of state to use in thermopyhysicalProperties file
+                #   perfectGas:                 Perfect gas equation of state (default)
+                'equation_of_state': EquationOfState.perfectGas,
+
                 # specify whether input parameters should be specified using dimensional or non-dimensional parameters
                 #   dimensional:        Use dimensional quantities. Properties from the dimensional_properties
                 #                       dictionary will be used
@@ -202,23 +216,33 @@ class BaseCase(metaclass = ABCMeta):
 
                 # properties used when input parameters are specified using dimensional properties
                 'dimensional_properties': {
+                    # material property to use
+                    #   Air:    Use default values for air
+                    'material': MaterialProperty.Air,
+
+                    # overwrite default values from material properties, sepcified as a dictionary. 
+                    # The following parameters can be set as key, value dictionary entries
+                    #   rho:        specify density at inlet / freestream (only used for compressible calculations)
+                    #   nu:         specify the laminar viscosity (used for incompressible flows or compressible, if
+                    #               viscosity is set to const)
+                    #   mu:         specify the dynamic viscosity
+                    #   p:          pecify total pressure at inlet / freestream (ignored for incompressible flows, here,
+                    #               static pressure will be used and will be set to 0 by default)
+                    #   T:          specify temperature at inlet / freestream
+                    #   Ts:         temperature constant used in sutherland's law to calculate temperature-dependend
+                    #               viscosity
+                    #   As:         constant used in sutherland's law
+                    #   R:          specific gas constant
+                    #   Gamma:      heat capacity ratio
+                    #   Pr:         prandtl number
+                    #   molWeight:  molecular weight
+                    #   Cp:         heat capacity at constant pressure
+                    #   Hf:         heat of Fusion
+                    'material_properties': {},
+
                     # specify the inlet velocity magnitude. The vector components will be constructed using the
                     # axis_aligned_flow_direction properties.
                     'velocity_magnitude': 1.0,
-
-                    # specify density at inlet / freestream (only used for compressible calculations)
-                    'rho': 1.0,
-
-                    # specify the laminar viscosity (used for incompressible flows or compressible, if viscosity is set
-                    # to const)
-                    'nu': 1e-6,
-
-                    # specify total pressure at inlet / freestream (ignored for incompressible flows, here,
-                    # static pressure will be used and will be set to 0 by default)
-                    'p': 0.0,
-
-                    # specify temperature at inlet / freestream
-                    'T': 273.15,
                 },
 
                 # specify the direction of the inflow velocity vector. Will be used to construct a 3D vector based on

@@ -43,6 +43,24 @@ class FlowType(Enum):
     incompressible = auto()
     compressible = auto()
 
+# type of equations to solve
+class Equations(Enum):
+    navier_stokes = auto()
+    euler = auto()
+
+# type of energy equation to use for compressible flows
+class EnergyEquation(Enum):
+    sensibleEnthalpy = auto()
+    sensibleInternalEnergy = auto()
+
+# equation of state
+class EquationOfState(Enum):
+    perfectGas = auto()
+
+# list of material properties available
+class MaterialProperty(Enum):
+    Air = auto()
+
 # input parameter specification mode
 class Dimensionality(Enum):
     dimensional = auto()

@@ -38,11 +38,11 @@ class WingAndWinglet(BaseCase):
                 'const_viscosity': True,
                 'input_parameters_specification_mode': Dimensionality.dimensional,
                 'dimensional_properties': {
+                    'material': MaterialProperty.Air,
+                    'material_properties': {
+                        'p': 0,
+                    },
                     'velocity_magnitude': 10,
-                    'rho': 1.0,
-                    'nu': 1.46e-5,
-                    'p': 0,
-                    'T': 288,
                 },
                 'axis_aligned_flow_direction': {
                     'tangential': Coordinates.x,
