@@ -30,7 +30,11 @@ class UtilityScripts:
             all_run += f'decomposePar\n'
             pre_solver_flag = f'mpirun -np {self.properties["parallel_properties"]["number_of_processors"]} '
             post_solver_flag = f' -parallel'
-
+        
+        all_run += f'restore0Dir\n'
+        if (self.properties['flow_properties']['flow_type'] == FlowType.incompressible and
+                self.properties['flow_properties']['initialise_with_potential_flow'] == True):
+            all_run += f'potentialFoam -writep\n'
         all_run += f'# allow to run with different solver if specified as command line argument, otherwise use specified one\n'
         all_run += f'if [ "$#" -eq 1 ]\n'
         all_run += f'then\n'
@@ -38,7 +42,6 @@ class UtilityScripts:
         all_run += f'else\n'
         all_run += f'    {pre_solver_flag}{self.properties["solver_properties"]["solver"].name}{post_solver_flag}\n'
         all_run += f'fi\n'
-        # all_run += f'{pre_solver_flag}{self.properties["solver_properties"]["solver"].name} {post_solver_flag}\n'
         if self.properties['parallel_properties']['run_in_parallel']:
             all_run += f'reconstructPar\n'
 
@@ -83,7 +86,7 @@ class UtilityScripts:
         all_clean += f'cd "${{0%/*}}" || exit  # Run from this directory\n'
         all_clean += f'# ------------------------------------------------------------------------------\n'
         all_clean += f'\n'
-        all_clean += f'rm -rf 0.[0-9]* [1-9]* log logs processor*\n'
+        all_clean += f'rm -rf 0.[0-9]* [1-9]* 0 log logs processor*\n'
         all_clean += f'cd postProcessing/\n'
         all_clean += f'find . -type f ! -name \'*.py\' -delete\n'
         all_clean += f'find . -type d -delete\n'

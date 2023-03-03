@@ -10,13 +10,14 @@ class Naca0012(BaseCase):
         self.add_parameters('reynolds_number', 6000000)
         self.add_parameters('angle_of_attack', 0)
         self.add_parameters('rans_model', RansModel.kOmegaSST)
+        self.add_parameters('mesh', 'coarse')
 
     def create_case(self):
         self.update_case({
             'file_properties': {
                 'case_name': 'Naca0012',
                 'mesh_treatment': Mesh.poly_mesh,
-                'polymesh_directory': os.path.join('input', 'mesh', 'airfoilNASA', 'coarse'),
+                'polymesh_directory': os.path.join('input', 'mesh', 'airfoilNASA', BaseCase.parameters['mesh']),
                 'run_directory': os.path.join(''),
                 'version': 'v2212',
             },
@@ -44,7 +45,7 @@ class Naca0012(BaseCase):
                 'solver': Solver.pimpleFoam,
                 'number_of_non_orthogonal_corrector_steps': 2,
                 'number_of_corrector_steps': 2,
-                'number_of_outer_corrector_steps': 5,
+                'number_of_outer_corrector_steps': 2,
                 'under_relaxation_equations': {
                     'U': 0.7,
                 },
@@ -54,13 +55,13 @@ class Naca0012(BaseCase):
                 'unsteady_properties': {
                     'startFrom': SimulationStart.startTime,
                     'startTime': 0,
-                    'endTime': 1,
+                    'endTime': 500,
                     'CFLBasedTimeStepping': True,
-                    'CFL': 25.0,
+                    'CFL': 2500.0,
                     'deltaT': 1e-4,
                     'maxDeltaT': 1,
                     'write_control': OutputWriteControl.adjustableRunTime,
-                    'write_frequency': 0.01,
+                    'write_frequency': 10,
                 },
             },
             'spatial_discretisation': {

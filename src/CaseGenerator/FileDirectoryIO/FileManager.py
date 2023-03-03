@@ -53,7 +53,7 @@ class FileManager:
 
     def create_directory_structure(self):
         self.__create_directory(os.path.join(self.properties['file_properties']['path']))
-        self.__create_directory(os.path.join(self.properties['file_properties']['path'], '0'))
+        self.__create_directory(os.path.join(self.properties['file_properties']['path'], '0.orig'))
         self.__create_directory(os.path.join(self.properties['file_properties']['path'], 'constant'))
         self.__create_directory(os.path.join(self.properties['file_properties']['path'], 'system'))
         self.__create_directory(os.path.join(self.properties['file_properties']['path'], 'system/include'))
@@ -66,7 +66,7 @@ class FileManager:
         return file_id
 
     def write_content_to_file(self, folder, file_name, content):
-        file_id = open(os.path.join(self.properties['file_properties']['path'], folder, file_name), 'w')
+        file_id = open(os.path.join(self.properties['file_properties']['path'], folder, file_name), 'w', newline='\n')
         file_id.write(content)
         file_id.close()
 

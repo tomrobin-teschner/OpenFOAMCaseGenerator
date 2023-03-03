@@ -29,6 +29,7 @@
   ✔ Select compressible model based on enthalpy or energy (check which one is available in OF) @done(23-01-27 07:47)
   ☐ Allow for parameter overwriting in script if required by the user
   ✔ Use LUST instead of linearUpwind for LES discretisation of convective terms @done(23-01-28 23:19)
+  ☐ Add mesh refinement as option to properties
 
 ☐ Cases
   ☐ Provide an internal and external LES example case setup
@@ -39,6 +40,7 @@
 ☐ Scripts
   ✔ Provide custom function object for residuals (L0 and L2 norm) with python script to extract and plot data @done(23-02-01 06:33)
   ☐ Provide script for LES (calculate percentage of domain that resolves scales (should be 80% or above))
+  ☐ Provide script to calculate statistical average at specified points
 
 ✘ Solver extensions @cancelled(23-02-01 06:33)
   ✘ Allow for custom solvers / postProcessing functions to be compiled as part of the case setup @cancelled(23-02-01 06:33)
@@ -46,10 +48,10 @@
 ☐ Documentation
   ☐ Provide readthedocs page
 
-☐ GUI
-  ☐ Provide initial implementation with wxPython to set up cases (later, extend towards meshing with OpenGL as well)
-  ☐ Provide a way to use existing cases as tempaltes in file menu
-  ☐ Provide a setup wizard to set up cases quickly
+✘ GUI @cancelled(23-02-03 05:43)
+  ✘ Provide initial implementation with wxPython to set up cases (later, extend towards meshing with OpenGL as well) @cancelled(23-02-03 05:43)
+  ✘ Provide a way to use existing cases as tempaltes in file menu @cancelled(23-02-03 05:43)
+  ✘ Provide a setup wizard to set up cases quickly @cancelled(23-02-03 05:43)
 
 ☐ Parameterisation
   ☐ Provide velocity template functionality within any script that ends in *.vel (automatically add python layer to transform *.vel file into normal openfoam file)

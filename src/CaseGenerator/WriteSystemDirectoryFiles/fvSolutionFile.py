@@ -39,6 +39,22 @@ class fvSolutionFile:
                 fv_solution += f'        $p;\n'
                 fv_solution += f'    }}\n'
                 fv_solution += f'\n'
+                if (self.properties['flow_properties']['flow_type'] == FlowType.incompressible and
+                        self.properties['flow_properties']['initialise_with_potential_flow'] == True):
+                    fv_solution += f'    Phi\n'
+                    fv_solution += f'    {{\n'
+                    fv_solution += f'        solver           PCG;\n'
+                    fv_solution += f'        preconditioner   DIC;\n'
+                    fv_solution += f'        tolerance        1e-10;\n'
+                    fv_solution += f'        relTol           0.0001;\n'
+                    fv_solution += f'    }}\n'
+                    fv_solution += f'\n'
+                    fv_solution += f'    PhiFinal\n'
+                    fv_solution += f'    {{\n'
+                    fv_solution += f'        $Phi;\n'
+                    fv_solution += f'    }}\n'
+                    fv_solution += f'\n'
+
                 if self.properties['flow_properties']['flow_type'] == FlowType.compressible:
                     fv_solution += f'    rho\n'
                     fv_solution += f'    {{\n'
@@ -117,8 +133,9 @@ class fvSolutionFile:
             boundaries = self.properties['boundary_properties']['boundary_conditions']
             use_pressure_min_max_factors = False
             for key, value in boundaries.items():
-                if ((value == BoundaryConditions.inlet) or (value == BoundaryConditions.outlet) or (value == OutletBoundaryCondition.inlet_outlet) or
-                        (value == BoundaryConditions.freestream) or (value == BoundaryConditions.backflow_outlet) or
+                if ((value == BoundaryConditions.inlet) or (value == BoundaryConditions.outlet) or
+                        (value == OutletBoundaryCondition.inlet_outlet) or (value == BoundaryConditions.freestream) or
+                        (value == BoundaryConditions.backflow_outlet) or
                         (value == BoundaryConditions.advective_outlet) or (value == BoundaryConditions.dfsem_inlet)):
                     use_pressure_min_max_factors = True
             if use_pressure_min_max_factors:

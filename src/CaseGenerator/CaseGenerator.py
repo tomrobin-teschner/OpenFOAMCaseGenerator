@@ -25,7 +25,7 @@ class CaseGenerator:
         boundary_conditions = ZeroDir.BoundaryConditionManager(self.properties)
         [variables, bcs] = boundary_conditions.get_all_boundary_conditions()
         for variable, bc in zip(variables, bcs):
-            file_manager.write_content_to_file('0', variable, bc)
+            file_manager.write_content_to_file('0.orig', variable, bc)
 
         # write transport or thermo-physical self.properties depending on flow type
         if self.properties['flow_properties']['flow_type'] == FlowType.incompressible:

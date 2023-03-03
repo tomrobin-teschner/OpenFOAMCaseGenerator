@@ -174,6 +174,9 @@ class BaseCase(metaclass = ABCMeta):
                 #   zero_velocity:              set the initial field to a zero velocity field
                 'initial_conditions': InitialConditions.boundary_condition_based,
 
+                # specify whether the flow should be initialised with a potential flow solution
+                'initialise_with_potential_flow': False,
+
                 # type of the flow to solve
                 #   The following types are supported:
                 #     incompressible:   Solve the flow using a constant density approach
