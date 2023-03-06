@@ -4,15 +4,18 @@ from src.CaseGenerator.Properties.GlobalVariables import *
 from enum import Enum
 
 # set current software version here. Will be printed to screen and automatically updated in README.md file
-version_major = 2
-version_minor = 1
-version_patch = 1
+version_major = 3
+version_minor = 0
+version_patch = 0
+version_note = 'beta.1'
 
 class ScreenOutput:
     def __init__(self, properties):
         self.properties = properties
         self.copyright = f'2020-{datetime.date.today().year}'
         self.version = f'{version_major}.{version_minor}.{version_patch}'
+        if version_note != '':
+            self.version += f'-{version_note}'
         
         # overwrite version in README.md file
         file_id = open('README.md', 'r')

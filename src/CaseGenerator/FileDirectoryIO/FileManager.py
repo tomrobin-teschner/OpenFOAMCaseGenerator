@@ -60,11 +60,6 @@ class FileManager:
         self.__create_directory(os.path.join(self.properties['file_properties']['path'], 'postProcessing'))
         self.__create_case_file()
 
-    #TODO: deprecated, use write_content_to_file instead
-    def create_file(self, folder, file_name):
-        file_id = open(os.path.join(self.properties['file_properties']['path'], folder, file_name), 'w')
-        return file_id
-
     def write_content_to_file(self, folder, file_name, content):
         file_id = open(os.path.join(self.properties['file_properties']['path'], folder, file_name), 'w', newline='\n')
         file_id.write(content)
