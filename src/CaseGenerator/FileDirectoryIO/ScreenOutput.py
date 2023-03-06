@@ -15,7 +15,7 @@ class ScreenOutput:
         self.copyright = f'2020-{datetime.date.today().year}'
         self.version = f'{version_major}.{version_minor}.{version_patch}'
         if version_note != '':
-            self.version += f'-{version_note}'
+            self.version += f'{version_note}'
         
         # overwrite version in README.md file
         file_id = open('README.md', 'r')
