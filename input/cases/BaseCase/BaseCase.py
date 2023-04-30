@@ -189,7 +189,7 @@ class BaseCase(metaclass = ABCMeta):
 
                 # Equation to use to solve the Navier-Stokes equations
                 #   navier_stokes:   Use the full set of the Navier-Stokes equations (including viscous forces)
-                #   euler:          No viscosity, only useful for compressible flows
+                #   euler:           No viscosity, only useful for compressible flows
                 'equations': Equations.navier_stokes,
 
                 # Energy equation formulation to use for compressible flows

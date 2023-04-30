@@ -2,3 +2,6 @@
 __pycache__
 .idea
 venv
+
+# ignore documentation output (build folder)
+docs/build/*

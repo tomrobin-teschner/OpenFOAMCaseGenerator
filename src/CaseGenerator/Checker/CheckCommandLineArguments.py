@@ -1,4 +1,5 @@
 import sys
+import os
 
 
 class CheckCommandLineArguments:
@@ -34,7 +35,11 @@ class CheckCommandLineArguments:
                                     or by running the case generator, if a case has parameters defined, these will be
                                     listed at the bottom.
 
-        --no-checks                 Run the case generator again but suppress any warnings and/or error messages 
+        -p:key=value                Same as --parameter:key=value, short-hand notation
+
+        --no-checks                 Run the case generator again but suppress any warnings and/or error messages
+
+        --list-cases                List all available cases for which a valid setup exist
         '''
 
         self.__options['parameter'] = {}
@@ -44,10 +49,21 @@ class CheckCommandLineArguments:
                 self.__options['case'] = self.__args[i].replace('--case=', '')
             if '--no-checks' in self.__args[i]:
                 self.__options['no-checks'] = True
-            elif '--parameter' in self.__args[i]:
+            if '--parameter' in self.__args[i]:
                 key_value = self.__args[i].replace('--parameter:', '').split('=')
                 self.__options['parameter'][key_value[0]] = key_value[1]
-            elif '--help' in self.__args[i]:
+            if '-p:' in self.__args[i]:
+                key_value = self.__args[i].replace('-p:', '').split('=')
+                self.__options['parameter'][key_value[0]] = key_value[1]
+            if '--list-cases' in self.__args[i]:
+                print('\nAvailable case setups:')
+                for root, dirs, files in os.walk(os.path.join('input', 'cases'), topdown=True):
+                    for dir in dirs:
+                        if 'pycache' not in dir:
+                            if 'BaseCase' not in dir:
+                                print('- ', dir)
+                exit(0)
+            if '--help' in self.__args[i]:
                 print(help)
                 exit(0)
 
