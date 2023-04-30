@@ -41,3 +41,8 @@ or
 ``python3 OpenFOAMCaseGenerator.py --case=Naca0012 -p:angle_of_attack=10``
 
 We will see in the next section, how we can define our own parameters, as well as how to setup new cases from scratch. If you want your case to be included in future distributions of this software, please open a pull request at ``https://github.com/tomrobin-teschner/OpenFOAMCaseGenerator``.
+
+Protection against common mistakes
+----------------------------------
+
+It is easy to set up a simulation which provides a perfectly acceptable case setup and which will run in OpenFOAM which is, however, non-physical or is deemed to give inaccurate results. For this, a case checking utility is implemented which will prevent the user from setting up the case with wrong settings. For example, there is no point to say we want to perform an LES simulation with a steady state solver, or, specify the flow to be compressible but then requesting an incompressible solver. These checks are implemented to help the user avoid common pitfalls and, depending on the severity of the situation, either a warning or error (which will then abort the case setup) will be issued. This is similar to the ANSYS Fluent check case but more pertinent to OpenFOAM specific settings.

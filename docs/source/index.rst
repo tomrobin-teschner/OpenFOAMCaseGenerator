@@ -9,3 +9,4 @@ Contents
    motivation
    usage
    custom_cases
+   testing
