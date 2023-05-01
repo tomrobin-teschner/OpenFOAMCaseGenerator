@@ -45,8 +45,8 @@
 ✘ Solver extensions @cancelled(23-02-01 06:33)
   ✘ Allow for custom solvers / postProcessing functions to be compiled as part of the case setup @cancelled(23-02-01 06:33)
 
-☐ Documentation
-  ☐ Provide readthedocs page
+✔ Documentation @done(23-04-30 19:56)
+  ✔ Provide readthedocs page @done(23-04-30 19:56)
 
 ✘ GUI @cancelled(23-02-03 05:43)
   ✘ Provide initial implementation with wxPython to set up cases (later, extend towards meshing with OpenGL as well) @cancelled(23-02-03 05:43)
