@@ -57,7 +57,7 @@ class TaylorGreenVortex(BaseCase):
                         'p': 100,
                         'T': 300,
                     },
-                    'velocity_magnitude': 1.0,
+                    'velocity': 1.0,
                 },
             },
             'solver_properties': {

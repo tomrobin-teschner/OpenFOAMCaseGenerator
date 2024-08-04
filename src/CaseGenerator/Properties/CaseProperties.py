@@ -69,7 +69,7 @@ class CaseProperties:
 
         properties['flow_properties']['dimensional_properties']['material_properties']['rho'] = 1.0
         properties['flow_properties']['dimensional_properties']['material_properties']['p'] = 0
-        properties['flow_properties']['dimensional_properties']['velocity_magnitude'] = u_mag
+        properties['flow_properties']['dimensional_properties']['velocity'] = u_mag
         return properties
 
     def __calculate_dimensional_properties_from_Ma_compressible(self, properties):
@@ -94,12 +94,12 @@ class CaseProperties:
         properties['flow_properties']['dimensional_properties']['material_properties']['rho'] = self.material.get('rho')
         properties['flow_properties']['dimensional_properties']['material_properties']['T'] = self.material.get('T')
         properties['flow_properties']['dimensional_properties']['material_properties']['p'] = self.material.get('p')
-        properties['flow_properties']['dimensional_properties']['velocity_magnitude'] = u_mag
+        properties['flow_properties']['dimensional_properties']['velocity'] = u_mag
         return properties
 
     def __calculate_Re_incompressible_from_dimensional_properties(self, properties):
         # calculate reynolds number
-        u_mag = properties['flow_properties']['dimensional_properties']['velocity_magnitude']
+        u_mag = self.__get_velocity_magnitude(properties)
         nu = properties['flow_properties']['dimensional_properties']['material_properties']['nu']
         l_ref = properties['dimensionless_coefficients']['reference_length']
         properties['flow_properties']['non_dimensional_properties']['Re'] = u_mag * l_ref / nu
@@ -109,25 +109,37 @@ class CaseProperties:
         T = self.material.get('T')
         R = self.material.get('R')
         gamma = self.material.get('gamma')
-        u_mag = properties['flow_properties']['dimensional_properties']['velocity_magnitude']
+        u_mag = self.__get_velocity_magnitude(properties)
         c = sqrt(gamma * R * T)
         properties['flow_properties']['dimensional_properties']['material_properties']['speed_of_sound'] = c
         properties['flow_properties']['non_dimensional_properties']['Ma'] = u_mag / c
         return properties
 
     def __create_inlet_velocity_vector_from_velocity_magnitude_and_direction(self, properties):
-        velocity_vector = [0.0, 0.0, 0.0]
-        RAD_TO_DEG = pi / 180
+        provided_velocity = properties['flow_properties']['dimensional_properties']['velocity']
 
-        tangential = properties['flow_properties']['axis_aligned_flow_direction']['tangential']
-        normal = properties['flow_properties']['axis_aligned_flow_direction']['normal']
-        aoa = properties['flow_properties']['axis_aligned_flow_direction']['angle_of_attack']
-        u_mag = properties['flow_properties']['dimensional_properties']['velocity_magnitude']
+        if isinstance(provided_velocity, list):
+            velocity_vector = properties['flow_properties']['dimensional_properties']['velocity']
+            properties['flow_properties']['dimensional_properties']['velocity_vector'] = velocity_vector
+            u_mag = sqrt(pow(provided_velocity[0], 2) + pow(provided_velocity[1], 2) + pow(provided_velocity[2], 2))
+            properties['flow_properties']['dimensional_properties']['velocity_magnitude'] = u_mag
+        elif isinstance(provided_velocity, int) or isinstance(provided_velocity, float):
+            velocity_vector = [0.0, 0.0, 0.0]
+            RAD_TO_DEG = pi / 180
 
-        velocity_vector[tangential.value] = cos(aoa * RAD_TO_DEG) * u_mag
-        velocity_vector[normal.value] = sin(aoa * RAD_TO_DEG) * u_mag
+            tangential = properties['flow_properties']['axis_aligned_flow_direction']['tangential']
+            normal = properties['flow_properties']['axis_aligned_flow_direction']['normal']
+            aoa = properties['flow_properties']['axis_aligned_flow_direction']['angle_of_attack']
+            u_mag = self.__get_velocity_magnitude(properties)
 
-        properties['flow_properties']['dimensional_properties']['velocity_vector'] = velocity_vector
+            velocity_vector[tangential.value] = cos(aoa * RAD_TO_DEG) * u_mag
+            velocity_vector[normal.value] = sin(aoa * RAD_TO_DEG) * u_mag
+
+            properties['flow_properties']['dimensional_properties']['velocity_vector'] = velocity_vector
+            properties['flow_properties']['dimensional_properties']['velocity_magnitude'] = u_mag
+        else:
+            raise ValueError(f"Invalid velocity value: {provided_velocity}")
+
         return properties
 
     def __set_correct_gradient_reconstruction_scheme_for_RANS(self, properties):
@@ -139,3 +151,14 @@ class CaseProperties:
                 RansModel == RansModel.SSG):
             properties['turbulence_properties']['use_phi_instead_of_grad_U'] = True
         return properties
+    
+    def __get_velocity_magnitude(self, properties):
+        u_temp = properties['flow_properties']['dimensional_properties']['velocity']
+        if isinstance(u_temp, int) or isinstance(u_temp, float):
+            u_mag = u_temp
+        elif isinstance(u_temp, list) and len(u_temp) == 3:
+            u_mag = sqrt(pow(u_temp[0], 2) + pow(u_temp[1], 2) + pow(u_temp[2], 2))
+        else:
+            raise ValueError(f"Invalid velocity value: {u_temp}")
+
+        return u_mag

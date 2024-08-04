@@ -3,6 +3,7 @@ from src.CaseGenerator.WriteZeroDirectoryFiles.TurbulentFreestreamConditions imp
 from src.CaseGenerator.WriteZeroDirectoryFiles.StateVariableManager import StateVariableManager
 from src.CaseGenerator.FileDirectoryIO.WriteHeader import WriteHeader
 import copy
+from math import sqrt, pow
 
 
 class BoundaryConditionManager:

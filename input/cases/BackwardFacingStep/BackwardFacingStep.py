@@ -50,12 +50,7 @@ class BackwardFacingStep(BaseCase):
                         'rho': 1.0,
                         'nu': 1.0e-4,
                     },
-                    'velocity_magnitude': 3.410896,
-                },
-                'axis_aligned_flow_direction': {
-                    'tangential': Coordinates.x,
-                    'normal': Coordinates.z,
-                    'angle_of_attack': 0,
+                    'velocity': [3.410896, 0.0, 0.0],
                 },
             },
             'solver_properties': {

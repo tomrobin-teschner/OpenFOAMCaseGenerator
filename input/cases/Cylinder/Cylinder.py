@@ -39,12 +39,7 @@ class Cylinder(BaseCase):
                     'material_properties': {
                         'nu': 0.01,
                     },
-                    'velocity_magnitude': 1,
-                },
-                'axis_aligned_flow_direction': {
-                    'tangential': Coordinates.x,
-                    'normal': Coordinates.y,
-                    'angle_of_attack': 0,
+                    'velocity': [1.0, 0.0, 0.0],
                 },
             },
             'solver_properties': {

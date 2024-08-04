@@ -243,9 +243,10 @@ class BaseCase(metaclass = ABCMeta):
                     #   Hf:         heat of Fusion
                     'material_properties': {},
 
-                    # specify the inlet velocity magnitude. The vector components will be constructed using the
-                    # axis_aligned_flow_direction properties.
-                    'velocity_magnitude': 1.0,
+                    # specify the velocity vector or magnitute. If the magnitute is specified, the
+                    # axis_aligned_flow_direction needs to be specified as well to construct all three velocity
+                    # components. If the velocity is provided as a list of three entries, they will be used directly
+                    'velocity': 1.0,
                 },
 
                 # specify the direction of the inflow velocity vector. Will be used to construct a 3D vector based on

@@ -1,5 +1,5 @@
 from src.CaseGenerator.FileDirectoryIO import WriteHeader
-from math import sin, cos, pi
+from math import sin, cos, pi, sqrt, pow
 
 
 class ForceCoefficients:
@@ -13,7 +13,8 @@ class ForceCoefficients:
         aoa = self.properties['flow_properties']['axis_aligned_flow_direction']['angle_of_attack']
         cofr = self.properties['dimensionless_coefficients']['center_of_rotation']
         rho = self.properties['flow_properties']['dimensional_properties']['material_properties']['rho']
-        vel_mag = self.properties['flow_properties']['dimensional_properties']['velocity_magnitude']
+        vel_vec = self.properties['flow_properties']['dimensional_properties']['velocity_vector']
+        vel_mag = sqrt(pow(vel_vec[0], 2) + pow(vel_vec[1], 2) + pow(vel_vec[2], 2))
         l_ref = self.properties['dimensionless_coefficients']['reference_length']
         a_ref = self.properties['dimensionless_coefficients']['reference_area']
         lift_dir = [0, 0, 0]

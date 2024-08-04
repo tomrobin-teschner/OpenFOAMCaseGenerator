@@ -7,7 +7,7 @@ from enum import Enum
 version_major = 3
 version_minor = 0
 version_patch = 0
-version_note = 'beta.1'
+version_note = 'beta.2'
 
 class ScreenOutput:
     def __init__(self, properties):

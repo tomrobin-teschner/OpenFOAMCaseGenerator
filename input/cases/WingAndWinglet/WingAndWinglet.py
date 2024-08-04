@@ -42,7 +42,7 @@ class WingAndWinglet(BaseCase):
                     'material_properties': {
                         'p': 0,
                     },
-                    'velocity_magnitude': 10,
+                    'velocity': 10.0,
                 },
                 'axis_aligned_flow_direction': {
                     'tangential': Coordinates.x,
