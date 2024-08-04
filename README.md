@@ -1,5 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Generic badge](https://img.shields.io/badge/Version-v3.0.0beta.1-red.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/Version-v3.0.0beta.2-red.svg)](https://shields.io/)
 
 ## Overview
 
